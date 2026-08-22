@@ -1,9 +1,22 @@
 {
   "skill": "formation",
-  "version": "0.161.0",
+  "version": "0.164.0",
   "updatedAt": "2026-08-22",
   "sourcePath": "skill/formation",
   "releaseNotes": [
+    "Added an evidence-led editorial scrollytelling capability that maps situation, mechanism, outcome, and proof to stable semantic scene states without copying a source site's visual identity.",
+    "Replaced equal-section scroll quantization with measured step-center geometry, one shared reversible controller, responsive stage composition, and explicit no-JavaScript, reduced-motion, and Save-Data behavior.",
+    "Added a typed landing surface contract, static validator, pure geometry fixtures, and LaunchBench failures for synchronization drift, short mobile layouts, copy-to-visual disconnects, and incomplete fallbacks.",
+    "Bound the capability to the existing Design Room and local landing workflow, with browser evidence required before an active landing can pass.",
+    "Added the Formation Craft Lens and a validator-backed reasoning contract for physical models, structural motion, mobile recomposition, native-medium presentation, restraint, precise microinteractions, concept comparison, and convergence.",
+    "Added distribution proof, a lifecycle-aware signal corpus, and traffic-backed offer testing to the founder-owned pre-build Go, Pivot, or Kill decision.",
+    "Added structured content intelligence, owned-relationship metrics, manual-before-automation proof, and persona-balanced beta guidance without weakening existing launch, UGC, operations, or release requirements.",
+    "Preserved fresh-context verification for completed final-batch work when a session ends through cooperative yield without repeating the verifier at ordinary empty-frontier completion.",
+    "Required explicit CTA conversion counts, complete Craft Lens reasoning before substantive mutation, and an applicability decision plus a structured passed manual-run result before value-producing automation.",
+    "Required real non-future calendar dates across new signal and offer-test records, and required superseded signal records to resolve to a distinct declared replacement.",
+    "Added a strict research workflow-output gate, bounded whole-number offer measurements by exposure, and required signal supersession chains to be acyclic and terminate at usable evidence.",
+    "Added an exact fence-aware Markdown table adapter and required every manual-loop, offer-decision, measurement, and waiver row to stay structurally valid instead of selecting one valid-looking row.",
+    "Limited cooperative-yield verification to exact fresh-context attempts produced by completed batches, and made Signal Corpus not-applicable status parsing fence-aware and fail-closed for duplicate or malformed declarations.",
     "Added a release-date Apple source gate that checks live upcoming requirements, submission baselines, Xcode compatibility, and upload guidance against the local build host before each archive.",
     "Added compiled-archive bundle, version, and build reconciliation with App Store Connect, including a guard against leading-zero version segments.",
     "Kept the supplied Apple Developer Forums thread as historical failure evidence while routing policy decisions to current official Apple documentation.",
@@ -12,6 +25,15 @@
     "Split intended pre-archive checks from new-archive inspection, attached the validator to the release workflow, and rejected stale or contradictory sign-off evidence.",
     "Added a strict release-node gate and structural bundle, version, and build comparison so unresolved or mismatched identity evidence cannot pass by label alone.",
     "Ordered privacy proof before signing verification and bound post-archive approval to the current archive path, creation timestamp, and Info.plist fingerprint.",
-    "Verified release evidence against the real compiled archive, separated build uniqueness from App Store Connect equality, and rejected negated readiness states."
+    "Verified release evidence against the real compiled archive, separated build uniqueness from App Store Connect equality, and rejected negated readiness states.",
+    "Made every substantive Signal Corpus table fence-aware and duplicate-safe, added bounded conflict-row semantics, and clarified persona-balanced beta worksheets as optional planning rather than app-quality completion proof.",
+    "Moved Distribution Proof onto the same exact fence-aware table contract while preserving its source-ledger, signal-resolution, and measured-evidence semantics.",
+    "Completed the research-evidence parser migration for Source Ledger, Category Revenue Reality, and Go/Pivot/Kill, sharing one rendered provenance index while preserving activation and verdict semantics.",
+    "Required exactly one rendered Manual Loop applicability declaration and bound every automation-authorizing decision to a passed run of that same process.",
+    "Defined strict evidence Markdown with column-zero hidden fences. Raw HTML, comment openers, non-column-zero fences, and four-column indentation now fail closed document-wide.",
+    "Bound final waived offer decisions to a matching dated decision-maker waiver, and excluded invalid or future Source Ledger timestamps from evidence completeness and ID eligibility.",
+    "Required every complete Source Ledger row to name a substantive platform or source type before its source and trace IDs can support Distribution Proof.",
+    "Rejected absent owned-relationship values in offer and distribution contracts, and required substantive Signal Corpus not-applicable reasons.",
+    "Rejected compliments, likes, and general survey interest as offer-test primary responses."
   ]
 }

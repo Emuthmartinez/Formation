@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.161.0",
+  "version": "0.164.0",
   "description": "Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into autonomous operation, with deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -110,6 +110,7 @@
     "check:lane-coverage": "tsx skill/formation/validation/business/process/check-lane-coverage.ts",
     "check:change-cascade": "tsx skill/formation/validation/business/process/check-change-cascade.ts",
     "check:research": "tsx skill/formation/validation/business/research/check-research-evidence.ts",
+    "check:research-workflow-output": "tsx skill/formation/validation/business/research/check-research-evidence.ts --require-workflow-outputs",
     "check:revenue": "tsx skill/formation/validation/business/money/check-revenue.ts",
     "check:email": "tsx skill/formation/validation/business/operations/check-email.ts",
     "check:analytics-catalog": "tsx skill/formation/validation/business/data/check-analytics-catalog.ts",

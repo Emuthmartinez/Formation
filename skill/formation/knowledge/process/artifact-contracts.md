@@ -544,14 +544,24 @@ Acceptance:
 
 ## `strategy/RESEARCH.md`
 
-Validator: `npm run check:research -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor (Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Go, Pivot, Or Kill, trace pointers; dated evidence, a judged revenue bar, a founder-decided verdict mirrored to state, and no placeholders when the research lane is done).
+Validator: `npm run check:research -- --root . --state state/PROJECT_STATE.yaml` preserves the pre-claim template behavior. It enforces the full structural floor when the lane is done or the pre-build verdict is mandatory. The `research-backed-spec` workflow uses `check:research-workflow-output`. This strict wrapper requires complete claimed outputs even when the lane is still `not_started` or `partial`. The floor covers Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Distribution Proof, Go, Pivot, Or Kill, and trace pointers. It also covers dated evidence, a judged revenue bar, signal lifecycle, offer response, a founder-decided verdict mirrored to state, and template placeholders.
 
 Use when research spans app stores, social platforms, competitor websites, reviews, creators, keywords, pricing, or paid acquisition signals.
 
 Must include:
 - research date, target country/market, tool/source, query, and limits/credit budget
 - Category Revenue Reality: top-competitor revenue rows with sources, a stated bar, and an explicit pass/fail judgment
-- Go, Pivot, Or Kill: the pre-build verdict row (date, evidence cells, founder's verdict), mirrored to `lanes.research.go_pivot_kill_decision`
+- Distribution Proof: one audience, exact discovery location, native format, owned relationship, measured signal, and resolved evidence IDs
+  - A ledger ID must occur in a complete Source Ledger row's URL/source-ID or Artifact/trace cell.
+  - A Signal ID must have a `current` or `dated` status.
+- `strategy/SIGNAL_CORPUS.md`: validated Corpus Inputs and atomic claims whose Source IDs resolve to those inputs
+  - Each claim includes dates, applicability, confidence, lifecycle, supersession, and trace pointers.
+  - Keep unverified, rejected, and superseded history, but do not use it for Distribution Proof or Derived Outputs.
+  - When no reusable source exists, write a project-specific `Status: not applicable —` reason. Do not add fabricated rows or placeholder reason text.
+- `strategy/OFFER_TEST.md`: one project-specific value for each test-contract field, measured exposure and CTA response, and a founder decision
+  - An option menu is not a completed field.
+- Go, Pivot, Or Kill: the pre-build verdict row with category, wedge, demand, distribution, and offer evidence
+- the verdict mirror in `lanes.research.go_pivot_kill_decision`
 - AppKittie findings: category economics, competitors, downloads/revenue estimates, IAP/pricing, screenshots, ad presence, creator partnerships, contact/social links, review themes, and keyword results
 - XPOZ findings: platform, query, creator/subreddit/handle, post/comment evidence, user language, emotional register, objections, and ad/organic content formats
 - Firecrawl/web findings: competitor pages crawled, pricing, plans, claims, CTAs, FAQ/help/policy pages, SEO/GEO patterns, and source URLs
@@ -563,6 +573,8 @@ Acceptance:
 - A future agent can reproduce the research path without guessing queries.
 - App-store estimates, social evidence, and web claims are labeled by source type.
 - No claim moves into public copy unless it has supporting evidence or is marked as founder opinion.
+- A founder waiver names the residual risk when the offer test does not run.
+- A later claim can supersede an earlier claim without deleting the earlier record.
 
 ## `strategy/BRAND.md`
 

@@ -115,7 +115,7 @@ Design work is ready for review only when:
 
 - `studio/seed/business.json` and `studio/seed/theme.tokens.json` validate.
 - `design/design.md` exists and contains all required sections.
-- The `Reference Evidence` section has a status and reason for all six evidence sources. Each adopted principle has an adaptation, state path, and validation method.
+- The `Reference Evidence` section has a status and reason for all six evidence sources. Substantive work records a complete Formation Craft Lens row. Each adopted principle has an adaptation, state path, and validation method.
 - `designRoom.versionLog` names the mutation and rendered artifacts.
 - `design/design-room.html` hash matches the current state.
 - The rendered name, positioning, audience, mutation summary, and surface totals match the current state.

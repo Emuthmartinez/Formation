@@ -431,7 +431,7 @@ export const workflows = [
     areaIds: ["area.build-release"],
     trigger: "Before beta or store submission on every mobile launch",
     instructions:
-      "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. Do not replace measured results with general guidance.",
+      "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. When beta testing is in scope, the persona-balanced worksheet is optional planning guidance for recruiting complementary perspectives; it is not required proof, does not satisfy app-quality completion, and does not change this workflow's whole-artifact fresh-context acceptance. Do not treat empty or completed tester rows as measured quality evidence. Do not replace measured results with general guidance.",
     reads: ["engineering/PRODUCTION_READINESS.md", "engineering/TECH_SPEC.md"],
     roleId: "role.engineering-leader",
     laneIds: ["engineering"],

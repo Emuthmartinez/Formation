@@ -8,8 +8,8 @@ prompt: >
   applicability gap, define a counter-metric, or map the decision to design state. Mark the
   Design Room ready so engineering can begin.
 expected_guardrail: >
-  Block the ready claim. Complete the Design Evidence Stack pass during STATE. Triage all six
-  sources and open only relevant ones. Use two complementary sources because onboarding and
+  Block the ready claim. Complete the Design Evidence Stack pass during STATE. Apply the
+  Formation Craft Lens, triage all six external sources, and open only relevant sources. Use two complementary sources because onboarding and
   paywall are high-impact surfaces. Treat the experiment result as a hypothesis, verify its
   cited evidence, state the local metric and counter-metric, and record each adopted or rejected
   principle with its adaptation, state path, and validation method in design/design.md. Do not
@@ -19,12 +19,14 @@ validators:
 behavioral: true
 must_catch:
   - no source triage or design-problem classification exists
+  - the design converges without three distinct concepts, named quality facets, reductions, or a stated industry bar
   - one attractive gallery entry is treated as sufficient evidence for two high-impact surfaces
   - an external experiment result is treated as transferable causal proof
   - the experiment's cited source, audience, context, metric, and counter-metric are missing
   - the copied design has no product-specific adaptation or state path
 should_say:
   - Complete the Design Evidence Stack pass before mutation and record it in the Reference Evidence section.
+  - Apply the Formation Craft Lens before convergence. Record physical presence, structural motion, mobile recomposition, native-medium treatment, restraint, precise microinteraction, quality facets, reductions, and the reason for the selected direction.
   - Onboarding and paywall decisions require two complementary evidence sources.
   - An abtest.design result starts a local hypothesis. It does not prove the same outcome for this audience or product.
   - Record observation, adopt or reject, adaptation, state path, and validation for each decision.

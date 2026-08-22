@@ -8,7 +8,7 @@ Record market, competitor, App Store, review, social-language, video, and user e
 
 | Source | Platform / type | URL / source ID | Observed at | Tool / backend / query | Transcript / visual / sample limit | Observation | Inference | Confidence | Artifact / trace |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| founder brief | founder opinion | intake | YYYY-MM-DDTHH:MM:SSZ | intake conversation | direct notes / n-a | founder described the core problem | initial promise needs market evidence | medium | product/SPEC.md / TRACE-001 |
+| founder brief | founder opinion | SOURCE-001 — replace with canonical URL or source ID | YYYY-MM-DDTHH:MM:SSZ | intake conversation | direct notes / n-a | founder described the core problem | initial promise needs market evidence | medium | product/SPEC.md / TRACE-001 |
 
 ## Evidence Capture Protocol
 
@@ -33,12 +33,20 @@ Is this market big enough to be worth building in at all? Pull top-competitor re
 - Stated bar and why:
 - Pass or fail against the bar:
 
+## Distribution Proof
+
+Name one reachable audience before the verdict. Every Evidence ID must resolve to a complete Source Ledger row or to `strategy/SIGNAL_CORPUS.md`. For a ledger row, use a stable ID from the URL/source-ID or Artifact/trace cell. For a signal record, use only a `current` or `dated` Signal ID. Keep unverified, rejected, and superseded signals in the corpus, but do not use them as distribution proof.
+
+| Audience segment | Exact discovery location | Native format | Owned relationship | Measured signal | Evidence IDs |
+| --- | --- | --- | --- | --- | --- |
+| replace with one segment | replace with one named location | replace with one native format | replace with one durable route | replace with a number | replace with SOURCE-### or eligible SIG-### |
+
 ## Go, Pivot, Or Kill
 
 The pre-build twin of the post-launch Kill-Or-Scale Review: before any Phase 2 design or build work, the agent assembles the evidence and the founder decides whether this idea earns a build. The verdict is the founder's call, never automatic. A Kill or Pivot here is the process working — it costs a research doc instead of a shipped app. Record the verdict here and mirror it in `state/PROJECT_STATE.yaml` (`lanes.research.go_pivot_kill_decision` / `go_pivot_kill_decided_at`). "Decided by" names the founder (by name or role) — never an agent or automation identity. `check:research` refuses a done lane whose latest verdict is not Go, and enforces the verdict from phase_2 onward even while the lane is still partial — advancing to design without the checkpoint is the bypass, not a shortcut.
 
-| Date | Category revenue reality | Wedge | Demand signal | Verdict (Go / Pivot / Kill) | Decided by |
-| --- | --- | --- | --- | --- | --- |
+| Date | Category revenue reality | Wedge | Demand signal | Distribution proof | Offer test | Verdict (Go / Pivot / Kill) | Decided by |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 
 ## Decision Inputs
 

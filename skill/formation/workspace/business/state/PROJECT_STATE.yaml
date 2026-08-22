@@ -180,12 +180,14 @@ lanes:
     status: "not_started"
     evidence:
       - "strategy/RESEARCH.md"
+      - "strategy/SIGNAL_CORPUS.md"
+      - "strategy/OFFER_TEST.md"
       - "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       - "strategy/localization-market-research/localization-market-research.html"
     blockers: []
     # Pre-build verdict from the Go, Pivot, Or Kill checkpoint (strategy/RESEARCH.md,
-    # launch-phases.md Phase 1): founder-decided over category-revenue, wedge,
-    # and demand evidence, before design/build work is spent on the idea.
+    # launch-phases.md Phase 1): founder-decided over category revenue, wedge,
+    # demand, distribution, and offer evidence before design or build work starts.
     # Values: go | pivot | kill. Date is the ISO day the founder decided.
     go_pivot_kill_decision: ""
     go_pivot_kill_decided_at: ""

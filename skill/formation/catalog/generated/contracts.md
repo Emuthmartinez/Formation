@@ -154,7 +154,7 @@ _App live (phase_6/6b), "what now", weekly ops, incident response, retention rev
 - **Consults:** `growth/PAID_UA.md`
 - **Produces:** `operations/POST_LAUNCH_OPS.md`, `operations/LAUNCH_RETRO.md`
 - **Gates:** `check:post-launch`
-- **Knowledge:** [Paid User Acquisition](../../knowledge/growth/paid-user-acquisition.md), [Billing Health And Reactivation](../../knowledge/money/billing-health-and-reactivation.md), [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md), [Change Cascade](../../knowledge/process/change-cascade.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md)
+- **Knowledge:** [Paid User Acquisition](../../knowledge/growth/paid-user-acquisition.md), [Billing Health And Reactivation](../../knowledge/money/billing-health-and-reactivation.md), [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md), [Change Cascade](../../knowledge/process/change-cascade.md), [Distribution, Offer, And Signal Validation](../../knowledge/research/distribution-offer-signal.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md)
 
 ### Support queue operations
 
@@ -245,9 +245,9 @@ _Need category economics, competitor, review/social-language, keyword, or name-c
 - **Providers:** —
 - **Reads:** `state/PROJECT_STATE.yaml`
 - **Consults:** —
-- **Produces:** `strategy/RESEARCH.md`, `product/SPEC.md`
-- **Gates:** `check:research`
-- **Knowledge:** [Research Intelligence](../../knowledge/process/tool-recipes/research-intelligence.md), [Core Loop And V1 Scope (Non-Archetype Products)](../../knowledge/product/core-loop-and-v1-scope.md), [Product Moat](../../knowledge/product/product-moat.md), [Go, Pivot, Or Kill: The Pre-Build Research Verdict](../../knowledge/research/go-pivot-or-kill.md)
+- **Produces:** `strategy/RESEARCH.md`, `strategy/SIGNAL_CORPUS.md`, `strategy/OFFER_TEST.md`, `product/SPEC.md`
+- **Gates:** `check:research-workflow-output`
+- **Knowledge:** [Research Intelligence](../../knowledge/process/tool-recipes/research-intelligence.md), [Core Loop And V1 Scope (Non-Archetype Products)](../../knowledge/product/core-loop-and-v1-scope.md), [Product Moat](../../knowledge/product/product-moat.md), [Distribution, Offer, And Signal Validation](../../knowledge/research/distribution-offer-signal.md), [Go, Pivot, Or Kill: The Pre-Build Research Verdict](../../knowledge/research/go-pivot-or-kill.md)
 
 ### Localization market research
 
@@ -816,7 +816,7 @@ _Before beta or store submission on every mobile launch_
 - **Consults:** —
 - **Produces:** `engineering/APP_QUALITY.md`
 - **Gates:** —
-- **Knowledge:** [App Quality And Vitals](../../knowledge/engineering/app-quality.md)
+- **Knowledge:** [App Quality And Vitals](../../knowledge/engineering/app-quality.md), [Distribution, Offer, And Signal Validation](../../knowledge/research/distribution-offer-signal.md)
 
 ## App Store And Google Play
 
@@ -1026,11 +1026,11 @@ _Before the public announcement, launch-day run-of-show, or weekly release rhyth
 - **Role:** Marketing guru
 - **Phases:** 1e, 3, 6
 - **Providers:** —
-- **Reads:** `design/design.md`, `growth/VIRAL_GROWTH.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`
+- **Reads:** `design/design.md`, `growth/VIRAL_GROWTH.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`, `strategy/RESEARCH.md`, `strategy/SIGNAL_CORPUS.md`
 - **Consults:** `growth/content-assets/CONTENT_ASSETS.md`
-- **Produces:** `growth/LAUNCH_NARRATIVE.md`
+- **Produces:** `growth/LAUNCH_NARRATIVE.md`, `growth/content-intelligence.csv`
 - **Gates:** —
-- **Knowledge:** [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md), [Launch Narrative Cadence](../../knowledge/growth/launch-narrative-cadence.md), [Viral Growth Loops](../../knowledge/growth/viral-growth-loops.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [No-Slop Writing](../../knowledge/words/no-slop-writing.md)
+- **Knowledge:** [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md), [Launch Narrative Cadence](../../knowledge/growth/launch-narrative-cadence.md), [Viral Growth Loops](../../knowledge/growth/viral-growth-loops.md), [Distribution, Offer, And Signal Validation](../../knowledge/research/distribution-offer-signal.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [No-Slop Writing](../../knowledge/words/no-slop-writing.md)
 
 ### GEO/SEO public-surface plan
 
@@ -1078,11 +1078,11 @@ _Before founder-led organic social, creator sourcing/contracts, format-discovery
 - **Role:** Marketing guru
 - **Phases:** 6
 - **Providers:** —
-- **Reads:** `design/design.md`, `growth/VIRAL_GROWTH.md`, `growth/LAUNCH_NARRATIVE.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`
+- **Reads:** `design/design.md`, `growth/VIRAL_GROWTH.md`, `growth/LAUNCH_NARRATIVE.md`, `growth/content-intelligence.csv`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`, `strategy/SIGNAL_CORPUS.md`
 - **Consults:** —
 - **Produces:** `growth/UGC_PLAYBOOK.md`, `ugc/script-bank.md`
 - **Gates:** —
-- **Knowledge:** [Influencer Sponsorship Engine](../../knowledge/growth/influencer-sponsorship-engine.md), [UGC Creator Engine](../../knowledge/growth/ugc-creator-engine.md), [Viral Growth Loops](../../knowledge/growth/viral-growth-loops.md), [No-Slop Writing](../../knowledge/words/no-slop-writing.md)
+- **Knowledge:** [Influencer Sponsorship Engine](../../knowledge/growth/influencer-sponsorship-engine.md), [UGC Creator Engine](../../knowledge/growth/ugc-creator-engine.md), [Viral Growth Loops](../../knowledge/growth/viral-growth-loops.md), [Distribution, Offer, And Signal Validation](../../knowledge/research/distribution-offer-signal.md), [No-Slop Writing](../../knowledge/words/no-slop-writing.md)
 
 ### Fastlane growth ops
 
@@ -1091,7 +1091,7 @@ _After launch approval/public beta, or usefastlane.ai/Blitz setup, scheduling, s
 - **Role:** Marketing guru
 - **Phases:** 6
 - **Providers:** —
-- **Reads:** `design/design.md`, `growth/LAUNCH_NARRATIVE.md`, `ugc/script-bank.md`
+- **Reads:** `design/design.md`, `growth/LAUNCH_NARRATIVE.md`, `growth/content-intelligence.csv`, `ugc/script-bank.md`
 - **Consults:** —
 - **Produces:** `growth/FASTLANE_OPS.md`
 - **Gates:** `check:post-launch`

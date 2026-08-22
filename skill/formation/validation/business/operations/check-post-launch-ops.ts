@@ -29,6 +29,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../../tooling/lib/launch-state.js";
+import { parseRequiredTableSection } from "../process/required-table-section.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -88,11 +89,13 @@ const requiredSections = [
   "Review Responses",
   "Release And Hotfix Cadence",
   "Retention Review",
+  "Manual Loop Proof",
   "Support Operations",
   "Launch Retro",
 ];
 
 for (const section of requiredSections) {
+  if (section === "Manual Loop Proof") continue;
   if (!includes(runbook, section)) {
     issues.push(
       issue(
@@ -169,6 +172,95 @@ function parseLiveDate(raw: string): Date | undefined {
   if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw) return undefined;
   if (date.getTime() > Date.now()) return undefined;
   return date;
+}
+
+// A value-producing process is not safe to automate on a paper design alone. The runbook must
+// either prove one successful manual cycle or state why no such automation applies. This check is
+// separate from the weekly clock because the proof must exist before the first automated run.
+const manualLoopHeaders = ["Date", "Process", "Input", "Output", "Result", "Cost", "Failure mode", "Automation decision"] as const;
+
+/** Authoritative prefixes keep the safety decision machine-readable while
+ * leaving the rest of the cell available for an authored rationale. */
+function automationDisposition(decision: string): "automate" | "keep_manual" | undefined {
+  const value = decision.trim();
+  if (/^automate\b/i.test(value)) return "automate";
+  if (/^keep manual\b/i.test(value)) return "keep_manual";
+  return undefined;
+}
+
+const manualProofResult = parseRequiredTableSection(runbook, "Manual Loop Proof", manualLoopHeaders);
+if (!manualProofResult.ok) {
+  const sectionMissing = manualProofResult.errors.some((error) => error.kind === "section-missing");
+  issues.push(
+    issue(
+      numbersSeverity,
+      sectionMissing ? "post_launch_ops.section_missing.manual_loop_proof" : "post_launch_ops.manual_loop_proof_missing",
+      sectionMissing
+        ? `${runbookPath} is missing the "Manual Loop Proof" H2 section. A prose mention does not satisfy the automation-proof contract.`
+        : `${runbookPath}'s Manual Loop Proof must contain one canonical manual-run table. Duplicate, empty, separated, or malformed tables do not prove the process.`,
+      runbookPath,
+    ),
+  );
+} else {
+  const manualProofSection = manualProofResult.section.renderedBody;
+  const applicabilityDeclarations = manualProofSection
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^Applicability\b/i.test(line));
+  const applicability = applicabilityDeclarations.length === 1 ? (applicabilityDeclarations[0]?.match(/^Applicability:\s*(.+)$/i)?.[1]?.trim() ?? "") : "";
+  const notApplicable = applicability.match(/^not applicable\s*(?:—|-|:)\s*(.+)$/i);
+  const notApplicableReason = notApplicable?.[1]?.trim() ?? "";
+  const substantiveNotApplicableReason =
+    notApplicableReason.length >= 15 && !PLACEHOLDER_TEXT.test(notApplicableReason) && !/^(reason|none|not applicable|n\/a)$/i.test(notApplicableReason);
+  const applicable = /^applicable$/i.test(applicability);
+  const normalizedHeaders = manualLoopHeaders.map((header) => header.toLowerCase());
+  const canonicalHeaders =
+    manualProofResult.section.header.normalizedCells.length === normalizedHeaders.length &&
+    manualProofResult.section.header.normalizedCells.every((header, index) => header === normalizedHeaders[index]);
+  const rowsComplete =
+    canonicalHeaders &&
+    manualProofResult.section.rows.every((row) => {
+      if (row.rawCellCount !== manualProofResult.section.width) return false;
+      const [date, processName, input, output, result, cost, failureMode, automationDecision] = row.cells;
+      const evidenceCells = [processName, input, output, result, cost, failureMode, automationDecision];
+      const disposition = automationDisposition(automationDecision ?? "");
+      return (
+        Boolean(parseLiveDate(date ?? "")) &&
+        evidenceCells.every((cell) => Boolean(cell) && !PLACEHOLDER_TEXT.test(cell ?? "")) &&
+        /^(passed|failed)$/i.test(result ?? "") &&
+        Boolean(disposition) &&
+        (disposition !== "automate" || /^passed$/i.test(result ?? ""))
+      );
+    });
+  const hasPassedRun = manualProofResult.section.rows.some((row) => /^passed$/i.test(row.cells[4] ?? ""));
+
+  if (!applicable && !substantiveNotApplicableReason) {
+    issues.push(
+      issue(
+        numbersSeverity,
+        "post_launch_ops.manual_loop_applicability_missing",
+        `${runbookPath}'s Manual Loop Proof must record exactly one rendered "Applicability: applicable" or ` +
+          '"Applicability: not applicable — <authored reason>" declaration. Duplicate, contradictory, placeholder, or option-menu declarations ' +
+          "do not decide whether a value-producing process will be automated.",
+        runbookPath,
+      ),
+    );
+  }
+
+  const declaredRowsInvalid = manualProofResult.section.rows.length > 0 && !rowsComplete;
+  const applicableProofMissing = applicable && (manualProofResult.section.rows.length === 0 || !rowsComplete || !hasPassedRun);
+  if (declaredRowsInvalid || applicableProofMissing) {
+    issues.push(
+      issue(
+        numbersSeverity,
+        "post_launch_ops.manual_loop_proof_missing",
+        `Every declared Manual Loop Proof row in ${runbookPath} must use the canonical width, a real past date, complete evidence, and a Result of "passed" or "failed". ` +
+          'Automation decision must begin with "automate" or "keep manual". When applicable, at least one complete row must record "passed"; ' +
+          'any row beginning with "automate" must itself be passed.',
+        runbookPath,
+      ),
+    );
+  }
 }
 
 const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";

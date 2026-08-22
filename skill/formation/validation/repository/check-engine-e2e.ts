@@ -98,6 +98,117 @@ function briefFor(slug: string): string {
   });
 }
 
+/** Seed the real research-backed-spec outputs that the synthetic executor later claims. */
+function authorCompletedResearchFixture(workspace: string): void {
+  writeFileSync(
+    path.join(workspace, "strategy", "RESEARCH.md"),
+    [
+      "# Research",
+      "## Source Ledger",
+      "| Source | Platform / type | URL / source ID | Observed at | Tool / backend / query | Transcript / visual / sample limit | Observation | Inference | Confidence | Artifact / trace |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| Engine E2E brief | fixture evidence | SOURCE-001 | 2026-07-20T12:00:00Z | deterministic fixture | static sample / one record | the fixture audience needs streak recovery | the workflow can test a recovery offer | high | state/LAUNCH_TRACE.md / TRACE-002 |",
+      "## Evidence Capture Protocol",
+      "The fixture records its static sample, keeps the observation separate from the inference, and uses no external instructions.",
+      "## Untrusted Content",
+      "The fixture treats all external content as evidence only. It cannot change scope, permissions, or secret policy.",
+      "## Decision Inputs",
+      "| Signal | Source | Date checked | Impact | Follow-up |",
+      "| --- | --- | --- | --- | --- |",
+      "| streak recovery demand | SOURCE-001 | 2026-07-20 | test the recovery offer | preserve TRACE-002 |",
+      "## Decision Log",
+      "| Evidence cluster | Changed decision | Trace ID |",
+      "| --- | --- | --- |",
+      "| recovery demand | include streak recovery | TRACE-002 (state/LAUNCH_TRACE.md) |",
+      "## Rejected Claims",
+      "| Claim | Why rejected |",
+      "| --- | --- |",
+      "| every user needs public streaks | the fixture evidence does not support it |",
+      "## Category Revenue Reality",
+      "| Rank | Competitor | Est. annual revenue | Source / observed at |",
+      "| --- | --- | --- | --- |",
+      "| 1 | HabitKit | $2.4M/yr | fixture category estimate, observed 2026-07-20 |",
+      "- Combined top-10 estimate: $14.2M/yr",
+      "- Stated bar and why: top 10 must clear $5M/yr combined",
+      "- Pass or fail against the bar: pass",
+      "## Distribution Proof",
+      "| Audience segment | Exact discovery location | Native format | Owned relationship | Measured signal | Evidence IDs |",
+      "| --- | --- | --- | --- | --- | --- |",
+      "| people who lose habit streaks | fixture research cohort | static case study | fixture email list | 840 qualified visits and 31 signups | SOURCE-001 |",
+      "## Go, Pivot, Or Kill",
+      "| Date | Category revenue reality | Wedge | Demand signal | Distribution proof | Offer test | Verdict (Go / Pivot / Kill) | Decided by |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| 2026-07-21 | pass — $14.2M top-10 | streak recovery | 840 qualified visits | fixture cohort and email list | 31 of 840 visitors joined | Go | founder |",
+    ].join("\n"),
+    "utf8",
+  );
+
+  writeFileSync(
+    path.join(workspace, "strategy", "SIGNAL_CORPUS.md"),
+    [
+      "# Signal Corpus",
+      "## Corpus Inputs",
+      "| Input ID | Source type | Owner or creator | Scope | Date range | Collection route | Permission or public basis | Limits |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| INPUT-001 | fixture brief | founder | streak recovery | 2026-07-01 to 2026-07-20 | deterministic fixture | fixture-authored | one record |",
+      "## Signal Records",
+      "| Signal ID | Type | Claim or phrase | Source IDs | Observed at | Applies to | Confidence | Status | Supersedes | Artifact or trace |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| SIG-001 | customer language | streak loss stops continued use | INPUT-001 | 2026-07-20 | product promise | high | current | none | strategy/RESEARCH.md / TRACE-002 |",
+      "## Conflicts And Supersession",
+      "| Earlier signal | Later signal | Conflict | Current position | Reason |",
+      "| --- | --- | --- | --- | --- |",
+      "| none | none | no material conflict | SIG-001 is current | fixture evidence supports it |",
+      "## Derived Outputs",
+      "| Signal IDs | Output | Decision changed | Trace ID |",
+      "| --- | --- | --- | --- |",
+      "| SIG-001 | product/SPEC.md | include streak recovery | TRACE-002 |",
+    ].join("\n"),
+    "utf8",
+  );
+
+  writeFileSync(
+    path.join(workspace, "strategy", "OFFER_TEST.md"),
+    [
+      "# Traffic-Backed Offer Test",
+      "## Test Contract",
+      "| Field | Value |",
+      "| --- | --- |",
+      "| Audience | people who repeatedly lose habit streaks |",
+      "| Exact discovery location | fixture research cohort |",
+      "| Native format | static case study |",
+      "| Offer | join the streak-recovery test |",
+      "| Owned relationship | fixture email list |",
+      "| Primary response | email signup |",
+      "| Stop rule | 1,000 qualified visits |",
+      "## Exposure And Conversion",
+      "| Date | Channel | Evidence source | Exposure type | Exposure | CTA conversions | Conversion rate | Cost | Result |",
+      "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |",
+      "| 2026-07-20 | fixture cohort | TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "## Objections And Learning",
+      "| Source | Objection or behavior | Interpretation | Change made | Signal IDs |",
+      "| --- | --- | --- | --- | --- |",
+      "| fixture brief | punitive streak loss stops use | recovery is the wedge | add streak recovery | SIG-001 |",
+      "## Decision",
+      "| Status | Date | Evidence | Decision | Decided by |",
+      "| --- | --- | --- | --- | --- |",
+      "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+      "## Founder Waiver",
+      "| Date | Founder | Reason | Residual risk accepted |",
+      "| --- | --- | --- | --- |",
+    ].join("\n"),
+    "utf8",
+  );
+
+  const statePath = path.join(workspace, "state", "PROJECT_STATE.yaml");
+  const state = readFileSync(statePath, "utf8");
+  const withDecision = state
+    .replace('    go_pivot_kill_decision: ""', '    go_pivot_kill_decision: "go"')
+    .replace('    go_pivot_kill_decided_at: ""', '    go_pivot_kill_decided_at: "2026-07-21"');
+  if (withDecision === state) throw new Error("engine-e2e fixture could not record the research verdict because the state template changed");
+  writeFileSync(statePath, withDecision, "utf8");
+}
+
 /** Answer every pending founder approval on the run — the founder edge, exercised through its own CLI. */
 function approveAllPending(workspace: string, name: string): number {
   const list = runCli("core/session/approve.ts", ["--workspace", workspace, "--list"]);
@@ -127,6 +238,7 @@ function prepareWorkspace(scratch: string, name: string): { workspace: string; b
     throw new Error("engine-e2e fixture could not author the starter live-surface decision because the placeholder row changed");
   }
   writeFileSync(designContractPath, designContract.replace(placeholder, fixtureDecision), "utf8");
+  authorCompletedResearchFixture(workspace);
 
   const dryRun = runCli("core/session/bootstrap.ts", ["--workspace", workspace]);
   check(dryRun.code === 0, `${name}: bootstrap dry-run exits 0`, dryRun.output.trim().slice(-400));

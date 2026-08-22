@@ -42,17 +42,18 @@ collection wearing a gate's clothes.
 
 ## 2. The Go, Pivot, Or Kill Table Contract
 
-The verdict itself lives in a `## Go, Pivot, Or Kill` table with exactly these columns, in
-order:
+The verdict itself lives in a `## Go, Pivot, Or Kill` table with these required named columns.
+The starter uses this canonical order, but projects may reorder the named columns or add
+project-specific columns:
 
-| Date | Category revenue reality | Wedge | Demand signal | Verdict (Go / Pivot / Kill) | Decided by |
-| --- | --- | --- | --- | --- | --- |
+| Date | Category revenue reality | Wedge | Demand signal | Distribution proof | Offer test | Verdict (Go / Pivot / Kill) | Decided by |
+| ---- | ------------------------ | ----- | ------------- | ------------------ | ---------- | --------------------------- | ---------- |
 
-The three evidence columns between Date and Verdict are named on purpose: **category revenue
-reality**, **wedge**, and **demand signal** are the inputs a real verdict is judged from. A
-table renamed to Notes/Opinion/Summary carries cells, not the required inputs, and
-`check:research` rejects it — it reads for these three column headers between Date and Verdict,
-not for a table shaped roughly like a decision.
+The five evidence columns are named on purpose: **category revenue reality**, **wedge**,
+**demand signal**, **distribution proof**, and **offer test** are the inputs a real verdict is
+judged from. A table renamed to Notes/Opinion/Summary carries cells, not the required inputs,
+and `check:research` rejects it. The validator resolves the required fields by normalized name,
+not by physical position or by a table shaped roughly like a decision.
 
 Row-level requirements once the lane is done:
 
@@ -62,11 +63,11 @@ Row-level requirements once the lane is done:
   founder already superseded.
 - **the latest date wins ties.** If two rows share the newest date, the later row in the table
   is the one that counts.
-- **evidence cells must be substantive.** Every cell between Date and Verdict on the latest row
-  must be non-empty and free of placeholder text (`unverified`, `tbd`, `todo`, `to be filled`,
-  `pending`, `placeholder`). A verdict decided over "unverified" is a mood, not a decision — fill
-  category revenue, wedge, and demand from the Category Revenue Reality section and the rest of
-  the evidence ledger before recording it.
+- **evidence cells must be substantive.** Each of the five named evidence cells on the latest
+  row must be non-empty and free of placeholder text (`unverified`, `tbd`, `todo`, `to be
+filled`, `pending`, `placeholder`). A verdict decided over "unverified" is a mood, not a
+  decision — fill category revenue, wedge, demand, distribution, and offer evidence before
+  recording it.
 
 ## 3. The Verdict Is Founder-Only
 
@@ -107,6 +108,10 @@ enforcing. `check:research` requires a real verdict the moment any of the follow
 - `project.phase` is `phase_2` or later, or
 - any downstream lane — `experience`, `product`, `design`, `content_assets`, or
   `engineering` — is already `partial` or `done`.
+
+The `research-backed-spec` workflow uses `check:research-workflow-output`. This strict wrapper
+also requires complete research, signal-corpus, and offer-test outputs when that workflow claims
+its work. It does not change the pre-claim behavior of the public `check:research` command.
 
 That last condition is the one that matters most in practice: design and build effort spent
 before the founder's verdict is exactly the cost this checkpoint exists to prevent, whatever the

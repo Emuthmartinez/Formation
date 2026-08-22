@@ -728,11 +728,27 @@ async function main(): Promise<number> {
     const verifierSessionId = `${sessionId}.verifier`;
     const scopedRefreshDependencyIds = new Set<RunNodeId>();
     const failedScopedRefreshDependencyIds = new Set<RunNodeId>();
-    const runVerificationSweep = async (): Promise<number> => {
+    // A cooperative yield's final sweep is deliberately narrower than an ordinary empty-frontier
+    // sweep. It may judge only exact attempts that THIS session moved into fresh-context pending
+    // state in a fully completed dispatch batch. Older durable pending work remains discoverable
+    // by ordinary sweeps, but a yield before any batch must not opportunistically judge it.
+    const cooperativeYieldCandidateAttempts = new Map<RunNodeId, string>();
+    const runVerificationSweep = async (allowCooperativeYield = false, candidateAttempts?: ReadonlyMap<RunNodeId, string>): Promise<number> => {
       if (!verifier) return 0;
-      const pending = listPendingFreshContext(plan, run).filter((nodeId) => {
+      const allPending = listPendingFreshContext(plan, run);
+      const allPendingSet = new Set(allPending);
+      // Retire an exact candidate only when that attempt is no longer the pending attempt. A
+      // still-pending, unvisited candidate survives a boundary interruption for the final sweep.
+      for (const [nodeId, attemptId] of cooperativeYieldCandidateAttempts) {
+        const latestAttempt = run.nodes[nodeId]?.attempts.at(-1);
+        if (!allPendingSet.has(nodeId) || latestAttempt?.id !== attemptId) cooperativeYieldCandidateAttempts.delete(nodeId);
+      }
+      const pending = allPending.filter((nodeId) => {
         const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
-        return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId) || scopedRefreshDependencyIds.has(nodeId);
+        const inScope = nodeInScope(brief!.scopeHints, node.domainId, node.workflowId) || scopedRefreshDependencyIds.has(nodeId);
+        if (!inScope) return false;
+        if (!candidateAttempts) return true;
+        return candidateAttempts.get(nodeId) === run.nodes[nodeId]?.attempts.at(-1)?.id;
       });
       let accepted = 0;
       for (const nodeId of pending) {
@@ -747,7 +763,7 @@ async function main(): Promise<number> {
           haltReason = "kill_switch";
           break;
         }
-        if (boundary.halt) {
+        if (boundary.halt && !(allowCooperativeYield && boundary.reason === "cooperative_yield")) {
           haltReason = boundary.reason;
           break;
         }
@@ -767,6 +783,11 @@ async function main(): Promise<number> {
           return { artifactId, path: binding?.path ?? "", evidence: attempt?.evidence ?? [] };
         });
         const outcome = await verifier.verify(node, { workspaceDir: workspace, skillRootDir: skillRoot(), outputs, now: sessionNow() });
+        // This exact candidate has now been judged (accepted/rejected) or attempted
+        // (unavailable). Retire it individually; never clear the whole cohort, because a normal
+        // sweep can be interrupted between candidates and the unvisited remainder still needs
+        // the cooperative-yield final pass.
+        cooperativeYieldCandidateAttempts.delete(nodeId);
         const judgedAt = sessionNow();
         if (outcome.status === "accepted") {
           try {
@@ -934,6 +955,11 @@ async function main(): Promise<number> {
           break dispatchLoop;
         }
         heartbeat(paths.sessionLock, sessionId);
+
+        // Snapshot before dispatch and register only the fresh-context pending delta after the
+        // entire batch has durably reconciled. Registering inside the node loop would let a
+        // partially completed batch leak into the cooperative-yield sweep.
+        const pendingBeforeBatch = new Set(listPendingFreshContext(plan, run));
 
         for (const nodeId of batch.nodeIds) {
           const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
@@ -1144,7 +1170,21 @@ async function main(): Promise<number> {
           }
           writeRunState(paths.runState, run);
         }
+
+        for (const nodeId of listPendingFreshContext(plan, run)) {
+          if (pendingBeforeBatch.has(nodeId)) continue;
+          const latestAttempt = run.nodes[nodeId]?.attempts.at(-1);
+          if (latestAttempt?.ownerSessionId === sessionId) cooperativeYieldCandidateAttempts.set(nodeId, latestAttempt.id);
+        }
       }
+    }
+
+    // A cooperative yield can arrive while a batch is running. That batch may produce
+    // fresh-context work after the loop's last empty-frontier sweep, so judge it before the
+    // session closes. Ordinary empty-frontier completion already ran the sweep above; do not
+    // invoke an unavailable verifier twice. A timeout or kill switch remains final.
+    if (verifier && !timedOut && haltReason === "cooperative_yield" && cooperativeYieldCandidateAttempts.size > 0) {
+      await runVerificationSweep(true, cooperativeYieldCandidateAttempts);
     }
 
     if (!verifier) {

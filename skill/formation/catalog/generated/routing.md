@@ -78,6 +78,7 @@ Generated from catalog/knowledge/**/*.yaml.
 
 | Load when | Reference |
 | --- | --- |
+| before a Go, Pivot, or Kill decision; when founder posts, transcripts, reviews, interviews, support records, or prior launch material can inform the business; before automating a value-producing business loop | [`knowledge/research/distribution-offer-signal.md`](../../knowledge/research/distribution-offer-signal.md) |
 | writing or updating strategy/RESEARCH.md's Category Revenue Reality or Go, Pivot, Or Kill sections; deciding whether a category and wedge earn a build before Phase 2 design/build spend | [`knowledge/research/go-pivot-or-kill.md`](../../knowledge/research/go-pivot-or-kill.md) |
 | before localizing any surface (store metadata/keywords/screenshots, paywall/offers, landing/web, lifecycle email, paid storefronts) or choosing which locales to ship | [`knowledge/research/localization-market-research.md`](../../knowledge/research/localization-market-research.md) |
 

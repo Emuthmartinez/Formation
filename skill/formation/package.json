@@ -1,6 +1,6 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.161.0",
+  "version": "0.164.0",
   "private": true,
   "bin": {
     "formation": "bin/formation.mjs",
@@ -100,6 +100,7 @@
     "check:lane-coverage": "tsx validation/business/process/check-lane-coverage.ts",
     "check:change-cascade": "tsx validation/business/process/check-change-cascade.ts",
     "check:research": "tsx validation/business/research/check-research-evidence.ts",
+    "check:research-workflow-output": "tsx validation/business/research/check-research-evidence.ts --require-workflow-outputs",
     "check:revenue": "tsx validation/business/money/check-revenue.ts",
     "check:email": "tsx validation/business/operations/check-email.ts",
     "check:analytics-catalog": "tsx validation/business/data/check-analytics-catalog.ts",

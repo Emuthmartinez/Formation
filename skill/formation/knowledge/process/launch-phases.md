@@ -166,6 +166,11 @@ Do:
 - Mine social language with XPOZ from Reddit, TikTok, X/Twitter, Instagram, and creator content for the pain users already name.
 - Run keyword and name collision checks before locking a name, subtitle, or ASO angle.
 - Judge the category against a stated revenue bar: top-competitor revenue estimates into strategy/RESEARCH.md's Category Revenue Reality table with an explicit pass/fail — data collection without a judgment is not evidence.
+- Compile available founder and market material into `strategy/SIGNAL_CORPUS.md`, or record an explicit not-applicable status with an authored reason when no reusable source exists.
+- Preserve claim dates, confidence, conflicts, and supersession.
+- Identify one reachable audience, one exact discovery location, and one native format.
+- Run a small offer test. Record exposure and CTA response in `strategy/OFFER_TEST.md`.
+- Record a dated founder waiver and residual risk when the test does not run.
 - Convert findings into a revised product spec, with evidence cited inline or in an appendix.
 - Separate identity from storefront when needed: e.g. list where users search, position against the category if that is the wedge.
 - Update `state/PROJECT_STATE.yaml` research/product/traceability lane statuses and active failure cards when evidence gaps remain.
@@ -173,13 +178,17 @@ Do:
 Outputs:
 - `product/SPEC.md` with positioning, category strategy, competitor threat model, core loop, onboarding, monetization, roadmap, metrics, risks, and decisions
 - evidence ledger with AppKittie tables, review summaries, XPOZ/social-language evidence, Firecrawl/web evidence, and keyword scan
+- `strategy/SIGNAL_CORPUS.md` with reusable, lifecycle-aware signal records
+- `strategy/OFFER_TEST.md` with measured response or a founder waiver
 - initial `state/LAUNCH_TRACE.md` rows or equivalent trace section tying evidence to product decisions, claims, scope, and rejected alternatives
-- the Go, Pivot, Or Kill verdict: agent-assembled evidence, founder-decided, in `strategy/RESEARCH.md`, mirrored to `lanes.research.go_pivot_kill_decision`
+- the Go, Pivot, Or Kill verdict over category, wedge, demand, distribution, and offer evidence
+- the verdict mirror in `lanes.research.go_pivot_kill_decision`
 - short decision checkpoint for founder-only calls
 
 Acceptance:
 - A skeptical agent can tell why this category, this wedge, this price posture, and this name won.
-- The founder has recorded a Go verdict over the category-revenue, wedge, and demand evidence. A Pivot re-enters this phase; a Kill here is the process succeeding — a research doc instead of a shipped app. `check:research` refuses a done lane without it, and every downstream lane depends on research.
+- The founder has recorded a Go verdict over category-revenue, wedge, demand, distribution, and offer evidence. A Pivot re-enters this phase; a Kill here is the process succeeding — a research package instead of a shipped app.
+- `check:research` refuses a done lane without that verdict, and every downstream lane depends on research.
 - V1/V2/V3 boundaries are explicit.
 - Unsupported claims are either removed or marked as needing validation.
 - Competitor app-store, social, and web evidence are separated instead of blended into vague market claims.

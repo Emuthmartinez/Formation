@@ -108,7 +108,7 @@ export const roles: CatalogRole[] = [
       route("AppKittie/XPOZ or approved equivalents", "category, keyword, review, or social-language evidence is required"),
     ],
     ["provider.aso-skills"],
-    ["strategy/RESEARCH.md", "strategy/localization-market-research/", "product/SPEC.md"],
+    ["strategy/RESEARCH.md", "strategy/SIGNAL_CORPUS.md", "strategy/OFFER_TEST.md", "strategy/localization-market-research/", "product/SPEC.md"],
   ),
   role(
     "role.product-leader",
