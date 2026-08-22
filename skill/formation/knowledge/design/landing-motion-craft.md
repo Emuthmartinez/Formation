@@ -1,6 +1,8 @@
 # Landing Motion Craft
 
-Motionsites-grade landing motion on the project's own brand tokens — cinematic AND crawlable/fast, proven (not asserted) by `docs/prototypes/landing-motion-lab.html` in the skill repo. Load this reference before building or animating any landing page, funnel page, or web marketing surface; it is routed from `geo-seo.md` §3a and `design-visual-system.md`. The inspiration benchmark is motionsites.ai (`https://motionsites.ai`) — a visual reference, not a command-syntax source.
+Use this reference before you build or animate a landing page, funnel page, or public web surface. Use `docs/prototypes/landing-motion-lab.html` as the local motion proof. Use motionsites.ai (`https://motionsites.ai`) only as an inspiration benchmark.
+
+When the page needs a scroll-led story, also load [`editorial-scrollytelling.md`](./editorial-scrollytelling.md). That reference owns story maps, stable state anchors, measured progress, responsive composition, and scrollytelling proof.
 
 ## The two-lane content model
 
@@ -9,30 +11,36 @@ One brand timing system, two delivery lanes. Both read the same promoted `--moti
 | Lane | Tool | Owns | Never does |
 | --- | --- | --- | --- |
 | **Baked** | Remotion (`remotion-content-assets.md`) | hero loop `.webm`/`.mp4` + poster, section media tiles, ad/store art — render once, embed | live scroll/hover/cursor behavior |
-| **Live** | `motion/react` (`https://motion.dev/docs/react`) | in-view stagger reveals, scroll-linked parallax, sticky scrollytelling, count-up, cursor spotlight, 3D tilt, marquee | frame-exact video output |
+| **Live** | DOM, CSS, and `motion/react` when needed (`https://motion.dev/docs/react`) | measured story state, in-view reveals, parallax, count-up, cursor response, and marquee | frame-exact video output |
 
-Remotion is the wrong *primary* tool for landing motion: it renders frames, not live DOM behavior. The "wow" of a motionsites-grade page is ~85% the live lane. Do not re-litigate this split per launch; record the baked-video opt-in (license-gated per [`paid-tool-routing.md`](../operations/paid-tool-routing.md)) in `strategy/TOOL_DECISIONS.md`.
+Remotion renders frames. It does not own live DOM behavior. Record each baked-video choice in `strategy/TOOL_DECISIONS.md`. The choice uses the license gate in [`paid-tool-routing.md`](../operations/paid-tool-routing.md).
 
 ## The section library
 
-`business/growth/landing/` ships the reusable sections — Hero (mesh/video, parallax, word stagger, tilt), Marquee, Bento, Scrollytelling, Stats count-up, Testimonials spotlight, Pricing glass + billing toggle, CTA gradient morph — plus `lib/motion-tokens.ts` (SSR-safe token reader) and `motion.css` (js-gated reveal utilities, reduced-motion collapse). Start from the library and customize copy/layout; do not improvise section choreography from scratch. The pack is aesthetic-neutral: warm-editorial and dark-glass brands come out of the same components purely via tokens.
+`business/growth/landing/` ships reusable section code, `lib/motion-tokens.ts`, and `motion.css`. Treat this set as an inventory, not a page recipe. Select a section only when audience, story, proof, and conversion evidence require it.
+
+Do not fill every slot. Do not apply a source site's palette, fonts, metaphors, claims, copy, layout identity, or assets. Transfer the useful mechanism and express it through the current design contract.
+
+For scrollytelling, write the situation-to-mechanism-to-outcome-to-proof map before component work. The story anchors must drive the visual state. Do not use a separate narrative timer.
 
 Two web-lane recipes live in the in-app benchmark file [`motion-craft-benchmarks.md`](./motion-craft-benchmarks.md): R9, the contained edge-warp scroll transition (margin, channel-split, and edge-proximity rules), and R1, asynchronous-grid hero liveness. Load it when a landing hero or scroll moment calls for either.
 
 When the 60fps.design MCP is connected, the landing lane can ground a hero, scroll moment, or micro-interaction in a live exemplar the same way the in-app lane does — `60fps_search_shots` to find the pattern, `60fps_get_motion_breakdown` for its trigger/start→transition→end anatomy (tools and ground rules in `motion-craft-benchmarks.md` §Live Catalog Access). The shots are iOS in-app clips: adopt the mechanic, re-express it in `motion/react` on the `--motion-*` scale, and skip `60fps_get_motion_code` on this lane — its SwiftUI starter has no web target. motionsites.ai stays the landing benchmark; when the MCP is not connected, the section library plus R9/R1 remain the contract and searching is not required.
 
-Before drafting copy for any section slot — hero headline/subhead, testimonial spotlight quotes, stats captions, or CTA button/microcopy — load `knowledge/words/no-slop-writing.md`; keep the brand's voice from `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md`, not a flattened landing-page register.
+Before you draft section copy, load `knowledge/words/no-slop-writing.md`. Use the voice in `strategy/BRAND.md` and `11_STAR_EXPERIENCE.md`.
 
-Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `business/growth/landing/` exception is deliberate and web-only).
+Host the supplied React adapters in Next.js App Router or another React SSR site. An Astro or static SSR host can render the semantic scrollytelling markup and register the framework-light controller directly. Scrollytelling does not require a React island. Use `motion/react` only for sections that need its choreography. Never import it in the mobile binary. `check:template-safety` enforces this boundary.
 
 ## The progressive-enhancement contract (enforceable)
 
-Cinematic and GEO/perf-safe is not a tradeoff. Rules 1, 2, and 4 are mechanically enforced by `check:landing-funnel` when landing sources animate; rule 3 is architectural guidance verified through the deploy gates and live checks rather than a static scan:
+Rules 1, 2, and 4 are mechanically enforced by `check:landing-funnel` when landing sources animate. Deploy gates and browser proof verify rule 3.
 
-1. **Real text, always.** Above-the-fold copy exists in static HTML and is never animation-gated. Reveal states apply only under `html.js` (set on hydration); with JavaScript off the page is a calm, legible document. Hero word-spans are created only after hydration so crawlers see the intact headline.
-2. **Reduced motion collapses everything.** Landing sources that animate must carry a `prefers-reduced-motion` block (and component-level `useReducedMotion()` checks) that zeroes durations and removes transforms — the calm final state, immediately.
+1. **Real text, always.** Above-the-fold copy exists in static HTML and is never animation-gated. Reveal states apply only under `html.js`. A final-only no-JavaScript visual is valid only when semantic prose or captions contain every claim and proof. Otherwise, render static visual panels in document flow.
+2. **Reduced motion preserves proof.** Animated sources must include a `prefers-reduced-motion` rule. A final-only visual is valid only when semantic prose or captions contain every claim and proof. Otherwise, render static visual panels in document flow.
 3. **Motion never gates LCP/INP.** Server-render or statically render content; hydrate choreography after. Entrance animation must not delay first paint or hide text from crawlers.
 4. **Tokens, not magic numbers.** Durations/easings read the `--motion-*` scale. Raw millisecond literals in landing motion styles are flagged — retime the brand by re-promoting tokens, not by editing sections.
+5. **Save-Data is separate.** Pass the request-derived `saveData?: boolean` prop during SSR. The runtime ORs it with `navigator.connection.saveData`. When the prop is true, render a poster or omit the heavy source on the server. CSS hiding does not stop an image request.
+6. **Layout changes trigger measurement.** Call `remeasureScrollScenes()` after a locale or document-direction change.
 
 ## The landing motion token scale
 
@@ -54,4 +62,6 @@ These live in `studio/seed/theme.tokens.json` → promoted into `design/system/t
 - **Baked hero video:** opt-in per launch through the Remotion lane; always ship a poster and keep the mesh fallback.
 - **Smooth scroll (Lenis):** optional; if adopted it must degrade cleanly, respect reduced motion, and be registered in `source-registry.yaml` before use.
 - **Copy:** section copy passes the `no-slop-writing.md` self-check (§6) before `check:landing-funnel` runs — brand voice from `strategy/BRAND.md` wins over generic landing-page register.
-- **Verification:** run `check:landing-funnel` (deploy gates + GEO/SEO files + copy guardrails + motion craft) before calling the landing lane ready; the LaunchBench scenario `landing-motion-progressive-enhancement-missing` locks the failure mode.
+- **Scrollytelling:** show the situation, mechanism, change, and proof. Do not use repeated slogans or giant words as evidence visuals.
+- **Generated media:** use the approved content-asset route. Record its narrative job and provenance. Do not use it to hide weak state design.
+- **Verification:** record Chrome, Safari, and Firefox proof for short and tall desktop viewports. Record iOS Safari and Android Chrome proof for short and tall mobile viewports. Run `check:design-room`, `check:vibecoded-tells`, `check:scrollytelling`, and `check:landing-funnel`.

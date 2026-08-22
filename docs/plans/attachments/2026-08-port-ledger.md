@@ -75,10 +75,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 106 | 0 | 0 | 1 | 107 |
+| Knowledge content files | 107 | 0 | 0 | 1 | 108 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
-| Validators (68) | 34 | 25 | 0 | 15 | 74 |
-| **Total** | **148** | **25** | **1** | **31** | **205** |
+| Validators (69) | 35 | 25 | 0 | 15 | 75 |
+| **Total** | **150** | **25** | **1** | **31** | **207** |
 
 ---
 
@@ -115,7 +115,7 @@ implementation of R20, and the most consequential single disposition in this led
 
 ## 2. Knowledge content files
 
-90 keep, 1 drop (91 total). Every "keep" row ports into `content/<domain>/` at U11 keyed by the
+107 keep, 1 drop (108 total). Every "keep" row ports into `content/<domain>/` at U11 keyed by the
 matching knowledge manifest, which carries its authored `loadWhen` text
 — the reason column here stays short since the full rationale lives there.
 
@@ -160,7 +160,7 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 |---|---|---|
 | knowledge/data/analytics-attribution.md | keep | event-catalog/attribution reference gating multiple downstream lanes |
 
-### domain.design (12 files, all keep)
+### domain.design (13 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
@@ -169,6 +169,7 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 | knowledge/design/audience-derived-identity.md | keep | post-cutover addition (2026-08-17): audience-facts-to-design-decisions derivation chain and generic-template tells; drives design.md's Audience And Identity section, `check:design-room` |
 | knowledge/design/vibecoded-tells.md | keep | post-cutover addition (2026-08-18): the 30-item vibecoded smell list as Tier 1 trust breakers and Tier 2 default tells with earned exceptions; drives the vibecode audit pass and `check:vibecoded-tells` |
 | knowledge/design/design-visual-system.md | keep | visual-system/brand reference, `check:token-promotion` |
+| knowledge/design/editorial-scrollytelling.md | keep | evidence-led story, measured-controller, responsive-composition, progressive-enhancement, and browser-proof contract enforced by `check:scrollytelling` |
 | knowledge/design/landing-motion-craft.md | keep | landing/funnel motion-craft reference, `check:landing-funnel` |
 | knowledge/design/motion-craft-benchmarks.md | keep | unique numeric R1–R10 motion recipes bound to shipped tokens; found nowhere else |
 | knowledge/design/premium-mobile-craft.md | keep | ships real SwiftUI/RN/Flutter parity craft component |
@@ -332,7 +333,7 @@ holding.
 
 ---
 
-## 4. Validators (67)
+## 4. Validators (68)
 
 Classification legend used in the reason column: **STRUCTURAL** (file/schema/cross-reference
 checks — a verifiable fact), **LIVE-PROOF** (calls a real provider/CLI), **WORD-PATTERN**
@@ -353,6 +354,7 @@ split noted).
 |---|---|---|
 | validation/business/design/check-design-room-contract.ts | keep | STRUCTURAL — real WCAG contrast math + hash-drift check against rendered HTML |
 | validation/business/design/check-motion-contract.ts | keep | STRUCTURAL — numeric cross-referencing of duration/spring values across tokens.json/Swift/TS/markdown; strongest structural validator in its batch |
+| validation/business/design/check-scrollytelling-contract.ts | keep | STRUCTURAL — aligns localized scene copy digests, semantic state IDs, media assets, progressive-enhancement modes, responsive guides, and browser evidence with the shipped controller contract |
 | validation/business/design/check-token-promotion.ts | keep | STRUCTURAL — content-hash drift detection between tokens.json/css/Swift and the seed theme |
 | validation/business/design/check-vibecoded-tells.ts | keep | post-cutover addition (2026-08-18): mechanical subset of vibecoded-tells.md over landing/web-surface source — icon-pack imports and missing legal links error, default tells warn |
 | validation/business/design/validate-state.ts | keep | thin (15-line) diagnostic wrapper around the design-state loader; trivial to keep as-is |

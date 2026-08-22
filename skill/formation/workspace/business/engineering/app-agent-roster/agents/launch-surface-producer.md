@@ -29,8 +29,26 @@ Build `growth/landing/` while the mobile engineer builds the app.
 - Create screenshot slots for real app captures. Label design renders as previews.
 - Add the defined analytics events, crawler files, metadata, social cards, and valid JSON-LD.
 - Link the published terms and privacy pages from the footer before the build is called done.
+- Write `growth/landing/surface-contract.json`. Record input digests, Tier 1 locales, pricing, onboarding, screenshots, and proof.
+- Decide whether scrollytelling applies from the story evidence. Do not add it as a default section.
+- When scrollytelling applies, write a situation-to-mechanism-to-outcome-to-proof story map before component work.
+- Give each story beat one stable ID. Use that same ID for the semantic anchor and its visual state.
+- Use the exact `scrollytelling` contract keys from `artifact-contracts.md`: `applicable`, `evidence`, `locales`, `scenes`, and `qa`.
+- Put exact locale copy in `scenes[].localizations`. Record each beat's `text`, copy key, and SHA-256 digest. Hash each caption and accessible description separately.
+- Record the desktop and mobile compositions. Give the mobile layout its own stage and progress guide.
+- A final-only no-JavaScript or reduced-motion visual is valid only when semantic prose or captions contain every claim and proof. Otherwise, render static panels in document flow.
+- Pass the request-derived `saveData?: boolean` prop during SSR. The client runtime also reads `navigator.connection.saveData`.
+- When `saveData` is true, render the approved `poster_asset_id` or omit the heavy source on the server. CSS hiding does not prevent an image download.
+- Call `remeasureScrollScenes()` after locale or document-direction changes.
+- Record no-JavaScript, reduced-motion, Save-Data, keyboard, screen-reader, and text-spacing behavior.
+- Each QA row must record `browser` and `platform`.
+- Record current Chrome, Safari, and Firefox evidence for short and tall desktop viewports.
+- Record iOS Safari and Android Chrome evidence for short and tall mobile viewports.
+- Give each scrollytelling QA row an exact `mode`: `default`, `short_mobile`, `reduced_motion`, `no_js`, or `save_data`.
+- For every Tier 1 locale, record each scene state in both directions and every fallback mode. Measure anchors again after copy, font, viewport, orientation, or locale changes.
+- Use generated media only through `growth/content-assets/CONTENT_ASSETS.md`. Record its narrative job, provenance, poster, and fallback.
 - Review the build against `vibecoded-tells.md` and run `check:vibecoded-tells`. A Tier 1 hit, or two Tier 2 tells without recorded derivations, blocks handoff.
-- Run the local build and focused checks. Do not deploy.
+- Run `check:design-room`, `check:vibecoded-tells`, `check:scrollytelling`, and the local build. Do not deploy.
 
 ## Impact Audit Mode
 

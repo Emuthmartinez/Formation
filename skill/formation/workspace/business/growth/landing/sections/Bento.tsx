@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Bento stat grid — in-view stagger reveal, hover lift.
+ * Conditional modular evidence grid with an in-view reveal and hover response.
  *
  * Contract: the reveal uses the js-gated .lm-reveal/.lm-in CSS mechanism from
  * motion.css — never motion's `initial` prop, which bakes opacity:0 into SSR

@@ -107,6 +107,7 @@ npm run validate:launch-state -- --root /path/to/app
 | `check:control-plane` | Design Room, analytics, monetization, store ops, and growth are modeled as Control Plane panels |
 | `check:business-control-plane-workspace` | The committed generated workspace read model is not stale |
 | `check:emotional-design` | Emotional Experience System contract, per-card guardrails, PostHog event mapping, reduced-motion fallbacks, dark-pattern veto scans (spend-near-reward co-location is an error unless the copy states the separation or prohibits the pattern), and cross-file risk-tier parity between the `experience-cards.md` index and the `ethics-guardrail.md` risk table (one row per mechanism, valid tiers only) |
+| `check:scrollytelling` | Checks the shipped runtime and applicable landing contracts for stable IDs, story order, sources, locales, fallbacks, and recorded viewport QA. Browser tests must verify timing and visual quality. |
 | `check:token-promotion` | `studio/seed/theme.tokens.json` reached `design/system/` before handoff |
 | `check:vibecoded-tells` | The mechanical subset of `knowledge/design/vibecoded-tells.md` over landing/web-surface source: default icon packs and missing terms/privacy links as errors, plus warning-tier default tells (emoji in markup, default fonts, indigo-purple gradients, glassmorphism, blobs, sparkle icons, checkmark walls, bounce cues) that each demand a `design/design.md` derivation row |
 | `promote:design-tokens` | Promotes theme tokens into `design/system/` |

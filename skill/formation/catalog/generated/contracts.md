@@ -643,7 +643,7 @@ _Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywal
 - **Consults:** —
 - **Produces:** `design/design.md`, `studio/seed/business.json`, `studio/seed/theme.tokens.json`, `design/design-room.html`
 - **Gates:** `validate:design-state`, `check:design-room`, `render:design-room`
-- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Room](../../knowledge/design/design-room.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Quality Lens](../../knowledge/design/quality-lens.md), [Surfaces B2C](../../knowledge/design/surfaces-b2c.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md)
+- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Room](../../knowledge/design/design-room.md), [Evidence-Led Editorial Scrollytelling](../../knowledge/design/editorial-scrollytelling.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Quality Lens](../../knowledge/design/quality-lens.md), [Surfaces B2C](../../knowledge/design/surfaces-b2c.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md)
 
 ### Token promotion
 
@@ -1055,8 +1055,8 @@ _Immediately after design/design.md is accepted — build the local landing site
 - **Reads:** `GEO_SEO.md`, `analytics/ANALYTICS.md`, `product/copy/COPY_BRIEF.md`, `product/copy/COPY_DECK.md`, `product/ONBOARDING.md`, `strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md`, `design/design.md`
 - **Consults:** `revenue/REVENUE_OPS.md`, `store/app-store-listing/SCREENSHOTS.md`, `growth/content-assets/CONTENT_ASSETS.md`
 - **Produces:** `growth/landing/`
-- **Gates:** `check:design-room`
-- **Knowledge:** [Analytics And Attribution](../../knowledge/data/analytics-attribution.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md), [CRO Landing](../../knowledge/growth/cro-landing.md), [Funnel Domain And Privacy](../../knowledge/process/tool-recipes/funnel-domain-and-privacy.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
+- **Gates:** `check:design-room`, `check:vibecoded-tells`, `check:scrollytelling`
+- **Knowledge:** [Analytics And Attribution](../../knowledge/data/analytics-attribution.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Evidence-Led Editorial Scrollytelling](../../knowledge/design/editorial-scrollytelling.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md), [CRO Landing](../../knowledge/growth/cro-landing.md), [Funnel Domain And Privacy](../../knowledge/process/tool-recipes/funnel-domain-and-privacy.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
 
 ### Landing funnel publication and live proof
 

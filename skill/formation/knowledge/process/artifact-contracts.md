@@ -9,7 +9,7 @@ These are the reusable document shapes from the model launch session. Keep docs 
 - Design docs: `design/design.md`, optional `DESIGN_SYSTEM.md` appendix, and `design/design.html`
 - Conversion docs: `product/ONBOARDING.md`, `product/onboarding.html`
 - Launch ops: `LAUNCH.md`, `store/APPLE_SIGNING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `APP_STORE_LISTING.md`, `app-store-listing.html`, `app-privacy-questionnaire.html`, `store/STORE_CONSOLE.md`, `store/store-console.html`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, `content-assets.html`, `STORE_OPS.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`
-- Business ops: `growth/EMAIL_OPS.md`, `revenue/REVENUE_OPS.md`, `GEO_SEO.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `LEGAL_REVIEW.md`
+- Business ops: `growth/EMAIL_OPS.md`, `revenue/REVENUE_OPS.md`, `GEO_SEO.md`, `growth/landing/surface-contract.json`, `trust/PRIVACY.md`, `trust/TERMS.md`, `LEGAL_REVIEW.md`
 - Engineering docs: `engineering/TECH_SPEC.md`, `operations/ORCHESTRATION.md`, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md`, `LAUNCHBENCH.md`, `operations/FAILURE_CARDS.md`
 - Handoff docs: `PROMPTS.md`, `AUDIT_PROMPT.md`, `agents/`
 
@@ -1021,6 +1021,91 @@ Acceptance:
 - The canonical domain can be crawled and parsed without auth or client-only rendering failures.
 - AI/search-visible facts match the app store listing, legal pages, and brand docs.
 - Any unsupported claims are removed or tracked in legal/launch risk notes.
+
+## `growth/landing/surface-contract.json`
+
+Use this contract for each local landing or funnel build. It makes the inputs, applicability decisions, and proof machine-readable.
+
+Use these top-level fields:
+
+- `contract_version`;
+- `sources` with the canonical path and current SHA-256 digest;
+- `analytics_events`;
+- `locales` with evidence for each Tier 1 locale;
+- `pricing` and `onboarding`, each with `applicable` and `evidence`;
+- `screenshots` with locale, evidence, and `source_kind`;
+- `scrollytelling` with its applicability decision and browser proof.
+
+Add a `scrollytelling` object with these exact keys:
+
+- `applicable`: a Boolean value;
+- `evidence`: the evidence-based applicability decision;
+- `locales`: the stable locale tags covered by this sequence;
+- `scenes`: the ordered scene contracts;
+- `qa`: the browser evidence rows.
+
+Each `scenes` row must use these exact keys:
+
+- `id`: a stable lowercase scene slug;
+- `narrative_roles`: one or more semantic roles;
+- `states`: one or more stable lowercase state slugs;
+- `visual_job`: the situation, mechanism, change, or proof that the visual must show;
+- `source_kind`: `html`, `svg`, `canvas`, `image`, or `video`;
+- `asset_id`: the ID of a matching image or video record in `growth/content-assets/manifest.json`; the record must satisfy the content-asset shape, use a done-tier status (`done`, `ready`, `production`, or `approved`), and resolve every local output under the business workspace;
+- `poster_asset_id`: the ID of a distinct done-tier still-image record in `growth/content-assets/manifest.json` when an image or video uses `modes.save_data: poster`; it cannot reuse the primary or another video record, and the key must be absent when the Save-Data mode is `omit`;
+- `evidence_id`;
+- `localizations`: locale-specific beat copy, caption, and accessible-description contracts;
+- `activation_guides`: numeric `desktop`, `mobile`, and `short_mobile` positions from 0 to 1;
+- `modes`: `mobile`, `reduced_motion`, `no_js`, and `save_data` behavior;
+- `forward_reverse`: `true` after every state has forward and reverse browser evidence.
+
+Each `localizations` row must use this exact shape:
+
+```text
+{
+  locale,
+  beats: [{ state_id, text, copy_key, copy_sha256 }],
+  caption: { text, copy_key, copy_sha256 },
+  accessible_description: { text, copy_key, copy_sha256 }
+}
+```
+
+The locale must exist in `scrollytelling.locales`. Each `beats` list must cover every scene state in the same order. Each digest is the lowercase SHA-256 of the exact approved localized `text` in that row.
+
+Use `situation` or `need` for the first narrative stage. Use `decision`, `intervention`, or `mechanism` for the next stage. Use `outcome` or `proof` for the final stage.
+
+Each activation guide is a viewport ratio from 0 to 1. Select it to keep the active prose clear of the stage. Do not divide scroll progress into equal buckets.
+
+Set `modes.mobile` to `recomposed` or `inline`. Set reduced motion and no JavaScript to `final`. A final-only visual is valid only when semantic prose or captions contain every claim and proof. Otherwise, render static visual panels in document flow. Set Save-Data to `code-native` for HTML, SVG, or canvas. For image or video, use `poster` and provide `poster_asset_id`, or use `omit` when the complete semantic prose, caption, and accessible description remain without the media. Do not retain `poster_asset_id` on an omitted fallback.
+
+The static gate resolves manifest IDs, required record fields, approval status, output media extensions, and local output paths. It does not inspect the media pixels, measure poster byte size, or replace the recorded browser review.
+
+Each `qa` row must use these exact keys:
+
+- `browser`;
+- `platform`;
+- `viewport`;
+- `locale`;
+- `direction`: `forward`, `reverse`, or `jump`;
+- `mode`: `default`, `short_mobile`, `reduced_motion`, `no_js`, or `save_data`;
+- `scene_id`;
+- `expected_state`;
+- `result`: `pass`, `fail`, or `pending`;
+- `evidence`.
+
+If scrollytelling does not apply, set `applicable` to `false`. Record the reason in `evidence`. Keep `scenes` and `qa` as empty lists.
+
+Acceptance:
+
+- An applicable sequence has at least one scene. Each scene aligns ordered roles and states for situation or need, intervention or mechanism, and outcome or proof.
+- Stable scene and state IDs match the rendered DOM.
+- Browser proof covers current Chrome, Safari, and Firefox, each on short and tall desktop viewports.
+- Browser proof covers iOS Safari and Android Chrome, each on short and tall mobile viewports.
+- Each Tier 1 locale proves every scene state in forward and reverse default scroll. Each locale also proves reduced motion, no JavaScript, Save-Data, and short-mobile behavior for every scene.
+- Proof covers a direct jump or restored scroll position for each scene.
+- Every localized beat, caption, and accessible description has a current copy key and digest.
+- Every local evidence fragment resolves to a real Markdown heading or HTML anchor in its evidence file.
+- Image and video scenes resolve to done-tier manifest records whose existing output extension matches `source_kind`. Their Save-Data mode either resolves a separate approved still output or explicitly omits the media while the complete semantic narrative remains. A generated asset does not replace proof or necessary copy.
 
 ## `STORE_OPS.md`
 

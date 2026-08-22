@@ -29,7 +29,7 @@ Treat these repositories as live source material when the work depends on their 
 - Refero MCP and Refero Styles: `https://doc.refero.design/llms.txt`, `https://api.refero.design/mcp`, `https://styles.refero.design/`
 - Higgsfield local skills: `higgsfield-generate`, `higgsfield-product-photoshoot`, `higgsfield-soul-id`, `higgsfield-marketplace-cards`
 - ui-ux-pro-max skill (senior-grade UI generation: 67 styles, 161 palettes, 57 font pairings, 99 UX guidelines, framer-motion/Magic UI motion patterns, and anti-pattern/pre-delivery checklists; MIT-licensed, reference-only — invoke it or adapt its guidance, do not copy its CSV data into this repo or business repos): `https://github.com/nextlevelbuilder/ui-ux-pro-max-skill`
-- Motion (framer-motion's successor package, `motion/react`) for web-surface animation driven by the tokenized motion scale: `https://motion.dev/docs/react`. For landing/funnel sections, load [`landing-motion-craft.md`](./landing-motion-craft.md) and start from the `business/growth/landing/` section library instead of improvising choreography.
+- Motion (framer-motion's successor package, `motion/react`) for web-surface animation driven by the tokenized motion scale: `https://motion.dev/docs/react`. For landing and funnel motion, load [`landing-motion-craft.md`](./landing-motion-craft.md). When the surface uses a scroll-led story, also load [`editorial-scrollytelling.md`](./editorial-scrollytelling.md) before you select sections or write animation code.
 - 60fps.design (X @60fpsdesign) — curated catalog of in-app interaction details from best-in-class consumer apps; the in-app inspiration benchmark, counterpart to motionsites.ai on the landing lane. Use it through [`motion-craft-benchmarks.md`](./motion-craft-benchmarks.md), which distills it into numeric, checkable recipes on the token scale: `https://60fps.design/`. When the 60fps.design MCP server is connected (`https://60fps.design/mcp`), the catalog is queryable live — shot search, per-shot motion breakdowns, and SwiftUI starter code; that reference's Live Catalog Access section states the tools and the token-rewrite rule for generated code.
 
 If matching local skills are installed, load and use them. If Refero or Higgsfield is unavailable, load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) and ask before replacing it with local HTML/CSS/SVG/canvas, founder-owned assets, public-domain assets, public UX pattern libraries, bundled pattern templates, or real app screenshots. If the design-system source skills are not installed, apply the source workflow directly and cite the repository URL in the design notes.
@@ -59,6 +59,7 @@ Use `design/design.md` as the only design contract. It must contain:
 - Screen states, copy keys, analytics hooks, and proof paths
 - Onboarding, motion, haptics, and reduced-motion behavior
 - Landing, icon, store, ad, and lifecycle marketing direction
+- An evidence-led story map and responsive state plan when scrollytelling applies
 - Accessibility and implementation rules
 
 Validate when possible:

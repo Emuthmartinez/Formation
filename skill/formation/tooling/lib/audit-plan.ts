@@ -134,6 +134,7 @@ export function buildAuditPlan(layout: AuditLayout, roots?: { businessRoot?: str
     { id: "check:source-registry", kind: "script" },
     { id: "check:asc-command-contract", kind: "script", args: ["--skill-root", S] },
     { id: "check:motion-contract", kind: "script", args: ["--skill-root", S, "--workspace-root", T] },
+    { id: "check:scrollytelling", kind: "script", args: ["--skill-root", S, "--workspace-root", T] },
     { id: "check:mobai-proof", kind: "script", args: ["--skill-root", S, ...stateArgs] },
     { id: "check:source-checkpoint", kind: "script", args: rootArgs },
     { id: "check:continuity-contract", kind: "script" },

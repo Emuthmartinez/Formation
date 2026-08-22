@@ -1,12 +1,12 @@
 {
   "skill": "formation",
-  "version": "0.159.0",
-  "updatedAt": "2026-08-20",
+  "version": "0.160.0",
+  "updatedAt": "2026-08-21",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Added an always-on Design Evidence Stack that routes motion, trust, conversion, delight, flow, and component questions to six bounded design sources.",
-    "Required source triage and adopted evidence in the Design Room contract. Added validator coverage and a LaunchBench case for copied patterns and unsupported experiment claims.",
-    "Added General Legal's CC0 template collection as an optional privacy and terms drafting benchmark, with official-source and counsel-review boundaries.",
-    "Hardened Design Evidence and motion validation for rendered sections and scoped rows, strict nested Markdown fences, comments, raw script/style/template blocks, and indented code, resumable session-scoped serialized dependency refresh with full consumer/dependency admission, read-only plan parity, final-attempt blocking, inapplicable-scope cleanup, completed-cycle retention, strict target resolution, scoped and unscoped dispatch authorization, dependency and consumer attempt budgets, later-session failure retries, unaccepted failed bytes, sibling-result preservation, transient instructions, preserved change baselines, stale-token invalidation, and zero-output boundary results, lane-bound fallback sources, comprehensive standard-component routing, unique declarations and triage, ambiguous product terminology, and contiguous rendered motion tables."
+    "Added an evidence-led editorial scrollytelling capability that maps situation, mechanism, outcome, and proof to stable semantic scene states without copying a source site's visual identity.",
+    "Replaced equal-section scroll quantization with measured step-center geometry, one shared reversible controller, responsive stage composition, and explicit no-JavaScript, reduced-motion, and Save-Data behavior.",
+    "Added a typed landing surface contract, static validator, pure geometry fixtures, and LaunchBench failures for synchronization drift, short mobile layouts, copy-to-visual disconnects, and incomplete fallbacks.",
+    "Bound the capability to the existing Design Room and local landing workflow, with browser evidence required before an active landing can pass."
   ]
 }

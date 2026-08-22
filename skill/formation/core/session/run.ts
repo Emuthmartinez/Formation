@@ -190,7 +190,13 @@ function runDeterministicGates(gateIds: readonly string[], workspaceDir: string)
     });
     const passed = result.status === 0;
     evidence.push(`gate:${gate}=${passed ? "passed" : `exit ${result.status ?? "spawn-error"}`}`);
-    if (!passed) return { allPassed: false, evidence };
+    if (!passed) {
+      // A child gate inherits the session environment and may print credentials, customer data,
+      // internal paths, or terminal control sequences. Keep operator diagnostics to stable gate
+      // metadata; never forward raw stdout/stderr into retained session or CI logs.
+      console.error(`session.deterministic_gate_failed ${gate}: exit ${result.status ?? "spawn-error"}`);
+      return { allPassed: false, evidence };
+    }
   }
   return { allPassed: true, evidence };
 }

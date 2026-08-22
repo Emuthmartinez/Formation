@@ -262,6 +262,26 @@ sources:
       - docs/engine-backlog.md
     notes: First-party. The founder web application's own private repository, extracted from this monorepo on 2026-08-19
       (layering plan phase C); referenced wherever the docs name the L4 consumer.
+  - id: github-clueless-creations-site
+    name: Clueless Creations website repository
+    source_type: github
+    url: https://github.com/Clueless-Creations/clueless-creations-site
+    refresh_cadence_days: 90
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-editorial-scrollytelling.yaml
+    notes: Practice evidence for semantic story anchors and code-native visual states. The catalog manifest pins the
+      audited commit; future refreshes must transfer mechanics only.
+  - id: github-eduardomuth-site
+    name: Eduardo Martinez portfolio website repository
+    source_type: github
+    url: https://github.com/Emuthmartinez/eduardomuth-site
+    refresh_cadence_days: 90
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-editorial-scrollytelling.yaml
+    notes: First-party practice evidence for measured step-center control and responsive scrollytelling. The catalog
+      manifest pins the audited commit; future refreshes must transfer mechanics only.
   - id: github-com-general-legal-legal-templates
     name: General Legal template collection
     source_type: attorney_template_repository

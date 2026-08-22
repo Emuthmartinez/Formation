@@ -114,6 +114,20 @@ function prepareWorkspace(scratch: string, name: string): { workspace: string; b
   const workspace = path.join(scratch, name);
   cpSync(referenceWorkspace, workspace, { recursive: true });
 
+  // Once copied out of the packaged starter path this is an active fixture workspace, so the
+  // motion contract must contain an authored decision rather than the starter's placeholder.
+  // This journey exercises orchestration, not a deployed UI; `none` is therefore the truthful
+  // live-effect choice. Keep the replacement exact so starter-template drift fails loudly.
+  const designContractPath = path.join(workspace, "design", "design.md");
+  const designContract = readFileSync(designContractPath, "utf8");
+  const placeholder = "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |";
+  const fixtureDecision =
+    "| Engine E2E reference | No deployed live effect; this fixture exercises static business-state orchestration. | none | Semantic content and the final state remain visible. | No autonomous effect starts. | The same final state remains visible without motion. | Static content remains visible without heavy media. |";
+  if (!designContract.includes(placeholder)) {
+    throw new Error("engine-e2e fixture could not author the starter live-surface decision because the placeholder row changed");
+  }
+  writeFileSync(designContractPath, designContract.replace(placeholder, fixtureDecision), "utf8");
+
   const dryRun = runCli("core/session/bootstrap.ts", ["--workspace", workspace]);
   check(dryRun.code === 0, `${name}: bootstrap dry-run exits 0`, dryRun.output.trim().slice(-400));
 
