@@ -44,17 +44,42 @@ Native iOS proof from the in-app iOS Simulator (Claude Code Desktop pane, Claude
 - `Info.plist` purpose strings, `NSUserTrackingUsageDescription`, and ATT route when tracking is in scope
 - account deletion, review notes, privacy URLs, archive/upload warnings, and founder approval
 
+## Live Apple Release Baseline
+
+Do not rely on a pinned Xcode or SDK requirement in this packet. Read and record Apple's live requirements before each release archive.
+
+| Live Apple source | Checked at | Current requirement | Local proof | Result |
+| --- | --- | --- | --- | --- |
+| https://developer.apple.com/news/upcoming-requirements/ | {{APPLE_DOCS_CHECKED_AT}} | {{APPLE_UPCOMING_REQUIREMENT}} | `xcodebuild -version`; `xcodebuild -showsdks` | {{APPLE_UPCOMING_REQUIREMENT_RESULT}} |
+| https://developer.apple.com/app-store/submitting/ | {{APPLE_DOCS_CHECKED_AT}} | {{APPLE_SUBMISSION_BASELINE}} | archive platform and SDK | {{APPLE_SUBMISSION_BASELINE_RESULT}} |
+| https://developer.apple.com/xcode/system-requirements/ | {{APPLE_DOCS_CHECKED_AT}} | {{XCODE_HOST_REQUIREMENT}} | macOS and Xcode versions | {{XCODE_HOST_REQUIREMENT_RESULT}} |
+| https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/ | {{APPLE_DOCS_CHECKED_AT}} | {{APPLE_UPLOAD_REQUIREMENT}} | chosen validation/upload route | {{APPLE_UPLOAD_REQUIREMENT_RESULT}} |
+
+A weekly source-freshness result only proves that these pages are reachable. This dated release check must prove that the current text was read and compared with the build host.
+
+## Version And Build Identity
+
+| Identity | Intended value | Compiled archive value | App Store Connect value | Result |
+| --- | --- | --- | --- | --- |
+| `CFBundleIdentifier` | {{IOS_BUNDLE_ID}} | {{ARCHIVE_BUNDLE_ID}} | {{ASC_BUNDLE_ID}} | {{BUNDLE_ID_MATCH_RESULT}} |
+| `CFBundleShortVersionString` | {{MARKETING_VERSION}} | {{ARCHIVE_MARKETING_VERSION}} | {{ASC_VERSION}} | {{VERSION_MATCH_RESULT}} |
+| `CFBundleVersion` | {{CURRENT_PROJECT_VERSION}} | {{ARCHIVE_BUILD_VERSION}} | {{ASC_BUILD_VERSION}} | {{BUILD_UNIQUENESS_RESULT}} |
+
+Use three period-separated integer segments for `CFBundleShortVersionString`. Do not use leading zeroes. Confirm that the compiled archive contains no unresolved build variables and that Apple has not already received the same version/build combination. The [2016 Apple Developer Forums thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence only; current Apple documentation is authoritative.
+
 ## Pre-Archive/Export/Upload Preflight Sign-Off
 
-Record all five items below before running `xcodebuild archive`. Each item must read `pass` or `ready` before proceeding; if any item cannot pass, replace the line with `<item>: blocked — <reason>` and stop until it is resolved (that unresolved state opens the `apple-pre-upload-preflight-skipped` failure card).
+Record all seven items below before running `xcodebuild archive`. Each item must read `pass` or `ready` before proceeding; if any item cannot pass, replace the line with `<item>: blocked — <reason>` and stop until it is resolved (that unresolved state opens the `apple-pre-upload-preflight-skipped` failure card).
 
 ```text
 Pre-archive/export/upload preflight (sign-off recorded on the archive date):
-1. SDK keys in Info.plist (RevenueCat, PostHog, Supabase) verified with plutil -p on the compiled archive: pass.
-2. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): ok.
-3. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.
-4. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
-5. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.
+1. Live Apple release sources and local Xcode/SDK compatibility: pass.
+2. Archive bundle ID, version, and build identity against App Store Connect: pass.
+3. SDK keys in Info.plist (RevenueCat, PostHog, Supabase) verified with plutil -p on the compiled archive: pass.
+4. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): ok.
+5. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.
+6. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
+7. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.
 ```
 
 See the "Pre-Archive/Export/Upload Preflight Checklist" section in `apple-signing-release.md` for commands and acceptance criteria for each item.

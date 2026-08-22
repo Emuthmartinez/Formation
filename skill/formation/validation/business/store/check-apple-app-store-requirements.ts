@@ -20,6 +20,8 @@ const issues = [...loaded.issues];
 const state = loaded.state;
 const relative = "store/APPLE_APP_STORE_REQUIREMENTS.md";
 const text = readText(args.root, relative);
+const signingRelative = "store/APPLE_SIGNING.md";
+const signingText = readText(args.root, signingRelative);
 
 function statusForLane(name: string): string | undefined {
   return state ? asString(getPath(state, `lanes.${name}.status`))?.toLowerCase() : undefined;
@@ -194,6 +196,37 @@ if (appleRequirementsSkipped) {
   }
 
   if (readyClaim) {
+    const signingReleasePhrases = [
+      "Live Apple Release Baseline",
+      "upcoming-requirements",
+      "xcodebuild -version",
+      "xcodebuild -showsdks",
+      "Version And Build Identity",
+      "CFBundleIdentifier",
+      "CFBundleShortVersionString",
+      "CFBundleVersion",
+      "App Store Connect",
+      "leading zeroes",
+      "compiled archive",
+    ];
+
+    if (!signingText) {
+      issues.push(issue("error", "apple_requirements.signing_packet_missing", "A ready Apple submission needs store/APPLE_SIGNING.md.", signingRelative));
+    } else {
+      for (const phrase of signingReleasePhrases) {
+        if (!normalizedIncludes(signingText, phrase)) {
+          issues.push(
+            issue(
+              "error",
+              missingPhraseCode("apple_release_baseline", phrase),
+              `store/APPLE_SIGNING.md should include ${phrase} before release readiness is claimed.`,
+              signingRelative,
+            ),
+          );
+        }
+      }
+    }
+
     checkUnresolvedLines(text);
     const privacyManifests = findPrivacyManifests();
     if (privacyManifests.length === 0) {

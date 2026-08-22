@@ -29,6 +29,12 @@ Refresh official Apple docs before account, signing, app-record, archive/export,
 - Create an App Store Connect provisioning profile: `https://developer.apple.com/help/account/provisioning-profiles/create-an-app-store-provisioning-profile/`
 - Preparing your app for distribution: `https://developer.apple.com/documentation/xcode/preparing-your-app-for-distribution`
 - Distributing your app for beta testing and releases: `https://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases`
+- Upcoming App Store requirements: `https://developer.apple.com/news/upcoming-requirements/`
+- Current App Store submission baseline: `https://developer.apple.com/app-store/submitting/`
+- Xcode SDK and system requirements: `https://developer.apple.com/xcode/system-requirements/`
+- App version number (`CFBundleShortVersionString`): `https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleshortversionstring`
+- Build number (`CFBundleVersion`): `https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleversion`
+- Create a new App Store version: `https://developer.apple.com/help/app-store-connect/update-your-app/create-a-new-version/`
 - Changing the bundle identifier: `https://developer.apple.com/documentation/xcode/changing-the-bundle-identifier`
 - Privacy manifest files: `https://developer.apple.com/documentation/bundleresources/privacy-manifest-files`
 - Adding a privacy manifest: `https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk`
@@ -41,6 +47,8 @@ Refresh official Apple docs before account, signing, app-record, archive/export,
 - App information fields: `https://developer.apple.com/help/app-store-connect/reference/app-information`
 - Upload builds: `https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/`
 
+The [Apple Developer Forums version-number thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence. It shows how version segments with leading zeroes can be interpreted as integers and collide with a later version. The thread is not current policy. Use it to explain the failure mode, then use the live `CFBundleShortVersionString`, `CFBundleVersion`, distribution, upload, and App Store Connect pages above as the authority.
+
 Also refresh:
 
 - local Xcode version: `xcodebuild -version`
@@ -52,6 +60,42 @@ Also refresh:
 Record the docs checked date and command basis in `store/APPLE_SIGNING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `store/STORE_CONSOLE.md`, or `engineering/PRODUCTION_READINESS.md`.
 
 Also update `state/PROJECT_STATE.yaml` with Apple provider state: docs checked date, Apple Developer membership, Team ID, bundle ID/App ID, app record, signing strategy, certificate/profile status, privacy manifest/required-reason API status, archive/export/upload/TestFlight status, founder-only gates, and active failure cards such as `apple-signing-simulator-only`, `apple-privacy-manifest-unproven`, or `asc-name-fallback-unapproved`.
+
+## Live Apple Release Baseline
+
+Do not copy the current Xcode or SDK minimum into Formation as durable policy. Apple changes this requirement. Before each release archive, read the live Upcoming Requirements, App Store submission, Xcode system requirements, and Upload builds pages. Record:
+
+```text
+Apple release source check (YYYY-MM-DD):
+- Upcoming Requirements: checked — current upload deadline and minimum Xcode/SDK recorded
+- Submitting apps: checked — current platform SDK baseline recorded
+- Xcode system requirements: checked — build host and Xcode compatibility confirmed
+- Upload builds: checked — supported build/upload route confirmed
+- Local Xcode: <xcodebuild -version output>
+- Local SDKs: <relevant xcodebuild -showsdks output>
+Result: pass | BLOCKED — <mismatch>
+```
+
+Treat a stale or missing check as a release blocker. A weekly healthy-link result proves that the page is reachable. It does not prove that the current requirement was read and compared with the build host.
+
+## Version And Build Identity Contract
+
+Before each archive, reconcile the version record in App Store Connect with the values that the archive will contain:
+
+- `CFBundleShortVersionString` is the user-visible version. Use three period-separated integer segments. Do not use leading zeroes in a segment.
+- `CFBundleVersion` is the build identifier. Use only the format that the current Apple documentation accepts and ensure that the version/build combination is unique for the target platform.
+- `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` are inputs. The compiled archive `Info.plist` is the release evidence.
+- The App Store Connect version must match the archive version. Increment the build before another upload for the same version.
+
+Inspect the archive, then compare it with the intended App Store Connect version:
+
+```bash
+plutil -extract CFBundleIdentifier raw build/MyApp.xcarchive/Products/Applications/MyApp.app/Info.plist
+plutil -extract CFBundleShortVersionString raw build/MyApp.xcarchive/Products/Applications/MyApp.app/Info.plist
+plutil -extract CFBundleVersion raw build/MyApp.xcarchive/Products/Applications/MyApp.app/Info.plist
+```
+
+Stop if a value is missing, contains an unresolved build variable, uses a leading-zero version segment, does not match the App Store Connect record, or reuses a version/build combination that Apple has already received.
 
 ## Naming And Identifier Contract
 
@@ -280,9 +324,9 @@ Use when local Mac does not have distribution signing or the team prefers CI.
 
 ## Pre-Archive/Export/Upload Preflight Checklist
 
-Run every item below and record pass/fail in `store/APPLE_SIGNING.md` before archiving, exporting, or uploading. A single unresolved failure blocks upload. Do not skip this checklist on re-archive cycles.
+Run every item below and record pass/fail in `store/APPLE_SIGNING.md` before archiving, exporting, or uploading. The live Apple release baseline and version/build identity contract above are the first two checks. A single unresolved failure blocks upload. Do not skip this checklist on re-archive cycles.
 
-### 1. SDK Keys Injected Into Info.plist
+### 3. SDK Keys Injected Into Info.plist
 
 Verify that all provider runtime keys are present in the archive's `Info.plist` — not just in source — before upload. Keys that come from build variables must be confirmed injected, not assumed.
 
@@ -302,7 +346,7 @@ Record result:
 SDK key preflight: pass | BLOCKED — <key name> missing or unexpanded in Info.plist
 ```
 
-### 2. PrivacyInfo.xcprivacy Lint And Required Reason API Coverage
+### 4. PrivacyInfo.xcprivacy Lint And Required Reason API Coverage
 
 `PrivacyInfo.xcprivacy` must be a valid property list, not JSON. Run lint before archive:
 
@@ -332,7 +376,7 @@ plutil -lint: pass | BLOCKED — <error>
 NSPrivacyAccessedAPITypes coverage: complete | BLOCKED — <missing category>
 ```
 
-### 3. Export With API Key Auth, Not Interactive Session
+### 5. Export With API Key Auth, Not Interactive Session
 
 Interactive Apple ID sessions expire silently. Every `xcodebuild -exportArchive` invocation must use API key authentication flags to avoid mid-export session expiry errors:
 
@@ -356,7 +400,7 @@ Record result:
 exportArchive auth: API key flags set | BLOCKED — <missing key/issuer>
 ```
 
-### 4. Screenshot Dimension Floor Before Upload
+### 6. Screenshot Dimension Floor Before Upload
 
 Upscaling low-resolution captures to meet App Store minimums produces blurry, pixelated images that Apple may reject. Before including any screenshot in an upload or `SCREENSHOTS.md` "ready" row, verify native capture dimensions:
 
@@ -381,17 +425,19 @@ Record result:
 Screenshot dimension preflight: pass (<device> native: <WxH>) | BLOCKED — <device> capture at <WxH>, below minimum
 ```
 
-### 5. Preflight Sign-Off
+### 7. Preflight Sign-Off
 
-Record all four checks in `store/APPLE_SIGNING.md` before archiving:
+Record all seven checks in `store/APPLE_SIGNING.md` before archiving:
 
 ```text
 Pre-archive/export/upload preflight (YYYY-MM-DD):
-1. SDK keys in Info.plist: pass | BLOCKED
-2. plutil -lint PrivacyInfo.xcprivacy: pass | BLOCKED
-3. NSPrivacyAccessedAPITypes coverage: pass | BLOCKED
-4. exportArchive API key auth flags: ready | BLOCKED
-5. Screenshot dimension floor: pass | BLOCKED
+1. Live Apple release sources and local Xcode/SDK compatibility: pass | BLOCKED
+2. Archive bundle ID, version, and build identity against App Store Connect: pass | BLOCKED
+3. SDK keys in Info.plist: pass | BLOCKED
+4. plutil -lint PrivacyInfo.xcprivacy: pass | BLOCKED
+5. NSPrivacyAccessedAPITypes coverage: pass | BLOCKED
+6. exportArchive API key auth flags: ready | BLOCKED
+7. Screenshot dimension floor: pass | BLOCKED
 ```
 
 Do not begin `xcodebuild archive` until all items are `pass` or `ready`. A blocked item stays open until fixed; do not re-archive and upload speculatively hoping the upload will succeed.

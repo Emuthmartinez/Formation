@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.160.0",
+  "skillVersion": "0.161.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -5166,6 +5166,16 @@
           "reviewer": "formation-maintainers"
         },
         {
+          "id": "developer-apple-com-app-store-submitting",
+          "name": "Apple App Store submission baseline",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/app-store/submitting",
+          "reviewCadenceDays": 7,
+          "claimScope": "Live platform SDK and App Store submission baseline checked before a release archive.",
+          "lastReviewDate": "2026-08-21",
+          "reviewer": "formation-maintainers"
+        },
+        {
           "id": "developer-apple-com-documentation-bundleresources-adding-a-privacy-manifest-to",
           "name": "developer.apple.com",
           "sourceType": "official_docs",
@@ -5196,6 +5206,26 @@
           "reviewer": "formation-maintainers"
         },
         {
+          "id": "developer-apple-com-documentation-bundleresources-information-property-list-cfbu",
+          "name": "Apple CFBundleShortVersionString documentation",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleshortversionstring",
+          "reviewCadenceDays": 7,
+          "claimScope": "Current format and meaning of the user-visible app version.",
+          "lastReviewDate": "2026-08-21",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "developer-apple-com-documentation-bundleresources-information-property-list-cfbu-2",
+          "name": "Apple CFBundleVersion documentation",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleversion",
+          "reviewCadenceDays": 7,
+          "claimScope": "Current format and meaning of the build identifier.",
+          "lastReviewDate": "2026-08-21",
+          "reviewer": "formation-maintainers"
+        },
+        {
           "id": "developer-apple-com-documentation-bundleresources-protected-resources",
           "name": "developer.apple.com",
           "sourceType": "official_docs",
@@ -5223,6 +5253,16 @@
           "reviewCadenceDays": 7,
           "claimScope": "Official Apple Info.plist key documentation for ATT tracking usage description copy.",
           "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "developer-apple-com-forums-thread-50931",
+          "name": "Apple Developer Forums version-number thread",
+          "sourceType": "website",
+          "url": "https://developer.apple.com/forums/thread/50931",
+          "reviewCadenceDays": 30,
+          "claimScope": "Historical community failure evidence for leading-zero version collisions; never policy authority.",
+          "lastReviewDate": "2026-08-21",
           "reviewer": "formation-maintainers"
         },
         {
@@ -5326,6 +5366,16 @@
           "reviewer": "formation-maintainers"
         },
         {
+          "id": "developer-apple-com-help-app-store-connect-update-your-app-create-a-new-version",
+          "name": "Create a new App Store version",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/help/app-store-connect/update-your-app/create-a-new-version",
+          "reviewCadenceDays": 7,
+          "claimScope": "Current App Store Connect version creation and build-increment workflow.",
+          "lastReviewDate": "2026-08-21",
+          "reviewer": "formation-maintainers"
+        },
+        {
           "id": "developer-apple-com-help-app-store-connect-reference-app-information",
           "name": "developer.apple.com",
           "sourceType": "official_docs",
@@ -5343,6 +5393,26 @@
           "reviewCadenceDays": 7,
           "claimScope": "Auto-discovered from recently added repository content.",
           "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "developer-apple-com-news-upcoming-requirements",
+          "name": "Apple Upcoming Requirements",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/news/upcoming-requirements",
+          "reviewCadenceDays": 7,
+          "claimScope": "Fast-moving upload deadlines and minimum Xcode and SDK requirements checked on the archive date.",
+          "lastReviewDate": "2026-08-21",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "developer-apple-com-xcode-system-requirements",
+          "name": "Xcode SDK and system requirements",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/xcode/system-requirements",
+          "reviewCadenceDays": 7,
+          "claimScope": "Current macOS host, Xcode, SDK, deployment, device, and simulator compatibility.",
+          "lastReviewDate": "2026-08-21",
           "reviewer": "formation-maintainers"
         }
       ],
@@ -8919,7 +8989,7 @@
         "area.build-release"
       ],
       "trigger": "Before Apple Developer enrollment, Team ID, signing, profiles, archive/upload, TestFlight",
-      "instructions": "Classify the Apple account state (membership, Team ID, role, agreements signed) before any TestFlight/App Store distribution claim, and treat a simulator build as engineering proof only, never distribution readiness. Run the five-item pre-archive/export/upload preflight checklist — SDK keys actually injected into the archived Info.plist, `plutil -lint` on PrivacyInfo.xcprivacy, NSPrivacyAccessedAPITypes coverage, API-key (not interactive-session) export auth, and native screenshot dimension floors — and record pass/BLOCKED for each in store/APPLE_SIGNING.md before archiving. Do not begin `xcodebuild archive` until every item is pass or ready. A current exact TestFlight upload standing envelope authorizes archive/upload without another prompt; read back the build state and record proof. Enrollment, certificate creation/rotation, agreements, pricing, final review submission, and production release remain founder decisions unless the opening envelope names that exact action.",
+      "instructions": "Classify the Apple account state (membership, Team ID, role, agreements signed) before any TestFlight/App Store distribution claim, and treat a simulator build as engineering proof only, never distribution readiness. Before each release archive, read Apple's live Upcoming Requirements, submission baseline, Xcode compatibility, and upload pages; compare them with the local Xcode/SDK; then reconcile the compiled archive bundle ID, CFBundleShortVersionString, and CFBundleVersion with App Store Connect. Run the remaining pre-archive checks — SDK keys actually injected into the archived Info.plist, `plutil -lint` on PrivacyInfo.xcprivacy, NSPrivacyAccessedAPITypes coverage, API-key (not interactive-session) export auth, and native screenshot dimension floors — and record pass/BLOCKED for all seven items in store/APPLE_SIGNING.md before archiving. Do not begin `xcodebuild archive` until every item is pass or ready. A current exact TestFlight upload standing envelope authorizes archive/upload without another prompt; read back the build state and record proof. Enrollment, certificate creation/rotation, agreements, pricing, final review submission, and production release remain founder decisions unless the opening envelope names that exact action.",
       "reads": [
         "store/app-store-listing/APP_STORE_LISTING.md",
         "state/PROJECT_STATE.yaml"
