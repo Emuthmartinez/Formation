@@ -99,6 +99,7 @@
     "check:lane-coverage": "tsx validation/business/process/check-lane-coverage.ts",
     "check:change-cascade": "tsx validation/business/process/check-change-cascade.ts",
     "check:research": "tsx validation/business/research/check-research-evidence.ts",
+    "check:research-workflow-output": "tsx validation/business/research/check-research-evidence.ts --require-workflow-outputs",
     "check:revenue": "tsx validation/business/money/check-revenue.ts",
     "check:email": "tsx validation/business/operations/check-email.ts",
     "check:analytics-catalog": "tsx validation/business/data/check-analytics-catalog.ts",

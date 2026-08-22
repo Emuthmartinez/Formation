@@ -50,6 +50,8 @@ export const auditExcludedScripts: Record<string, string> = {
     "a strict --require-resolved wrapper around check:onboarding-cutover-repository (already an audit step), used only as ONB-22's own catalog gate; the shipped template's Deletion Manifest row deliberately keeps the unresolved disposition option list, so running this in the general audit would always fail",
   "check:onboarding-graph-complete":
     "a strict --require-done wrapper around check:onboarding-graph (already an audit step), used only as ONB-22's own catalog gate; the shipped onboarding template is deliberately not marked done, so running this in the general audit would always fail",
+  "check:research-workflow-output":
+    "a strict --require-workflow-outputs wrapper around check:research (already an audit step), used only as the research-backed-spec workflow gate; the shipped research artifacts are deliberate pre-claim templates, so running this in the general audit would always fail",
   "check:provider-proof-onboarding":
     "a --providers-scoped invocation of check:provider-proof (already an audit step) for PostHog/RevenueCat only, used as ONB-22's own catalog gate so its acceptance does not depend on an unrelated provider row (Resend, App Store Connect, Sentry, ...) elsewhere in operations/PROVIDER_PROOF.md; running the repo-wide check:provider-proof step already covers this file too, so running both in the general audit would duplicate the step",
   "check:onboarding-evidence-onb-00":

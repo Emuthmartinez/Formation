@@ -246,7 +246,7 @@ _Need category economics, competitor, review/social-language, keyword, or name-c
 - **Reads:** `state/PROJECT_STATE.yaml`
 - **Consults:** —
 - **Produces:** `strategy/RESEARCH.md`, `strategy/SIGNAL_CORPUS.md`, `strategy/OFFER_TEST.md`, `product/SPEC.md`
-- **Gates:** `check:research`
+- **Gates:** `check:research-workflow-output`
 - **Knowledge:** [Research Intelligence](../../knowledge/process/tool-recipes/research-intelligence.md), [Core Loop And V1 Scope (Non-Archetype Products)](../../knowledge/product/core-loop-and-v1-scope.md), [Product Moat](../../knowledge/product/product-moat.md), [Distribution, Offer, And Signal Validation](../../knowledge/research/distribution-offer-signal.md), [Go, Pivot, Or Kill: The Pre-Build Research Verdict](../../knowledge/research/go-pivot-or-kill.md)
 
 ### Localization market research

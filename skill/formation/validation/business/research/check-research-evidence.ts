@@ -11,8 +11,10 @@
  * Usage: tsx validation/business/research/check-research-evidence.ts --root <app-repo-root>
  */
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../../tooling/lib/launch-state.js";
+import { parseOfferMeasurement, validateSignalSupersessionGraph, type SignalLifecycle, type SignalSupersessionRecord } from "./research-evidence-helpers.js";
 
 const args = parseCliArgs(process.argv.slice(2));
+const requireWorkflowOutputs = process.argv.includes("--require-workflow-outputs");
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
@@ -22,6 +24,7 @@ const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
 const done = laneStatus === "done";
+const strictResearch = done || requireWorkflowOutputs;
 // The pre-build gate cannot wait for the lane to claim done: a project that
 // advances to design/build phases with research still partial is exactly the
 // bypass the checkpoint exists to stop, so the verdict is enforced from
@@ -36,17 +39,17 @@ const downstreamActive = DOWNSTREAM_OF_VERDICT.some((lane) => {
   const status = state ? asString(getPath(state, `lanes.${lane}.status`))?.toLowerCase() : undefined;
   return status === "partial" || status === "done";
 });
-const verdictRequired = done || buildPhase || downstreamActive;
+const verdictRequired = strictResearch || buildPhase || downstreamActive;
 const text = readText(args.root, "strategy/RESEARCH.md");
 const signalText = readText(args.root, "strategy/SIGNAL_CORPUS.md");
 const offerText = readText(args.root, "strategy/OFFER_TEST.md");
-const signalEvidence = verdictRequired ? validateSignalCorpus(signalText, issues, done) : emptySignalCorpusIndex();
+const signalEvidence = verdictRequired ? validateSignalCorpus(signalText, issues, strictResearch) : emptySignalCorpusIndex();
 
 // A deferred/not_needed research lane suppresses the missing-file error only
 // before the build phases: from phase_2 onward the verdict is mandatory, so
 // the artifact that carries it is too — deferring research out of existence
 // is not a route around the pre-build checkpoint.
-if ((!skip || buildPhase || downstreamActive) && !text) {
+if ((!skip || verdictRequired) && !text) {
   issues.push(
     issue(
       "error",
@@ -74,7 +77,7 @@ if (text) {
     if (!text.toLowerCase().includes(phrase.toLowerCase())) {
       issues.push(
         issue(
-          done ? "error" : "warning",
+          strictResearch ? "error" : "warning",
           `research.${phrase.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.missing`,
           `strategy/RESEARCH.md should include a ${phrase} section (see the strategy/RESEARCH.md contract in artifact-contracts.md).`,
           "strategy/RESEARCH.md",
@@ -86,7 +89,7 @@ if (text) {
   if (!text.includes("LAUNCH_TRACE")) {
     issues.push(
       issue(
-        done ? "error" : "warning",
+        strictResearch ? "error" : "warning",
         "research.trace_pointer.missing",
         "strategy/RESEARCH.md should give major decisions trace IDs or state/LAUNCH_TRACE.md pointers so evidence stays connected to build decisions.",
         "strategy/RESEARCH.md",
@@ -94,7 +97,7 @@ if (text) {
     );
   }
 
-  if (done) {
+  if (strictResearch) {
     for (const column of ["URL / source ID", "Observed at", "Tool / backend / query", "Transcript / visual", "Observation", "Inference", "Artifact / trace"]) {
       if (!text.toLowerCase().includes(column.toLowerCase())) {
         issues.push(
@@ -398,7 +401,7 @@ if (text) {
     }
   }
 
-  if (done) {
+  if (strictResearch) {
     const rows = sourceLedgerRows(text);
     const completeRows = rows.filter(isCompleteSourceLedgerRow);
     if (completeRows.length === 0) {
@@ -419,8 +422,6 @@ if (verdictRequired) {
 }
 
 reportAndExit("Research evidence check", issues);
-
-type SignalLifecycle = "current" | "dated" | "superseded" | "rejected" | "unverified";
 
 interface SignalCorpusIndex {
   signalLifecycles: Map<string, SignalLifecycle>;
@@ -565,9 +566,13 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
   } else {
     const columns = requiredColumns.map((pattern) => tableColumnIndex(records, pattern));
     const signalRows = tableDataRows(records);
-    const declaredSignalIds = new Set(
-      signalRows.map((row) => (row[columns[0]!] ?? "").trim().toUpperCase()).filter((id) => /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id)),
-    );
+    const supersessionRecords = signalRows.flatMap((row): SignalSupersessionRecord[] => {
+      const id = (row[columns[0]!] ?? "").trim().toUpperCase();
+      const lifecycle = (row[columns[7]!] ?? "").trim().toLowerCase();
+      if (!/^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id) || !/^(current|dated|superseded|rejected|unverified)$/.test(lifecycle)) return [];
+      return [{ id, lifecycle: lifecycle as SignalLifecycle, replacementId: (row[columns[8]!] ?? "").trim().toUpperCase() }];
+    });
+    const invalidSupersessionIds = new Set(validateSignalSupersessionGraph(supersessionRecords).invalidSignalIds);
     const seenSignalIds = new Set<string>();
     let rowsComplete = signalRows.length > 0;
     let unresolvedSource = false;
@@ -581,12 +586,10 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
       const appliesTo = cells[5] ?? "";
       const confidence = cells[6] ?? "";
       const lifecycle = (cells[7] ?? "").toLowerCase() as SignalLifecycle;
-      const supersedes = cells[8] ?? "";
       const trace = cells[9] ?? "";
       const sourceIds = parsePrefixedIdList(sources, "INPUT");
       const sourcesResolve = sourceIds.validSyntax && sourceIds.ids.length > 0 && sourceIds.ids.every((sourceId) => declaredInputIds.has(sourceId));
-      const replacementId = supersedes.toUpperCase();
-      const supersessionValid = lifecycle !== "superseded" || (declaredSignalIds.has(replacementId) && replacementId !== id);
+      const supersessionValid = lifecycle !== "superseded" || !invalidSupersessionIds.has(id);
       const rowComplete =
         /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id) &&
         [type, claim, appliesTo, trace].every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
@@ -609,7 +612,8 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
         issue(
           "error",
           "research.signal_corpus_row_missing",
-          "Every declared Signal Records row needs a unique stable ID, dated provenance, applicability, confidence, a documented lifecycle, supersession data, and a trace pointer.",
+          "Every declared Signal Records row needs a unique stable ID, dated provenance, applicability, confidence, a documented lifecycle, valid supersession data, and a trace pointer. " +
+            "A supersession chain must be acyclic and end at a current or dated replacement.",
           "strategy/SIGNAL_CORPUS.md",
         ),
       );
@@ -759,17 +763,15 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
       const exposureCell = (candidate[exposureColumn] ?? "").trim();
       const conversionsCell = (candidate[conversionsColumn] ?? "").trim();
       if (exposureCell.length === 0 || conversionsCell.length === 0) return false;
-      const exposure = Number(exposureCell.replace(/,/g, ""));
-      const conversions = Number(conversionsCell.replace(/,/g, ""));
       const source = (candidate[sourceColumn] ?? "").trim();
-      return Number.isFinite(exposure) && exposure > 0 && Number.isFinite(conversions) && conversions >= 0 && source.length > 0 && !placeholder.test(source);
+      return parseOfferMeasurement(exposureCell, conversionsCell) !== undefined && source.length > 0 && !placeholder.test(source);
     });
     if (!measured) {
       target.push(
         issue(
           "error",
           "research.offer_test_measurement_missing",
-          "A run offer test needs a measured exposure above zero, a CTA conversion count, and a real evidence source.",
+          "A run offer test needs positive whole-number exposure, a whole-number CTA conversion count no larger than exposure, and a real evidence source.",
           "strategy/OFFER_TEST.md",
         ),
       );

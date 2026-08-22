@@ -108,6 +108,10 @@ enforcing. `check:research` requires a real verdict the moment any of the follow
 - any downstream lane — `experience`, `product`, `design`, `content_assets`, or
   `engineering` — is already `partial` or `done`.
 
+The `research-backed-spec` workflow uses `check:research-workflow-output`. This strict wrapper
+also requires complete research, signal-corpus, and offer-test outputs when that workflow claims
+its work. It does not change the pre-claim behavior of the public `check:research` command.
+
 That last condition is the one that matters most in practice: design and build effort spent
 before the founder's verdict is exactly the cost this checkpoint exists to prevent, whatever the
 recorded project phase says. Deferring or marking the research lane `not_needed` does not route

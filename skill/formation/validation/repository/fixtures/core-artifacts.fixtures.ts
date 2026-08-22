@@ -26,6 +26,31 @@ export function register(h: Harness): void {
   const researchBaseline = makeFixture("research-baseline");
   runFixture("shipped research template passes before the lane is claimed", researchBaseline, "check-research-evidence.ts", 0);
 
+  const researchWorkflowStarter = makeFixture("research-workflow-starter");
+  runFixture(
+    "claimed research workflow rejects untouched starter outputs while the lane is not started",
+    researchWorkflowStarter,
+    "check-research-evidence.ts",
+    1,
+    "research.placeholder_complete",
+    ["--require-workflow-outputs"],
+  );
+
+  const researchWorkflowPartialStarter = makeFixture("research-workflow-partial-starter");
+  {
+    const state = readState(researchWorkflowPartialStarter);
+    getLane(state, "research")["status"] = "partial";
+    writeState(researchWorkflowPartialStarter, state);
+  }
+  runFixture(
+    "claimed research workflow rejects untouched starter outputs while the lane is partial",
+    researchWorkflowPartialStarter,
+    "check-research-evidence.ts",
+    1,
+    "research.placeholder_complete",
+    ["--require-workflow-outputs"],
+  );
+
   const researchDonePlaceholders = makeFixture("research-done-placeholders");
   setLaneDone(researchDonePlaceholders, "research", ["strategy/RESEARCH.md"]);
   runFixture("done research with template placeholders fails", researchDonePlaceholders, "check-research-evidence.ts", 1, "research.placeholder_complete");
@@ -156,6 +181,16 @@ export function register(h: Harness): void {
     writeResearch(root, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)]);
     return root;
   };
+
+  for (const status of ["not_started", "partial"] as const) {
+    const root = makeCompletedResearch(`research-workflow-complete-${status}`);
+    const state = readState(root);
+    getLane(state, "research")["status"] = status;
+    writeState(root, state);
+    runFixture(`claimed research workflow accepts complete outputs while the lane is ${status}`, root, "check-research-evidence.ts", 0, undefined, [
+      "--require-workflow-outputs",
+    ]);
+  }
   const useSourceLedgerDistribution = (root: string): void => {
     const researchPath = path.join(root, "strategy/RESEARCH.md");
     const research = readFileSync(researchPath, "utf8")
@@ -347,6 +382,73 @@ export function register(h: Harness): void {
     "research.signal_corpus_row_missing",
   );
 
+  const writeSupersessionRecords = (root: string, records: string[]): void => {
+    const signalPath = path.join(root, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8")
+      .replace(
+        "| SIG-001 | customer language | I lose the streak and stop opening the app | INPUT-001 | 2026-07-20 | product promise and retention | high | current | none | strategy/RESEARCH.md / TRACE-002 |",
+        records.join("\n"),
+      )
+      .replace("| SIG-001 | product/SPEC.md | add streak recovery | TRACE-002 |", "");
+    writeFileSync(signalPath, signal, "utf8");
+    useSourceLedgerDistribution(root);
+  };
+  const signalRecord = (id: string, lifecycle: string, replacement: string): string =>
+    `| ${id} | customer language | Evidence-backed statement for ${id} | INPUT-001 | 2026-07-20 | product promise and retention | high | ${lifecycle} | ${replacement} | strategy/RESEARCH.md / TRACE-002 |`;
+
+  const researchSupersessionTwoNodeCycle = makeCompletedResearch("research-supersession-two-node-cycle");
+  writeSupersessionRecords(researchSupersessionTwoNodeCycle, [
+    signalRecord("SIG-001", "superseded", "SIG-002"),
+    signalRecord("SIG-002", "superseded", "SIG-001"),
+  ]);
+  runFixture(
+    "signal supersession rejects a two-node cycle",
+    researchSupersessionTwoNodeCycle,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_row_missing",
+  );
+
+  const researchSupersessionThreeNodeCycle = makeCompletedResearch("research-supersession-three-node-cycle");
+  writeSupersessionRecords(researchSupersessionThreeNodeCycle, [
+    signalRecord("SIG-001", "superseded", "SIG-002"),
+    signalRecord("SIG-002", "superseded", "SIG-003"),
+    signalRecord("SIG-003", "superseded", "SIG-001"),
+  ]);
+  runFixture(
+    "signal supersession rejects a three-node cycle",
+    researchSupersessionThreeNodeCycle,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_row_missing",
+  );
+
+  const researchSupersessionUnusableTerminal = makeCompletedResearch("research-supersession-unusable-terminal");
+  writeSupersessionRecords(researchSupersessionUnusableTerminal, [
+    signalRecord("SIG-001", "superseded", "SIG-002"),
+    signalRecord("SIG-002", "unverified", "none"),
+  ]);
+  runFixture(
+    "signal supersession rejects a chain that terminates at an unusable signal",
+    researchSupersessionUnusableTerminal,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_row_missing",
+  );
+
+  const researchSupersessionValidMultiHop = makeCompletedResearch("research-supersession-valid-multi-hop");
+  writeSupersessionRecords(researchSupersessionValidMultiHop, [
+    signalRecord("SIG-001", "superseded", "SIG-002"),
+    signalRecord("SIG-002", "superseded", "SIG-003"),
+    signalRecord("SIG-003", "current", "none"),
+  ]);
+  runFixture(
+    "signal supersession accepts an acyclic multi-hop chain ending at a usable signal",
+    researchSupersessionValidMultiHop,
+    "check-research-evidence.ts",
+    0,
+  );
+
   const researchDistributionSourceLedger = makeCompletedResearch("research-distribution-source-ledger");
   {
     const researchPath = path.join(researchDistributionSourceLedger, "strategy/RESEARCH.md");
@@ -474,6 +576,68 @@ export function register(h: Harness): void {
     1,
     "research.offer_test_measurement_missing",
   );
+
+  const researchOfferFractionalConversion = makeCompletedResearch("research-offer-test-fractional-conversion");
+  {
+    const offerPath = path.join(researchOfferFractionalConversion, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31.5 | 3.75% | 0 | continue |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "run offer test rejects a fractional CTA conversion count",
+    researchOfferFractionalConversion,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
+  const researchOfferFractionalExposure = makeCompletedResearch("research-offer-test-fractional-exposure");
+  {
+    const offerPath = path.join(researchOfferFractionalExposure, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840.5 | 31 | 3.69% | 0 | continue |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "run offer test rejects fractional measured exposure",
+    researchOfferFractionalExposure,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
+  const researchOfferOverExposure = makeCompletedResearch("research-offer-test-over-exposure");
+  {
+    const offerPath = path.join(researchOfferOverExposure, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 1 | 2 | 200% | 0 | continue |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "run offer test rejects conversions above measured exposure",
+    researchOfferOverExposure,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
+  const researchOfferZeroConversions = makeCompletedResearch("research-offer-test-zero-conversions");
+  {
+    const offerPath = path.join(researchOfferZeroConversions, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 0 | 0% | 0 | stop |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture("run offer test accepts zero conversions from positive whole-number exposure", researchOfferZeroConversions, "check-research-evidence.ts", 0);
 
   const researchOfferMissingConversionColumn = makeCompletedResearch("research-offer-test-missing-conversion-column");
   {

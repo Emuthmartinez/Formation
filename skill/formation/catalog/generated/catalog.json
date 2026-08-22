@@ -7313,7 +7313,7 @@
         "area.product-experience"
       ],
       "trigger": "Need category economics, competitor, review/social-language, keyword, or name-collision evidence",
-      "instructions": "Assemble category-economics, competitor, review/social-language, keyword, and name-collision evidence into strategy/RESEARCH.md's Category Revenue Reality table — a sourced, dated revenue estimate per competitor row judged against a stated bar (default: top-10 category gross ≥$5M/year combined with 2+ apps clearing $1M/year each) — then run the mandatory Go/Pivot/Kill table; check:research fails a pass verdict with no stated threshold or a table with rows but no judgment line. Write strategy/SIGNAL_CORPUS.md from available founder and market material, keeping one claim per row and preserving dates, confidence, conflicts, and supersession; when no reusable source exists, record an explicit not-applicable status with an authored reason instead of fabricating rows. Write strategy/OFFER_TEST.md before the verdict. Measure one exact audience, discovery location, native format, owned-relationship route, exposure value, and CTA response; if the founder declines the test, record a dated founder waiver and the residual risk. Add Distribution proof and Offer test evidence to the Go, Pivot, Or Kill row. Before product/SPEC.md hardens, run the product-moat one-week-copy test naming which moat class the wedge is building toward and the specific beat moment against the top incumbents; a wedge with no surviving beat moment is Go/Pivot/Kill evidence, not a reason to soften the table. For a product that doesn't match one of the four shipped archetypes, use core-loop-and-v1-scope's general method to name the core loop and draw the V1 line instead of improvising. The founder alone decides Go, Pivot, or Kill — present the evidence, do not decide for them. check:research rejects a verdict with missing category, wedge, demand, distribution, offer, provenance, or founder-decision evidence.",
+      "instructions": "Assemble category-economics, competitor, review/social-language, keyword, and name-collision evidence into strategy/RESEARCH.md's Category Revenue Reality table — a sourced, dated revenue estimate per competitor row judged against a stated bar (default: top-10 category gross ≥$5M/year combined with 2+ apps clearing $1M/year each) — then run the mandatory Go/Pivot/Kill table; check:research-workflow-output fails a pass verdict with no stated threshold or a table with rows but no judgment line. Write strategy/SIGNAL_CORPUS.md from available founder and market material, keeping one claim per row and preserving dates, confidence, conflicts, and supersession; when no reusable source exists, record an explicit not-applicable status with an authored reason instead of fabricating rows. Write strategy/OFFER_TEST.md before the verdict. Measure one exact audience, discovery location, native format, owned-relationship route, exposure value, and CTA response; if the founder declines the test, record a dated founder waiver and the residual risk. Add Distribution proof and Offer test evidence to the Go, Pivot, Or Kill row. Before product/SPEC.md hardens, run the product-moat one-week-copy test naming which moat class the wedge is building toward and the specific beat moment against the top incumbents; a wedge with no surviving beat moment is Go/Pivot/Kill evidence, not a reason to soften the table. For a product that doesn't match one of the four shipped archetypes, use core-loop-and-v1-scope's general method to name the core loop and draw the V1 line instead of improvising. The founder alone decides Go, Pivot, or Kill — present the evidence, do not decide for them. check:research-workflow-output rejects claimed workflow outputs with missing category, wedge, demand, distribution, offer, provenance, or founder-decision evidence.",
       "reads": [
         "state/PROJECT_STATE.yaml"
       ],
@@ -7341,7 +7341,7 @@
         "product/SPEC.md"
       ],
       "gateCommands": [
-        "check:research"
+        "check:research-workflow-output"
       ],
       "providerIds": [],
       "founderOnlyActions": [
@@ -12281,6 +12281,13 @@
       "scriptPath": "validation/business/research/check-research-evidence.ts",
       "ownerDomainId": "domain.research",
       "audit": "required"
+    },
+    {
+      "id": "gate.check-research-workflow-output",
+      "command": "check:research-workflow-output",
+      "scriptPath": "validation/business/research/check-research-evidence.ts",
+      "ownerDomainId": "domain.research",
+      "audit": "excluded"
     },
     {
       "id": "gate.check-revenue",

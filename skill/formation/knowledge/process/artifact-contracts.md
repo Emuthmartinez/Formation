@@ -544,7 +544,7 @@ Acceptance:
 
 ## `strategy/RESEARCH.md`
 
-Validator: `npm run check:research -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor: Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Distribution Proof, Go, Pivot, Or Kill, and trace pointers; dated evidence; a judged revenue bar; signal lifecycle; offer response; a founder-decided verdict mirrored to state; and no placeholders when the research lane is done.
+Validator: `npm run check:research -- --root . --state state/PROJECT_STATE.yaml` preserves the pre-claim template behavior. It enforces the full structural floor when the lane is done or the pre-build verdict is mandatory. The `research-backed-spec` workflow uses `check:research-workflow-output`. This strict wrapper requires complete claimed outputs even when the lane is still `not_started` or `partial`. The floor covers Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Distribution Proof, Go, Pivot, Or Kill, and trace pointers. It also covers dated evidence, a judged revenue bar, signal lifecycle, offer response, a founder-decided verdict mirrored to state, and template placeholders.
 
 Use when research spans app stores, social platforms, competitor websites, reviews, creators, keywords, pricing, or paid acquisition signals.
 
