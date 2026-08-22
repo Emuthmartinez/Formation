@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.160.0",
+  "version": "0.161.0",
   "description": "Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into autonomous operation, with deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -34,6 +34,7 @@
     "validate:launch-state": "tsx skill/formation/validation/business/orchestration/validate-project-state.ts",
     "check:attribution": "tsx skill/formation/validation/business/data/check-attribution-contract.ts",
     "check:apple-requirements": "tsx skill/formation/validation/business/store/check-apple-app-store-requirements.ts",
+    "check:apple-release-readiness": "tsx skill/formation/validation/business/store/check-apple-app-store-requirements.ts --require-signing-ready",
     "check:store-console": "tsx skill/formation/validation/business/store/check-store-console-packet.ts",
     "check:store-screenshots": "tsx skill/formation/validation/business/store/check-store-screenshots.ts",
     "check:native-ios": "tsx skill/formation/validation/business/engineering/check-native-ios-proof.ts",

@@ -1,4 +1,5 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdirSync, readFileSync, utimesSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { expectRecord, getLane, readState, writeState } from "./_state.js";
 
@@ -24,10 +25,39 @@ export function writeCompleteAttribution(root: string): void {
 }
 
 export function writeCompleteAppleSigning(root: string): void {
+  const artifactDate = new Date();
+  artifactDate.setMilliseconds(0);
+  const checkedAt = artifactDate.toISOString().slice(0, 10);
+  const archiveTimestamp = artifactDate.toISOString();
+  const archivePath = "build/FixtureRelease.xcarchive";
+  const archiveDirectory = path.join(root, archivePath);
+  const archiveInfoPlistPath = path.join(archiveDirectory, "Products/Applications/Fixture.app/Info.plist");
+  mkdirSync(path.dirname(archiveInfoPlistPath), { recursive: true });
+  writeFileSync(
+    archiveInfoPlistPath,
+    [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<plist version="1.0"><dict>',
+      "<key>CFBundleIdentifier</key><string>com.example.fixture</string>",
+      "<key>CFBundleShortVersionString</key><string>1.2.3</string>",
+      "<key>CFBundleVersion</key><string>42</string>",
+      "<key>REVENUECAT_ENTITLEMENT_ID</key><string>premium</string>",
+      "<key>POSTHOG_HOST</key><string>fixture-posthog-host</string>",
+      "<key>SUPABASE_URL</key><string>fixture-supabase-endpoint</string>",
+      "</dict></plist>",
+    ].join("\n"),
+    "utf8",
+  );
+  const infoPlistTime = new Date(artifactDate.getTime() - 2 * 60 * 1_000);
+  const archiveDirectoryTime = new Date(artifactDate.getTime() - 60 * 1_000);
+  utimesSync(archiveInfoPlistPath, infoPlistTime, infoPlistTime);
+  utimesSync(archiveDirectory, archiveDirectoryTime, archiveDirectoryTime);
+  const archiveInfoPlistSha = createHash("sha256").update(readFileSync(archiveInfoPlistPath)).digest("hex");
   writeFileSync(
     path.join(root, "store/APPLE_SIGNING.md"),
     [
       "# Apple Signing",
+      "Status: ready.",
       "Apple Developer account and Team ID are confirmed.",
       "Xcode DEVELOPMENT_TEAM is set for the Bundle ID and App ID.",
       "App Store Connect app record exists.",
@@ -36,17 +66,72 @@ export function writeCompleteAppleSigning(root: string): void {
       "Distribution certificate and provisioning profile are present.",
       "Archive, export, upload, and TestFlight proof are recorded.",
       "A simulator build alone is not distribution readiness.",
-      "Pre-Archive/Export/Upload Preflight sign-off:",
-      "SDK key injection into Info.plist verified with plutil -p on the compiled archive: pass.",
-      "plutil -lint on PrivacyInfo.xcprivacy: ok.",
-      "exportArchive uses -authenticationKeyPath, -authenticationKeyID, and -authenticationKeyIssuerID: ready.",
-      "Screenshot dimension floor check (raw capture meets device well minimum, no upscaling): pass.",
+      `Live Apple Release Baseline: Upcoming Requirements (https://developer.apple.com/news/upcoming-requirements/), App Store submission, Xcode system requirements, and Upload builds were checked on ${checkedAt}.`,
+      "Local compatibility was verified with xcodebuild -version and xcodebuild -showsdks.",
+      "| Live Apple source | Checked at | Current requirement | Local proof | Result |",
+      "| --- | --- | --- | --- | --- |",
+      `| https://developer.apple.com/news/upcoming-requirements/ | ${checkedAt} | Current Xcode and SDK submission baseline read live | xcodebuild -version and xcodebuild -showsdks recorded | pass |`,
+      `| https://developer.apple.com/app-store/submitting/ | ${checkedAt} | Current App Store submission baseline read live | archive platform and SDK verified | pass |`,
+      `| https://developer.apple.com/xcode/system-requirements/ | ${checkedAt} | Current Xcode host requirement read live | macOS and Xcode versions verified | pass |`,
+      `| https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/ | ${checkedAt} | Current upload requirement read live | validation and upload route verified | pass |`,
+      "Version And Build Identity: CFBundleIdentifier, CFBundleShortVersionString, and CFBundleVersion were read from the compiled archive and matched to App Store Connect.",
+      "| Identity | Intended value | Compiled archive value | App Store Connect value | Result |",
+      "| --- | --- | --- | --- | --- |",
+      "| CFBundleIdentifier | com.example.fixture | com.example.fixture | com.example.fixture | matched |",
+      "| CFBundleShortVersionString | 1.2.3 | 1.2.3 | 1.2.3 | matched |",
+      "| CFBundleVersion | 42 | 42 | available — not previously received | unique |",
+      "The version uses three integer segments with no leading zeroes; the version/build combination is unique.",
+      `Pre-archive sign-off (recorded ${checkedAt}):`,
+      "1. Live Apple release sources and local Xcode/SDK compatibility: pass.",
+      "2. Intended Release bundle ID, version, and build against App Store Connect: pass.",
+      "3. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): pass.",
+      "4. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.",
+      "5. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.",
+      "6. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.",
+      "Post-archive sign-off (recorded before export/upload):",
+      `Archive evidence: path=${archivePath}; created_at=${archiveTimestamp}; Info.plist SHA-256=${archiveInfoPlistSha}`,
+      `7. New compiled archive Info.plist identity and SDK keys [REVENUECAT_ENTITLEMENT_ID, POSTHOG_HOST, SUPABASE_URL]; archive path=${archivePath}; Info.plist SHA-256=${archiveInfoPlistSha}: pass.`,
     ].join("\n"),
     "utf8",
   );
 }
 
+export function rewriteFixtureArchiveInfoPlist(root: string, transform: (contents: string) => string): void {
+  const archiveDirectory = path.join(root, "build/FixtureRelease.xcarchive");
+  const archiveInfoPlistPath = path.join(archiveDirectory, "Products/Applications/Fixture.app/Info.plist");
+  const signingPath = path.join(root, "store/APPLE_SIGNING.md");
+  const signing = readFileSync(signingPath, "utf8");
+  const recordedTimestamp = /created_at=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/.exec(signing)?.[1];
+  if (!recordedTimestamp) throw new Error("fixture Apple signing record is missing created_at");
+  writeFileSync(archiveInfoPlistPath, transform(readFileSync(archiveInfoPlistPath, "utf8")), "utf8");
+  const recordedTime = new Date(recordedTimestamp);
+  const infoPlistTime = new Date(recordedTime.getTime() - 2 * 60 * 1_000);
+  const archiveDirectoryTime = new Date(recordedTime.getTime() - 60 * 1_000);
+  utimesSync(archiveInfoPlistPath, infoPlistTime, infoPlistTime);
+  utimesSync(archiveDirectory, archiveDirectoryTime, archiveDirectoryTime);
+  const archiveInfoPlistSha = createHash("sha256").update(readFileSync(archiveInfoPlistPath)).digest("hex");
+  writeFileSync(signingPath, signing.replaceAll(/Info\.plist SHA-256=[a-f\d]{64}/gi, `Info.plist SHA-256=${archiveInfoPlistSha}`), "utf8");
+}
+
+export function writeNewerCompetingFixtureArchive(root: string): void {
+  const signing = readFileSync(path.join(root, "store/APPLE_SIGNING.md"), "utf8");
+  const recordedTimestamp = /created_at=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/.exec(signing)?.[1];
+  if (!recordedTimestamp) throw new Error("fixture Apple signing record is missing created_at");
+  const archiveDirectory = path.join(root, "build/NewerFixtureRelease.xcarchive");
+  const infoPlistPath = path.join(archiveDirectory, "Products/Applications/NewerFixture.app/Info.plist");
+  mkdirSync(path.dirname(infoPlistPath), { recursive: true });
+  writeFileSync(
+    infoPlistPath,
+    '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.example.newer</string></dict></plist>',
+    "utf8",
+  );
+  const newerTime = new Date(new Date(recordedTimestamp).getTime() + 10_000);
+  utimesSync(infoPlistPath, newerTime, newerTime);
+  utimesSync(archiveDirectory, newerTime, newerTime);
+}
+
 export function writeCompleteAppleRequirements(root: string): void {
+  writeCompleteAppleSigning(root);
   mkdirSync(path.join(root, "ios", "App"), { recursive: true });
   writeFileSync(
     path.join(root, "ios", "App", "PrivacyInfo.xcprivacy"),

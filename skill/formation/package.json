@@ -1,6 +1,6 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.160.0",
+  "version": "0.161.0",
   "private": true,
   "bin": {
     "formation": "bin/formation.mjs",
@@ -26,6 +26,7 @@
     "validate:launch-state": "tsx validation/business/orchestration/validate-project-state.ts",
     "check:attribution": "tsx validation/business/data/check-attribution-contract.ts",
     "check:apple-requirements": "tsx validation/business/store/check-apple-app-store-requirements.ts",
+    "check:apple-release-readiness": "tsx validation/business/store/check-apple-app-store-requirements.ts --require-signing-ready",
     "check:store-console": "tsx validation/business/store/check-store-console-packet.ts",
     "check:store-screenshots": "tsx validation/business/store/check-store-screenshots.ts",
     "check:native-ios": "tsx validation/business/engineering/check-native-ios-proof.ts",

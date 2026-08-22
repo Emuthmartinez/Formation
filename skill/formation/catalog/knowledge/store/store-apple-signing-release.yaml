@@ -30,6 +30,14 @@ sources:
     claim_scope: Auto-discovered from recently added repository content.
     last_review_date: 2026-08-17
     reviewer: formation-maintainers
+  - id: developer-apple-com-app-store-submitting
+    name: Apple App Store submission baseline
+    source_type: official_docs
+    url: https://developer.apple.com/app-store/submitting
+    review_cadence_days: 7
+    claim_scope: Live platform SDK and App Store submission baseline checked before a release archive.
+    last_review_date: 2026-08-21
+    reviewer: formation-maintainers
   - id: developer-apple-com-documentation-bundleresources-adding-a-privacy-manifest-to
     name: developer.apple.com
     source_type: official_docs
@@ -54,6 +62,22 @@ sources:
     claim_scope: Auto-discovered from recently added repository content.
     last_review_date: 2026-08-17
     reviewer: formation-maintainers
+  - id: developer-apple-com-documentation-bundleresources-information-property-list-cfbu
+    name: Apple CFBundleShortVersionString documentation
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleshortversionstring
+    review_cadence_days: 7
+    claim_scope: Current format and meaning of the user-visible app version.
+    last_review_date: 2026-08-21
+    reviewer: formation-maintainers
+  - id: developer-apple-com-documentation-bundleresources-information-property-list-cfbu-2
+    name: Apple CFBundleVersion documentation
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleversion
+    review_cadence_days: 7
+    claim_scope: Current format and meaning of the build identifier.
+    last_review_date: 2026-08-21
+    reviewer: formation-maintainers
   - id: developer-apple-com-documentation-bundleresources-protected-resources
     name: developer.apple.com
     source_type: official_docs
@@ -77,6 +101,14 @@ sources:
     review_cadence_days: 7
     claim_scope: Official Apple Info.plist key documentation for ATT tracking usage description copy.
     last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: developer-apple-com-forums-thread-50931
+    name: Apple Developer Forums version-number thread
+    source_type: website
+    url: https://developer.apple.com/forums/thread/50931
+    review_cadence_days: 30
+    claim_scope: Historical community failure evidence for leading-zero version collisions; never policy authority.
+    last_review_date: 2026-08-21
     reviewer: formation-maintainers
   - id: developer-apple-com-support-third-party-sdk-requirements
     name: developer.apple.com
@@ -158,6 +190,14 @@ sources:
     claim_scope: Official App Store Connect documentation for uploading and processing builds.
     last_review_date: 2026-08-17
     reviewer: formation-maintainers
+  - id: developer-apple-com-help-app-store-connect-update-your-app-create-a-new-version
+    name: Create a new App Store version
+    source_type: official_docs
+    url: https://developer.apple.com/help/app-store-connect/update-your-app/create-a-new-version
+    review_cadence_days: 7
+    claim_scope: Current App Store Connect version creation and build-increment workflow.
+    last_review_date: 2026-08-21
+    reviewer: formation-maintainers
   - id: developer-apple-com-help-app-store-connect-reference-app-information
     name: developer.apple.com
     source_type: official_docs
@@ -173,4 +213,20 @@ sources:
     review_cadence_days: 7
     claim_scope: Auto-discovered from recently added repository content.
     last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: developer-apple-com-news-upcoming-requirements
+    name: Apple Upcoming Requirements
+    source_type: official_docs
+    url: https://developer.apple.com/news/upcoming-requirements
+    review_cadence_days: 7
+    claim_scope: Fast-moving upload deadlines and minimum Xcode and SDK requirements checked on the archive date.
+    last_review_date: 2026-08-21
+    reviewer: formation-maintainers
+  - id: developer-apple-com-xcode-system-requirements
+    name: Xcode SDK and system requirements
+    source_type: official_docs
+    url: https://developer.apple.com/xcode/system-requirements
+    review_cadence_days: 7
+    claim_scope: Current macOS host, Xcode, SDK, deployment, device, and simulator compatibility.
+    last_review_date: 2026-08-21
     reviewer: formation-maintainers

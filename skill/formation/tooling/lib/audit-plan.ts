@@ -43,6 +43,8 @@ export const auditExcludedScripts: Record<string, string> = {
   "check:landing-funnel":
     "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (workspace/business/growth/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
   "check:source-freshness": "alias of check:source-registry (same script and registry); running both would duplicate the step",
+  "check:apple-release-readiness":
+    "strict release-only mode of check:apple-requirements; the general audit already runs the base validator, while the shipped scaffold intentionally lacks signing-ready evidence and must fail this stricter command",
   "check:onboarding-page-fresh":
     "a --page-scoped invocation of check:generated-pages (already an audit step) for product/onboarding.html only, used as ONB-22's own catalog gate so its acceptance does not depend on an unrelated page elsewhere in the manifest; running the repo-wide check:generated-pages step already covers this page too, so running both in the general audit would duplicate the step",
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",

@@ -853,10 +853,10 @@ _Before Apple Developer enrollment, Team ID, signing, profiles, archive/upload, 
 - **Role:** Engineering leader
 - **Phases:** 3
 - **Providers:** `provider.app-store-connect` (cli, api, browser)
-- **Reads:** `store/app-store-listing/APP_STORE_LISTING.md`, `state/PROJECT_STATE.yaml`
+- **Reads:** `store/app-store-listing/APP_STORE_LISTING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `state/PROJECT_STATE.yaml`
 - **Consults:** —
 - **Produces:** `store/APPLE_SIGNING.md`
-- **Gates:** —
+- **Gates:** `check:apple-release-readiness`
 - **Knowledge:** [Secrets Management](../../knowledge/operations/secrets-management.md), [App Store Connect CLI](../../knowledge/store/app-store-connect-cli.md), [Apple Signing Release](../../knowledge/store/apple-signing-release.md)
 
 ### Apple App Store requirements (privacy manifest)
