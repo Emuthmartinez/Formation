@@ -11,6 +11,7 @@
  * Usage: tsx validation/business/research/check-research-evidence.ts --root <app-repo-root>
  */
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../../tooling/lib/launch-state.js";
+import { parseRequiredTableSection, type RequiredTableSection } from "../process/required-table-section.js";
 import { parseOfferMeasurement, validateSignalSupersessionGraph, type SignalLifecycle, type SignalSupersessionRecord } from "./research-evidence-helpers.js";
 
 const args = parseCliArgs(process.argv.slice(2));
@@ -20,6 +21,12 @@ const issues = [...loaded.issues];
 const state = loaded.state;
 const projectOwner = state ? (asString(getPath(state, "project.owner")) ?? "").trim() : "";
 const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|autopilot|ai)\b/i;
+const OFFER_TEST_HEADERS = {
+  contract: ["Field", "Value"],
+  decision: ["Status", "Date", "Evidence", "Decision", "Decided by"],
+  exposure: ["Date", "Channel", "Evidence source", "Exposure type", "Exposure", "CTA conversions", "Conversion rate", "Cost", "Result"],
+  waiver: ["Date", "Founder", "Reason", "Residual risk accepted"],
+} as const;
 
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
@@ -671,6 +678,18 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
   return index;
 }
 
+function normalizedTableLabel(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+}
+
+function tableColumn(section: RequiredTableSection, header: string): number {
+  return section.headerIndexes.get(normalizedTableLabel(header)) ?? -1;
+}
+
+function rowsMatchTableWidth(section: RequiredTableSection): boolean {
+  return section.rows.every((row) => row.rawCellCount === section.width);
+}
+
 function validateOfferTest(value: string | undefined, target: ReturnType<typeof issue>[]): void {
   if (!value) {
     target.push(
@@ -679,8 +698,15 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
     return;
   }
 
-  for (const heading of ["Test Contract", "Exposure And Conversion", "Decision"]) {
-    if (!markdownSection(value, heading)) {
+  const contractResult = parseRequiredTableSection(value, "Test Contract", OFFER_TEST_HEADERS.contract);
+  const exposureResult = parseRequiredTableSection(value, "Exposure And Conversion", OFFER_TEST_HEADERS.exposure);
+  const decisionResult = parseRequiredTableSection(value, "Decision", OFFER_TEST_HEADERS.decision);
+  for (const [heading, result] of [
+    ["Test Contract", contractResult],
+    ["Exposure And Conversion", exposureResult],
+    ["Decision", decisionResult],
+  ] as const) {
+    if (!result.ok) {
       target.push(
         issue(
           "error",
@@ -692,18 +718,29 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
     }
   }
 
-  const contractSection = markdownSection(value, "Test Contract");
-  const contractRows = tableDataRows(contractSection);
-  const contractFields = new Map(contractRows.map((row) => [(row[1] ?? "").trim().toLowerCase(), (row[2] ?? "").trim()]));
+  const contractFields = new Map<string, string>();
+  let contractStructureValid = contractResult.ok && rowsMatchTableWidth(contractResult.section);
+  if (contractResult.ok) {
+    const fieldColumn = tableColumn(contractResult.section, "Field");
+    const valueColumn = tableColumn(contractResult.section, "Value");
+    for (const row of contractResult.section.rows) {
+      const field = normalizedTableLabel(row.cells[fieldColumn] ?? "");
+      const fieldValue = (row.cells[valueColumn] ?? "").trim();
+      if (field.length === 0 || contractFields.has(field)) contractStructureValid = false;
+      contractFields.set(field, fieldValue);
+    }
+  }
   const requiredContractFields = ["audience", "exact discovery location", "native format", "offer", "owned relationship", "primary response", "stop rule"];
-  const contractIncomplete = requiredContractFields.some((field) => {
-    const value = contractFields.get(field) ?? "";
-    if (value.length === 0 || /\b(todo|tbd|placeholder|replace with|pending|unverified|required)\b|<[^>]+>/i.test(value)) return true;
-    if (isGenericOfferOptionMenu(field, value)) return true;
-    if (field === "exact discovery location" && /^(social media|online|internet|web|app store|community|creator audience)$/i.test(value)) return true;
-    if (field === "stop rule" && !/\d/.test(value)) return true;
-    return false;
-  });
+  const contractIncomplete =
+    !contractStructureValid ||
+    requiredContractFields.some((field) => {
+      const value = contractFields.get(field) ?? "";
+      if (value.length === 0 || /\b(todo|tbd|placeholder|replace with|pending|unverified|required)\b|<[^>]+>/i.test(value)) return true;
+      if (isGenericOfferOptionMenu(field, value)) return true;
+      if (field === "exact discovery location" && /^(social media|online|internet|web|app store|community|creator audience)$/i.test(value)) return true;
+      if (field === "stop rule" && !/\d/.test(value)) return true;
+      return false;
+    });
   if (contractIncomplete) {
     target.push(
       issue(
@@ -715,85 +752,105 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
     );
   }
 
-  const decisionSection = markdownSection(value, "Decision");
-  const statusColumn = tableColumnIndex(decisionSection, /^\s*status\s*$/i);
-  const dateColumn = tableColumnIndex(decisionSection, /^\s*date\s*$/i);
-  const evidenceColumn = tableColumnIndex(decisionSection, /evidence/i);
-  const decisionColumn = tableColumnIndex(decisionSection, /^\s*decision\s*$/i);
-  const deciderColumn = tableColumnIndex(decisionSection, /decided by/i);
-  const decisionRows = tableDataRows(decisionSection);
   const placeholder = /\b(todo|tbd|placeholder|replace with|pending|unverified)\b/i;
-  const row = [...decisionRows].reverse().find((candidate) => /^(run|waived)$/i.test(candidate[statusColumn] ?? ""));
-  if (!row || [statusColumn, dateColumn, evidenceColumn, decisionColumn, deciderColumn].some((column) => column < 1)) {
-    target.push(
-      issue(
-        "error",
-        "research.offer_test_decision_missing",
-        "The offer test needs a run or waived decision row with date, evidence, decision, and founder identity.",
-        "strategy/OFFER_TEST.md",
-      ),
-    );
-    return;
+  let status: "run" | "waived" | undefined;
+  if (decisionResult.ok) {
+    const statusColumn = tableColumn(decisionResult.section, "Status");
+    const dateColumn = tableColumn(decisionResult.section, "Date");
+    const evidenceColumn = tableColumn(decisionResult.section, "Evidence");
+    const decisionColumn = tableColumn(decisionResult.section, "Decision");
+    const deciderColumn = tableColumn(decisionResult.section, "Decided by");
+    const decisionRows = decisionResult.section.rows;
+    if (decisionRows.length === 0 || !rowsMatchTableWidth(decisionResult.section)) {
+      target.push(
+        issue(
+          "error",
+          "research.offer_test_decision_missing",
+          "The offer test needs a run or waived decision row with date, evidence, decision, and founder identity.",
+          "strategy/OFFER_TEST.md",
+        ),
+      );
+    } else {
+      const decisionComplete = decisionRows.every((row) => {
+        const rowStatus = (row.cells[statusColumn] ?? "").trim().toLowerCase();
+        const decider = (row.cells[deciderColumn] ?? "").trim();
+        return (
+          /^(run|waived)$/.test(rowStatus) &&
+          isValidPastIsoDate((row.cells[dateColumn] ?? "").trim()) &&
+          [row.cells[evidenceColumn] ?? "", row.cells[decisionColumn] ?? "", decider].every((cell) => cell.trim().length > 0 && !placeholder.test(cell)) &&
+          isFounderDecider(decider)
+        );
+      });
+      if (!decisionComplete) {
+        target.push(
+          issue(
+            "error",
+            "research.offer_test_decision_incomplete",
+            "The offer-test decision needs an ISO date, real evidence, a decision, and the founder or owner as decider.",
+            "strategy/OFFER_TEST.md",
+          ),
+        );
+      } else {
+        status = (decisionRows.at(-1)!.cells[statusColumn] ?? "").trim().toLowerCase() as "run" | "waived";
+      }
+    }
   }
 
-  const status = (row[statusColumn] ?? "").trim().toLowerCase();
-  const decider = (row[deciderColumn] ?? "").trim();
-  const decisionComplete =
-    isValidPastIsoDate((row[dateColumn] ?? "").trim()) &&
-    [row[evidenceColumn] ?? "", row[decisionColumn] ?? "", decider].every((cell) => cell.trim().length > 0 && !placeholder.test(cell)) &&
-    isFounderDecider(decider);
-  if (!decisionComplete) {
-    target.push(
-      issue(
-        "error",
-        "research.offer_test_decision_incomplete",
-        "The offer-test decision needs an ISO date, real evidence, a decision, and the founder or owner as decider.",
-        "strategy/OFFER_TEST.md",
-      ),
-    );
-  }
-
-  if (status === "run") {
-    const exposureSection = markdownSection(value, "Exposure And Conversion");
-    const exposureColumn = tableColumnIndex(exposureSection, /^\s*exposure\s*$/i);
-    const conversionsColumn = tableColumnIndex(exposureSection, /cta conversions/i);
-    const sourceColumn = tableColumnIndex(exposureSection, /evidence source/i);
-    const measured = tableDataRows(exposureSection).some((candidate) => {
-      if ([exposureColumn, conversionsColumn, sourceColumn].some((column) => column < 1)) return false;
-      const exposureCell = (candidate[exposureColumn] ?? "").trim();
-      const conversionsCell = (candidate[conversionsColumn] ?? "").trim();
-      if (exposureCell.length === 0 || conversionsCell.length === 0) return false;
-      const source = (candidate[sourceColumn] ?? "").trim();
-      return parseOfferMeasurement(exposureCell, conversionsCell) !== undefined && source.length > 0 && !placeholder.test(source);
-    });
-    if (!measured) {
+  if (exposureResult.ok) {
+    const dateColumn = tableColumn(exposureResult.section, "Date");
+    const exposureColumn = tableColumn(exposureResult.section, "Exposure");
+    const conversionsColumn = tableColumn(exposureResult.section, "CTA conversions");
+    const sourceColumn = tableColumn(exposureResult.section, "Evidence source");
+    const rowsValid =
+      rowsMatchTableWidth(exposureResult.section) &&
+      exposureResult.section.rows.every((row) => {
+        const source = (row.cells[sourceColumn] ?? "").trim();
+        return (
+          isValidPastIsoDate((row.cells[dateColumn] ?? "").trim()) &&
+          parseOfferMeasurement((row.cells[exposureColumn] ?? "").trim(), (row.cells[conversionsColumn] ?? "").trim()) !== undefined &&
+          source.length > 0 &&
+          !placeholder.test(source)
+        );
+      });
+    if (!rowsValid || (status === "run" && exposureResult.section.rows.length === 0)) {
       target.push(
         issue(
           "error",
           "research.offer_test_measurement_missing",
-          "A run offer test needs positive whole-number exposure, a whole-number CTA conversion count no larger than exposure, and a real evidence source.",
+          "Every offer measurement row needs a real non-future ISO date and evidence source, positive whole-number exposure, and a whole-number CTA conversion count no larger than exposure.",
           "strategy/OFFER_TEST.md",
         ),
       );
     }
+  } else if (status === "run") {
+    target.push(
+      issue(
+        "error",
+        "research.offer_test_measurement_missing",
+        "Every offer measurement row needs a real non-future ISO date and evidence source, positive whole-number exposure, and a whole-number CTA conversion count no larger than exposure.",
+        "strategy/OFFER_TEST.md",
+      ),
+    );
   }
 
   if (status === "waived") {
-    const waiverSection = markdownSection(value, "Founder Waiver");
-    const waiverDateColumn = tableColumnIndex(waiverSection, /^\s*date\s*$/i);
-    const founderColumn = tableColumnIndex(waiverSection, /founder/i);
-    const reasonColumn = tableColumnIndex(waiverSection, /reason/i);
-    const riskColumn = tableColumnIndex(waiverSection, /residual risk/i);
-    const waiverRows = tableDataRows(waiverSection);
-    const validWaiver = waiverRows.some((candidate) => {
-      const founder = candidate[founderColumn] ?? "";
-      return (
-        [waiverDateColumn, founderColumn, reasonColumn, riskColumn].every((column) => column > 0) &&
-        isValidPastIsoDate((candidate[waiverDateColumn] ?? "").trim()) &&
-        isFounderDecider(founder) &&
-        [candidate[reasonColumn] ?? "", candidate[riskColumn] ?? ""].every((cell) => cell.trim().length > 0 && !placeholder.test(cell))
-      );
-    });
+    const waiverResult = parseRequiredTableSection(value, "Founder Waiver", OFFER_TEST_HEADERS.waiver);
+    const validWaiver =
+      waiverResult.ok &&
+      rowsMatchTableWidth(waiverResult.section) &&
+      waiverResult.section.rows.length > 0 &&
+      waiverResult.section.rows.every((row) => {
+        const waiverDateColumn = tableColumn(waiverResult.section, "Date");
+        const founderColumn = tableColumn(waiverResult.section, "Founder");
+        const reasonColumn = tableColumn(waiverResult.section, "Reason");
+        const riskColumn = tableColumn(waiverResult.section, "Residual risk accepted");
+        const founder = row.cells[founderColumn] ?? "";
+        return (
+          isValidPastIsoDate((row.cells[waiverDateColumn] ?? "").trim()) &&
+          isFounderDecider(founder) &&
+          [row.cells[reasonColumn] ?? "", row.cells[riskColumn] ?? ""].every((cell) => cell.trim().length > 0 && !placeholder.test(cell))
+        );
+      });
     if (!validWaiver) {
       target.push(
         issue(

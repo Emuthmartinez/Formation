@@ -52,6 +52,18 @@ export function register(h: Harness): void {
     setManualLoopApplicability(root, "applicable");
   };
 
+  const makeCompletedPostLaunchFixture = (name: string): string => {
+    const root = makeFixture(name);
+    const state = readState(root);
+    expectRecord(state.project, "project")["phase"] = "phase_6b";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
+    writeState(root, state);
+    setPostLaunchLive(root, 10);
+    return root;
+  };
+
   // The three operating-lane artifacts (2026-08-19 split: support queue, retention program,
   // financial pulse). Valid by default; each fail-then-catch case below breaks exactly one rule.
   const writeOperatingLaneArtifacts = (root: string, overrides: { support?: string; retention?: string; finance?: string; daysAgo?: number } = {}): void => {
@@ -165,6 +177,207 @@ export function register(h: Harness): void {
     "check-post-launch-ops.ts",
     1,
     "post_launch_ops.manual_loop_applicability_missing",
+  );
+
+  const postLaunchManualLoopPhraseOnly = makeCompletedPostLaunchFixture("post-launch-manual-loop-phrase-only");
+  {
+    setManualLoopApplicability(postLaunchManualLoopPhraseOnly, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopPhraseOnly, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace("## Manual Loop Proof", "Manual Loop Proof is documented below.");
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a prose-only Manual Loop Proof phrase cannot replace the required H2 section",
+    postLaunchManualLoopPhraseOnly,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.section_missing.manual_loop_proof",
+  );
+
+  const postLaunchManualLoopMissing = makeCompletedPostLaunchFixture("post-launch-manual-loop-missing");
+  {
+    const runbookPath = path.join(postLaunchManualLoopMissing, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(/## Manual Loop Proof[\s\S]*?(?=## Support Operations)/, "");
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a missing Manual Loop Proof section fails",
+    postLaunchManualLoopMissing,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.section_missing.manual_loop_proof",
+  );
+
+  const postLaunchManualLoopEmptySection = makeCompletedPostLaunchFixture("post-launch-manual-loop-empty-section");
+  {
+    const runbookPath = path.join(postLaunchManualLoopEmptySection, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(/## Manual Loop Proof[\s\S]*?(?=## Support Operations)/, "## Manual Loop Proof\n\n");
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "an empty Manual Loop Proof section fails",
+    postLaunchManualLoopEmptySection,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopDuplicate = makeCompletedPostLaunchFixture("post-launch-manual-loop-duplicate");
+  {
+    setManualLoopApplicability(postLaunchManualLoopDuplicate, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopDuplicate, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "## Support Operations",
+      "## Manual Loop Proof\n\nApplicability: not applicable — No value-producing process is scheduled for automation.\n\n## Support Operations",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "duplicate Manual Loop Proof sections fail instead of selecting the first",
+    postLaunchManualLoopDuplicate,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopMalformedLater = makeCompletedPostLaunchFixture("post-launch-manual-loop-malformed-later-row");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopMalformedLater);
+    const runbookPath = path.join(postLaunchManualLoopMalformedLater, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "| keep manual until three clean weekly runs |",
+      "| keep manual until three clean weekly runs |\n" +
+        `| ${isoDaysAgo(1)} | renewal reminder send | 12 opted-in reminders | 11 delivered reminders | unknown | $0 | one address rejected | keep manual |`,
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a valid manual-loop row cannot hide a malformed later declared row",
+    postLaunchManualLoopMalformedLater,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopNestedFence = makeCompletedPostLaunchFixture("post-launch-manual-loop-nested-fence");
+  {
+    const runbookPath = path.join(postLaunchManualLoopNestedFence, "operations/POST_LAUNCH_OPS.md");
+    const nestedExample = [
+      "## Manual Loop Proof",
+      "",
+      "Applicability: applicable",
+      "",
+      "- Example only:",
+      "    ```markdown",
+      "    | Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |",
+      "    | --- | --- | --- | --- | --- | --- | --- | --- |",
+      `    | ${isoDaysAgo(2)} | renewal reminder send | 18 reminders | 18 delivered | passed | $0 | two stale addresses | keep manual |`,
+      "    ```",
+      "",
+    ].join("\n");
+    const runbook = readFileSync(runbookPath, "utf8").replace(/## Manual Loop Proof[\s\S]*?(?=## Support Operations)/, nestedExample);
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a table example inside a list-nested fence cannot satisfy Manual Loop Proof",
+    postLaunchManualLoopNestedFence,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopListMarkerFence = makeCompletedPostLaunchFixture("post-launch-manual-loop-list-marker-fence");
+  {
+    const runbookPath = path.join(postLaunchManualLoopListMarkerFence, "operations/POST_LAUNCH_OPS.md");
+    const nestedExample = [
+      "## Manual Loop Proof",
+      "",
+      "Applicability: applicable",
+      "",
+      "- ```markdown",
+      "  | Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |",
+      "  | --- | --- | --- | --- | --- | --- | --- | --- |",
+      `  | ${isoDaysAgo(2)} | renewal reminder send | 18 reminders | 18 delivered | passed | $0 | two stale addresses | keep manual |`,
+      "  ```",
+      "",
+    ].join("\n");
+    const runbook = readFileSync(runbookPath, "utf8").replace(/## Manual Loop Proof[\s\S]*?(?=## Support Operations)/, nestedExample);
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a table inside a fence opened on a list-marker line cannot satisfy Manual Loop Proof",
+    postLaunchManualLoopListMarkerFence,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopIndentedCode = makeCompletedPostLaunchFixture("post-launch-manual-loop-indented-code-table");
+  {
+    const runbookPath = path.join(postLaunchManualLoopIndentedCode, "operations/POST_LAUNCH_OPS.md");
+    const indentedExample = [
+      "## Manual Loop Proof",
+      "",
+      "Applicability: applicable",
+      "",
+      "    | Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |",
+      "    | --- | --- | --- | --- | --- | --- | --- | --- |",
+      `    | ${isoDaysAgo(2)} | renewal reminder send | 18 reminders | 18 delivered | passed | $0 | two stale addresses | keep manual |`,
+      "",
+    ].join("\n");
+    const runbook = readFileSync(runbookPath, "utf8").replace(/## Manual Loop Proof[\s\S]*?(?=## Support Operations)/, indentedExample);
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "an indented code-block table cannot satisfy Manual Loop Proof",
+    postLaunchManualLoopIndentedCode,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopIndentedProse = makeCompletedPostLaunchFixture("post-launch-manual-loop-indented-prose");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopIndentedProse);
+    const runbookPath = path.join(postLaunchManualLoopIndentedProse, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "Applicability: applicable",
+      "Applicability: applicable\n\nContext:\n    This explanation is indented, but it is not a competing evidence table.",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture("harmless indented prose beside a real Manual Loop table remains compatible", postLaunchManualLoopIndentedProse, "check-post-launch-ops.ts", 0);
+
+  const postLaunchManualLoopInvalidFenceInfo = makeCompletedPostLaunchFixture("post-launch-manual-loop-invalid-fence-info");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopInvalidFenceInfo);
+    const runbookPath = path.join(postLaunchManualLoopInvalidFenceInfo, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace("## Manual Loop Proof", "```example`invalid\n## Manual Loop Proof");
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "an invalid backtick info string does not hide a real Manual Loop Proof section",
+    postLaunchManualLoopInvalidFenceInfo,
+    "check-post-launch-ops.ts",
+    0,
+  );
+
+  const postLaunchManualLoopNotApplicableMalformed = makeCompletedPostLaunchFixture("post-launch-manual-loop-not-applicable-malformed-row");
+  {
+    setManualLoopApplicability(postLaunchManualLoopNotApplicableMalformed, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopNotApplicableMalformed, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- |\n| 2999-01-01 | reminder send | real input | real output | maybe | $0 | none | do not automate |",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "not-applicable prose cannot hide a malformed declared manual-loop row",
+    postLaunchManualLoopNotApplicableMalformed,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
   );
 
   // The live date is the anchor for every due-date and freshness gate; a live

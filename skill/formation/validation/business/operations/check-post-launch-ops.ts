@@ -29,6 +29,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../../tooling/lib/launch-state.js";
+import { parseRequiredTableSection } from "../process/required-table-section.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -94,6 +95,7 @@ const requiredSections = [
 ];
 
 for (const section of requiredSections) {
+  if (section === "Manual Loop Proof") continue;
   if (!includes(runbook, section)) {
     issues.push(
       issue(
@@ -175,14 +177,45 @@ function parseLiveDate(raw: string): Date | undefined {
 // A value-producing process is not safe to automate on a paper design alone. The runbook must
 // either prove one successful manual cycle or state why no such automation applies. This check is
 // separate from the weekly clock because the proof must exist before the first automated run.
-const manualProofSection = markdownSection(runbook, "Manual Loop Proof");
-if (manualProofSection) {
+const manualLoopHeaders = ["Date", "Process", "Input", "Output", "Result", "Cost", "Failure mode", "Automation decision"] as const;
+const manualProofResult = parseRequiredTableSection(runbook, "Manual Loop Proof", manualLoopHeaders);
+if (!manualProofResult.ok) {
+  const sectionMissing = manualProofResult.errors.some((error) => error.kind === "section-missing");
+  issues.push(
+    issue(
+      numbersSeverity,
+      sectionMissing ? "post_launch_ops.section_missing.manual_loop_proof" : "post_launch_ops.manual_loop_proof_missing",
+      sectionMissing
+        ? `${runbookPath} is missing the "Manual Loop Proof" H2 section. A prose mention does not satisfy the automation-proof contract.`
+        : `${runbookPath}'s Manual Loop Proof must contain one canonical manual-run table. Duplicate, empty, separated, or malformed tables do not prove the process.`,
+      runbookPath,
+    ),
+  );
+} else {
+  const manualProofSection = manualProofResult.section.renderedBody;
   const applicability = manualProofSection.match(/^Applicability:\s*(.+)$/im)?.[1]?.trim() ?? "";
   const notApplicable = applicability.match(/^not applicable\s*(?:—|-|:)\s*(.+)$/i);
   const notApplicableReason = notApplicable?.[1]?.trim() ?? "";
   const substantiveNotApplicableReason =
     notApplicableReason.length >= 15 && !PLACEHOLDER_TEXT.test(notApplicableReason) && !/^(reason|none|not applicable|n\/a)$/i.test(notApplicableReason);
   const applicable = /^applicable$/i.test(applicability);
+  const normalizedHeaders = manualLoopHeaders.map((header) => header.toLowerCase());
+  const canonicalHeaders =
+    manualProofResult.section.header.normalizedCells.length === normalizedHeaders.length &&
+    manualProofResult.section.header.normalizedCells.every((header, index) => header === normalizedHeaders[index]);
+  const rowsComplete =
+    canonicalHeaders &&
+    manualProofResult.section.rows.every((row) => {
+      if (row.rawCellCount !== manualProofResult.section.width) return false;
+      const [date, processName, input, output, result, cost, failureMode, automationDecision] = row.cells;
+      const evidenceCells = [processName, input, output, result, cost, failureMode, automationDecision];
+      return (
+        Boolean(parseLiveDate(date ?? "")) &&
+        evidenceCells.every((cell) => Boolean(cell) && !PLACEHOLDER_TEXT.test(cell ?? "")) &&
+        /^(passed|failed)$/i.test(result ?? "")
+      );
+    });
+  const hasPassedRun = manualProofResult.section.rows.some((row) => /^passed$/i.test(row.cells[4] ?? ""));
 
   if (!applicable && !substantiveNotApplicableReason) {
     issues.push(
@@ -194,45 +227,20 @@ if (manualProofSection) {
         runbookPath,
       ),
     );
-  } else if (applicable) {
-    const expectedHeaders = ["date", "process", "input", "output", "result", "cost", "failure mode", "automation decision"];
-    const lines = manualProofSection.split(/\r?\n/);
-    const headerIndex = lines.findIndex((line) => {
-      if (!line.trim().startsWith("|")) return false;
-      const cells = line
-        .split("|")
-        .slice(1, -1)
-        .map((cell) => cell.trim().toLowerCase());
-      return cells.length === expectedHeaders.length && cells.every((cell, index) => cell === expectedHeaders[index]);
-    });
-    const validManualRun =
-      headerIndex >= 0 &&
-      lines.slice(headerIndex + 2).some((line) => {
-        if (!line.trim().startsWith("|")) return false;
-        const cells = line
-          .split("|")
-          .slice(1, -1)
-          .map((cell) => cell.trim());
-        if (cells.length !== expectedHeaders.length) return false;
-        const [date, processName, input, output, result, cost, failureMode, automationDecision] = cells;
-        const evidenceCells = [processName, input, output, result, cost, failureMode, automationDecision];
-        return (
-          Boolean(parseLiveDate(date ?? "")) &&
-          evidenceCells.every((cell) => Boolean(cell) && !PLACEHOLDER_TEXT.test(cell ?? "")) &&
-          /^passed$/i.test(result ?? "")
-        );
-      });
-    if (!validManualRun) {
-      issues.push(
-        issue(
-          numbersSeverity,
-          "post_launch_ops.manual_loop_proof_missing",
-          `${runbookPath} marks Manual Loop Proof applicable but has no complete successful manual-run row. Record the date, process, real input and output, ` +
-            'a Result of "passed", cost, observed failure mode, and automation decision before automating the process.',
-          runbookPath,
-        ),
-      );
-    }
+  }
+
+  const declaredRowsInvalid = manualProofResult.section.rows.length > 0 && !rowsComplete;
+  const applicableProofMissing = applicable && (manualProofResult.section.rows.length === 0 || !rowsComplete || !hasPassedRun);
+  if (declaredRowsInvalid || applicableProofMissing) {
+    issues.push(
+      issue(
+        numbersSeverity,
+        "post_launch_ops.manual_loop_proof_missing",
+        `Every declared Manual Loop Proof row in ${runbookPath} must use the canonical width, a real past date, complete evidence, and a Result of "passed" or "failed". ` +
+          'When applicable, at least one complete row must record "passed" before automating the process.',
+        runbookPath,
+      ),
+    );
   }
 }
 

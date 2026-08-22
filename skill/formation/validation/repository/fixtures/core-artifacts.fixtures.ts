@@ -577,6 +577,21 @@ export function register(h: Harness): void {
     "research.offer_test_measurement_missing",
   );
 
+  for (const [name, date, label] of [
+    ["impossible-date", "2026-99-99", "an impossible calendar date"],
+    ["future-date", "2999-01-01", "a future date"],
+    ["missing-date", "", "a missing date"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-offer-test-measurement-${name}`);
+    const offerPath = path.join(root, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      `| ${date} | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |`,
+    );
+    writeFileSync(offerPath, offer, "utf8");
+    runFixture(`run offer test rejects measurement evidence with ${label}`, root, "check-research-evidence.ts", 1, "research.offer_test_measurement_missing");
+  }
+
   const researchOfferFractionalConversion = makeCompletedResearch("research-offer-test-fractional-conversion");
   {
     const offerPath = path.join(researchOfferFractionalConversion, "strategy/OFFER_TEST.md");
@@ -639,6 +654,24 @@ export function register(h: Harness): void {
   }
   runFixture("run offer test accepts zero conversions from positive whole-number exposure", researchOfferZeroConversions, "check-research-evidence.ts", 0);
 
+  const researchOfferMalformedLaterMeasurement = makeCompletedResearch("research-offer-test-malformed-later-measurement");
+  {
+    const offerPath = path.join(researchOfferMalformedLaterMeasurement, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |\n" +
+        "| 2026-07-21 | Reddit | follow-up cohort TRACE-004 | qualified visits | 20 | 21 | 105% | 0 | stop |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "a valid exposure row cannot hide a malformed later declared row",
+    researchOfferMalformedLaterMeasurement,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
   const researchOfferMissingConversionColumn = makeCompletedResearch("research-offer-test-missing-conversion-column");
   {
     const offerPath = path.join(researchOfferMissingConversionColumn, "strategy/OFFER_TEST.md");
@@ -687,6 +720,87 @@ export function register(h: Harness): void {
     "research.offer_test_decision_incomplete",
   );
 
+  const researchOfferMalformedLaterDecision = makeCompletedResearch("research-offer-test-malformed-later-decision");
+  {
+    const offerPath = path.join(researchOfferMalformedLaterDecision, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+      "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |\n" +
+        "| pending | 2026-07-22 | follow-up cohort TRACE-004 | keep collecting evidence | founder |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "an older valid offer decision cannot hide a malformed later declared decision",
+    researchOfferMalformedLaterDecision,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_decision_incomplete",
+  );
+
+  const researchOfferCommentedDecision = makeCompletedResearch("research-offer-test-commented-decision");
+  {
+    const offerPath = path.join(researchOfferCommentedDecision, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "## Decision\n| Status | Date | Evidence | Decision | Decided by |\n| --- | --- | --- | --- | --- |\n| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+      "<!--\n## Decision\n| Status | Date | Evidence | Decision | Decided by |\n| --- | --- | --- | --- | --- |\n| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |\n-->",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "an HTML-commented Decision section cannot satisfy the offer-test contract",
+    researchOfferCommentedDecision,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_decision_missing",
+  );
+
+  const researchOfferCommentedDecisionAfterClosedComment = makeCompletedResearch("research-offer-test-commented-decision-after-closed-comment");
+  {
+    const offerPath = path.join(researchOfferCommentedDecisionAfterClosedComment, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "## Decision\n| Status | Date | Evidence | Decision | Decided by |\n| --- | --- | --- | --- | --- |\n| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+      "<!-- prior note --> <!--\n## Decision\n| Status | Date | Evidence | Decision | Decided by |\n| --- | --- | --- | --- | --- |\n| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |\n-->",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "a second HTML-comment opener on one line still hides the following Decision section",
+    researchOfferCommentedDecisionAfterClosedComment,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_decision_missing",
+  );
+
+  const researchOfferInvalidDecisionAndExposure = makeCompletedResearch("research-offer-test-invalid-decision-and-exposure");
+  {
+    const offerPath = path.join(researchOfferInvalidDecisionAndExposure, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8")
+      .replace(
+        "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+        "| 2999-01-01 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 841 | 100.1% | 0 | continue |",
+      )
+      .replace(
+        "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+        "| pending | 2999-01-01 | TODO | TODO | founder |",
+      );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "a malformed Decision does not suppress a malformed declared Exposure row",
+    researchOfferInvalidDecisionAndExposure,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_decision_incomplete",
+  );
+  runFixture(
+    "a malformed declared Exposure row is still reported when Decision is malformed",
+    researchOfferInvalidDecisionAndExposure,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
   const researchOfferStarterContract = makeCompletedResearch("research-offer-test-starter-contract");
   {
     const offerPath = path.join(researchOfferStarterContract, "strategy/OFFER_TEST.md");
@@ -715,6 +829,23 @@ export function register(h: Harness): void {
   runFixture(
     "generic option menus do not complete the offer Test Contract",
     researchOfferOptionMenu,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_contract_incomplete",
+  );
+
+  const researchOfferDuplicateContractField = makeCompletedResearch("research-offer-test-duplicate-contract-field");
+  {
+    const offerPath = path.join(researchOfferDuplicateContractField, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| Stop rule | 1,000 qualified visits |",
+      "| Stop rule | 1,000 qualified visits |\n| Audience | people recovering from a recently broken habit streak |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "duplicate Test Contract fields fail instead of silently overwriting an earlier value",
+    researchOfferDuplicateContractField,
     "check-research-evidence.ts",
     1,
     "research.offer_test_contract_incomplete",
@@ -756,6 +887,65 @@ export function register(h: Harness): void {
     "check-research-evidence.ts",
     1,
     "research.offer_test_waiver_missing",
+  );
+
+  const researchOfferWaiverMalformedLater = makeCompletedResearch("research-offer-test-waiver-malformed-later-row");
+  {
+    const offerPath = path.join(researchOfferWaiverMalformedLater, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8")
+      .replace(
+        "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+        "| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | founder |",
+      )
+      .replace(
+        "## Founder Waiver\n| Date | Founder | Reason | Residual risk accepted |\n| --- | --- | --- | --- |",
+        "## Founder Waiver\n| Date | Founder | Reason | Residual risk accepted |\n| --- | --- | --- | --- |\n" +
+          "| 2026-07-21 | founder | no public account access before decision date | audience and message remain untested |\n" +
+          "| 2999-01-01 | founder | follow-up waiver | future risk acceptance |",
+      );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "a valid founder waiver cannot hide a malformed later declared waiver",
+    researchOfferWaiverMalformedLater,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_waiver_missing",
+  );
+
+  const researchOfferReorderedExtendedColumns = makeCompletedResearch("research-offer-test-reordered-extended-columns");
+  {
+    const offerPath = path.join(researchOfferReorderedExtendedColumns, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8")
+      .replace("| Field | Value |\n| --- | --- |", "| Value | Project note | Field |\n| --- | --- | --- |")
+      .replace(
+        /^\| ([^|]+) \| ([^|]+) \|$/gm,
+        (_row, field: string, fieldValue: string) => `| ${fieldValue.trim()} | verified in this project | ${field.trim()} |`,
+      )
+      .replace(
+        "| Date | Channel | Evidence source | Exposure type | Exposure | CTA conversions | Conversion rate | Cost | Result |\n" +
+          "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |\n" +
+          "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+        "| Channel | Date | Result | Evidence source | Exposure | CTA conversions | Exposure type | Conversion rate | Cost | Project note |\n" +
+          "| --- | --- | --- | --- | ---: | ---: | --- | ---: | ---: | --- |\n" +
+          "| Reddit | 2026-07-20 | continue | PostHog test cohort TRACE-003 | 840 | 31 | qualified visits | 3.69% | 0 | verified in this project |",
+      )
+      .replace(
+        "| Status | Date | Evidence | Decision | Decided by |\n| --- | --- | --- | --- | --- |\n| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+        "| Decided by | Evidence | Status | Decision | Date | Project note |\n| --- | --- | --- | --- | --- | --- |\n| founder | founder waiver WAIVER-001 | waived | proceed with explicit acquisition risk | 2026-07-21 | verified in this project |",
+      )
+      .replace(
+        "## Founder Waiver\n| Date | Founder | Reason | Residual risk accepted |\n| --- | --- | --- | --- |",
+        "## Founder Waiver\n| Reason | Date | Project note | Residual risk accepted | Founder |\n| --- | --- | --- | --- | --- |\n" +
+          "| no public account access before decision date | 2026-07-21 | verified in this project | audience and message remain untested | founder |",
+      );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "offer-test tables resolve required columns by name while allowing reordering and project-specific extensions",
+    researchOfferReorderedExtendedColumns,
+    "check-research-evidence.ts",
+    0,
   );
 
   const researchOfferRecordedOwner = makeCompletedResearch("research-offer-test-recorded-owner");

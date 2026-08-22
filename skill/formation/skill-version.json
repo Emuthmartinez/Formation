@@ -1,7 +1,7 @@
 {
   "skill": "formation",
   "version": "0.164.0",
-  "updatedAt": "2026-08-21",
+  "updatedAt": "2026-08-22",
   "sourcePath": "skill/formation",
   "releaseNotes": [
     "Added an evidence-led editorial scrollytelling capability that maps situation, mechanism, outcome, and proof to stable semantic scene states without copying a source site's visual identity.",
@@ -14,6 +14,7 @@
     "Preserved fresh-context verification for completed final-batch work when a session ends through cooperative yield without repeating the verifier at ordinary empty-frontier completion.",
     "Required explicit CTA conversion counts, complete Craft Lens reasoning before substantive mutation, and an applicability decision plus a structured passed manual-run result before value-producing automation.",
     "Required real non-future calendar dates across new signal and offer-test records, and required superseded signal records to resolve to a distinct declared replacement.",
-    "Added a strict research workflow-output gate, bounded whole-number offer measurements by exposure, and required signal supersession chains to be acyclic and terminate at usable evidence."
+    "Added a strict research workflow-output gate, bounded whole-number offer measurements by exposure, and required signal supersession chains to be acyclic and terminate at usable evidence.",
+    "Added an exact fence-aware Markdown table adapter and required every manual-loop, offer-decision, measurement, and waiver row to stay structurally valid instead of selecting one valid-looking row."
   ]
 }
