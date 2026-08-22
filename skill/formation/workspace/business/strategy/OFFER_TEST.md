@@ -6,6 +6,7 @@ Status: planned until measured response or a founder waiver is recorded.
 
 Replace every `TODO` value with one project-specific choice. A list of possible choices is guidance, not a completed contract.
 The Owned relationship field must name one durable route. An absent route does not complete the contract.
+Primary response must name a behavioral action. Compliments, likes, and general survey interest do not complete the contract.
 
 | Field | Value |
 | --- | --- |

@@ -33,6 +33,7 @@
     "Defined strict evidence Markdown with column-zero hidden fences. Raw HTML, comment openers, non-column-zero fences, and four-column indentation now fail closed document-wide.",
     "Bound final waived offer decisions to a matching dated decision-maker waiver, and excluded invalid or future Source Ledger timestamps from evidence completeness and ID eligibility.",
     "Required every complete Source Ledger row to name a substantive platform or source type before its source and trace IDs can support Distribution Proof.",
-    "Rejected absent owned-relationship values in offer and distribution contracts, and required substantive Signal Corpus not-applicable reasons."
+    "Rejected absent owned-relationship values in offer and distribution contracts, and required substantive Signal Corpus not-applicable reasons.",
+    "Rejected compliments, likes, and general survey interest as offer-test primary responses."
   ]
 }

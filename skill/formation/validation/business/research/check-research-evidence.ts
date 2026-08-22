@@ -863,6 +863,7 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
       const value = contractFields.get(field) ?? "";
       if (value.length === 0 || /\b(todo|tbd|placeholder|replace with|pending|unverified|required)\b|<[^>]+>/i.test(value)) return true;
       if (field === "owned relationship" && isAbsentOwnedRelationship(value)) return true;
+      if (field === "primary response" && isForbiddenPrimaryResponse(value)) return true;
       if (isGenericOfferOptionMenu(field, value)) return true;
       if (field === "exact discovery location" && /^(social media|online|internet|web|app store|community|creator audience)$/i.test(value)) return true;
       if (field === "stop rule" && !/\d/.test(value)) return true;
@@ -1008,16 +1009,24 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
 }
 
 function isEmptySignalNotApplicableReason(value: string): boolean {
-  const normalized = normalizeSentinelComparison(value);
+  const normalized = normalizeContractComparison(value);
   return normalized.length === 0 || /^(?:none|n\/a|not applicable|unknown|no reason)$/i.test(normalized);
 }
 
 function isAbsentOwnedRelationship(value: string): boolean {
-  const normalized = normalizeSentinelComparison(value);
+  const normalized = normalizeContractComparison(value);
   return normalized.length === 0 || /^(?:none|n\/a|not applicable|unknown|no owned (?:route|relationship))(?:\b|$)/i.test(normalized);
 }
 
-function normalizeSentinelComparison(value: string): string {
+function isForbiddenPrimaryResponse(value: string): boolean {
+  const normalized = normalizeContractComparison(value);
+  if (normalized.length === 0) return true;
+  const response = normalized.replace(/^\d[\d.,]*(?:[kmb])?\+?%?\s+/i, "");
+  if (/^like[-‐‑‒–—]minded\b/i.test(response)) return false;
+  return /^(?:likes?|compliments?|(?:general\s+)?survey\s+interest)(?:\b|$)/i.test(response);
+}
+
+function normalizeContractComparison(value: string): string {
   const withoutInlineCode = value.replace(/`([^`\r\n]*)`/gu, "$1");
   const withoutBold = withoutInlineCode.replace(/\*\*([^*\r\n]*)\*\*/gu, "$1");
   return withoutBold.trim().replace(/\s+/gu, " ");

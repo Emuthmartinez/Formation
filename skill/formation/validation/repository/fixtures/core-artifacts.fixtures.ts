@@ -1651,6 +1651,77 @@ export function register(h: Harness): void {
     "research.offer_test_contract_incomplete",
   );
 
+  for (const [name, primaryResponse] of [
+    ["likes", "likes"],
+    ["like-singular", "like"],
+    ["counted-likes", "20 likes"],
+    ["plus-counted-likes", "20+ likes"],
+    ["compact-counted-likes", "20k likes"],
+    ["grouped-counted-likes", "1,000,000 likes"],
+    ["likes-decorated", "likes on the launch post"],
+    ["compliments", "compliments"],
+    ["compliment-singular", "compliment"],
+    ["compliments-decorated", "compliments from respondents"],
+    ["survey-interest", "survey interest"],
+    ["general-survey-interest", "general survey interest"],
+    ["survey-interest-counted", "75% survey interest"],
+    ["case-varied", "LIKES"],
+    ["spacing-varied", "general  survey interest"],
+    ["bold", "**compliments**"],
+    ["inline-code", "`survey interest`"],
+    ["empty-inline-code", "``"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-offer-test-primary-response-${name}`);
+    const offerPath = path.join(root, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace("| Primary response | waitlist signup |", `| Primary response | ${primaryResponse} |`);
+    writeFileSync(offerPath, offer, "utf8");
+    runFixture(
+      `offer Test Contract rejects the vanity Primary response value ${primaryResponse}`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.offer_test_contract_incomplete",
+    );
+  }
+
+  for (const [name, primaryResponse] of [
+    ["signup", "waitlist signup"],
+    ["deposit", "paid deposit"],
+    ["purchase", "completed purchase"],
+    ["booked-call", "booked call"],
+    ["qualified-application", "qualified application"],
+    ["account-activation", "completed account activation"],
+    ["bold-signup", "**waitlist signup**"],
+    ["inline-code-signup", "`waitlist signup`"],
+    ["signup-not-likes", "waitlist signup, not likes"],
+    ["complimentary-signup", "complimentary beta signup"],
+    ["like-minded-referral", "like-minded member referral"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-offer-test-behavioral-response-${name}`);
+    const offerPath = path.join(root, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace("| Primary response | waitlist signup |", `| Primary response | ${primaryResponse} |`);
+    writeFileSync(offerPath, offer, "utf8");
+    runFixture(`offer Test Contract accepts the behavioral Primary response value ${primaryResponse}`, root, "check-research-evidence.ts", 0);
+  }
+
+  const researchWorkflowVanityResponse = makeCompletedResearch("research-workflow-vanity-primary-response");
+  {
+    const state = readState(researchWorkflowVanityResponse);
+    getLane(state, "research")["status"] = "not_started";
+    writeState(researchWorkflowVanityResponse, state);
+    const offerPath = path.join(researchWorkflowVanityResponse, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace("| Primary response | waitlist signup |", "| Primary response | likes |");
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "claimed research workflow rejects likes as the Primary response while the lane is not started",
+    researchWorkflowVanityResponse,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_contract_incomplete",
+    ["--require-workflow-outputs"],
+  );
+
   for (const [name, ownedRelationship] of [
     ["none", "none"],
     ["n-a", "n/a"],
