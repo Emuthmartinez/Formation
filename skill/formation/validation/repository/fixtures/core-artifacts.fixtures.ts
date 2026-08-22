@@ -1102,6 +1102,94 @@ export function register(h: Harness): void {
     0,
   );
 
+  const setSourceLedgerPlatform = (root: string, platform: string): void => {
+    replaceResearchBlock(root, sourceLedgerProofLines, [
+      sourceLedgerProofLines[0]!,
+      sourceLedgerProofLines[1]!,
+      sourceLedgerProofLines[2]!,
+      sourceLedgerProofLines[3]!.replace("app-store estimate", platform),
+    ]);
+  };
+
+  for (const [name, platform] of [
+    ["blank", ""],
+    ["placeholder", "n/a without reason"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-source-ledger-${name}-platform`);
+    setSourceLedgerPlatform(root, platform);
+    runFixture(
+      `a ${name} Source Ledger platform is incomplete but does not erase its valid observation date`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.source_ledger_row_missing",
+      [],
+      undefined,
+      "research.no_dated_evidence",
+    );
+  }
+
+  for (const [platformName, platform] of [
+    ["blank", ""],
+    ["placeholder", "n/a without reason"],
+  ] as const) {
+    const platformLedgerRows = [
+      sourceLedgerProofLines[0]!,
+      sourceLedgerProofLines[1]!,
+      sourceLedgerProofLines[2]!,
+      sourceLedgerProofLines[3]!
+        .replace("appkittie category", "SOURCE-PLATFORM-VALID")
+        .replace("strategy/RESEARCH.md / TRACE-002", "strategy/RESEARCH.md / TRACE-PLATFORM-VALID"),
+      sourceLedgerProofLines[3]!
+        .replace("app-store estimate", platform)
+        .replace("appkittie category", "SOURCE-PLATFORM-INCOMPLETE")
+        .replace("strategy/RESEARCH.md / TRACE-002", "strategy/RESEARCH.md / TRACE-PLATFORM-INCOMPLETE"),
+    ];
+    for (const [idName, evidenceId] of [
+      ["source ID", "SOURCE-PLATFORM-INCOMPLETE"],
+      ["trace ID", "TRACE-PLATFORM-INCOMPLETE"],
+    ] as const) {
+      const root = makeCompletedResearch(`research-source-ledger-${platformName}-platform-${idName.replace(/\s+/g, "-")}`);
+      replaceResearchBlock(root, sourceLedgerProofLines, platformLedgerRows);
+      replaceDistributionProof(root, [
+        distributionProofLines[0]!,
+        distributionProofLines[1]!,
+        distributionProofLines[2]!,
+        distributionProofLines[3]!.replace("SIG-001", evidenceId),
+      ]);
+      runFixture(
+        `a ${platformName} Source Ledger platform cannot make its ${idName} eligible for Distribution Proof`,
+        root,
+        "check-research-evidence.ts",
+        1,
+        "research.distribution_proof_row_invalid",
+      );
+    }
+  }
+
+  const researchSourceSubstantivePlatform = makeCompletedResearch("research-source-ledger-substantive-platform");
+  replaceResearchBlock(researchSourceSubstantivePlatform, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    sourceLedgerProofLines[1]!,
+    sourceLedgerProofLines[2]!,
+    sourceLedgerProofLines[3]!
+      .replace("app-store estimate", "App Store category revenue estimate")
+      .replace("appkittie category", "SOURCE-PLATFORM-SUBSTANTIVE")
+      .replace("strategy/RESEARCH.md / TRACE-002", "strategy/RESEARCH.md / TRACE-PLATFORM-SUBSTANTIVE"),
+  ]);
+  replaceDistributionProof(researchSourceSubstantivePlatform, [
+    distributionProofLines[0]!,
+    distributionProofLines[1]!,
+    distributionProofLines[2]!,
+    distributionProofLines[3]!.replace("SIG-001", "SOURCE-PLATFORM-SUBSTANTIVE, TRACE-PLATFORM-SUBSTANTIVE"),
+  ]);
+  runFixture(
+    "a substantive Source Ledger platform keeps its source and trace IDs eligible",
+    researchSourceSubstantivePlatform,
+    "check-research-evidence.ts",
+    0,
+  );
+
   const researchSourceFutureOnly = makeCompletedResearch("research-source-ledger-future-only");
   replaceResearchBlock(researchSourceFutureOnly, sourceLedgerProofLines, [
     sourceLedgerProofLines[0]!,

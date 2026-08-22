@@ -1085,6 +1085,7 @@ function buildSourceLedgerEvidence(section: RequiredTableSection | undefined): S
 
 function isCompleteSourceLedgerRow(cells: readonly string[], columns: SourceLedgerColumns): boolean {
   const source = cells[columns.source];
+  const platform = cells[columns.platform];
   const identity = cells[columns.identity];
   const observedAt = cells[columns.observedAt];
   const backendQuery = cells[columns.backendQuery];
@@ -1093,17 +1094,13 @@ function isCompleteSourceLedgerRow(cells: readonly string[], columns: SourceLedg
   const inference = cells[columns.inference];
   const confidence = cells[columns.confidence];
   const artifactTrace = cells[columns.artifactTrace];
+  const placeholder = /\b(pending|todo|tbd|placeholder|replace with|n\/a without reason)\b|<[^>]+>/i;
+  const requiredTextCells = [source, platform, identity, backendQuery, transcriptVisual, observation, inference, artifactTrace];
   return Boolean(
-    source?.trim() &&
-    identity?.trim() &&
+    requiredTextCells.every((cell) => cell?.trim() && !placeholder.test(cell)) &&
     isValidNonFutureRfc3339Instant(observedAt) &&
-    backendQuery?.trim() &&
-    transcriptVisual?.trim() &&
-    observation?.trim() &&
-    inference?.trim() &&
     /^(low|medium|high)$/i.test(confidence?.trim() ?? "") &&
-    artifactTrace?.trim() &&
-    !/\b(pending|todo|tbd|placeholder|replace with|n\/a without reason)\b|<[^>]+>/i.test(cells.join(" ")),
+    !placeholder.test(cells.join(" ")),
   );
 }
 
