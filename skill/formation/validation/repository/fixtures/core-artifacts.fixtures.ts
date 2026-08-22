@@ -105,6 +105,13 @@ export function register(h: Harness): void {
   const writeResearch = (root: string, sections: string[]): void => {
     writeFileSync(path.join(root, "strategy/RESEARCH.md"), sections.join("\n"), "utf8");
   };
+  const replaceResearchBlock = (root: string, current: readonly string[], replacement: readonly string[]): void => {
+    const researchPath = path.join(root, "strategy/RESEARCH.md");
+    const research = readFileSync(researchPath, "utf8");
+    const anchor = current.join("\n");
+    if (!research.includes(anchor)) throw new Error(`Research fixture anchor is missing in ${root}`);
+    writeFileSync(researchPath, research.replace(anchor, replacement.join("\n")), "utf8");
+  };
   const setResearchVerdictState = (root: string, decision: string, decidedAt: string): void => {
     const state = readState(root);
     const lane = getLane(state, "research");
@@ -191,6 +198,269 @@ export function register(h: Harness): void {
       "--require-workflow-outputs",
     ]);
   }
+
+  const sourceLedgerProofLines = researchCoreSections.slice(1, 5);
+  const categoryRevenueProofLines = categoryRevenueSection(revenueRow);
+  const verdictProofLines = goPivotKillSection(goRow);
+  for (const [name, opening, closing] of [
+    ["backtick fence", "```md", "```"],
+    ["tilde fence", "~~~md", "~~~"],
+    ["HTML comment", "<!--", "-->"],
+  ] as const) {
+    const sourceRoot = makeCompletedResearch(`research-source-ledger-hidden-${name.replace(/\s+/g, "-")}`);
+    replaceResearchBlock(sourceRoot, sourceLedgerProofLines, [sourceLedgerProofLines[0]!, opening, ...sourceLedgerProofLines.slice(1), closing]);
+    runFixture(
+      `Source Ledger cannot be satisfied by a table inside a ${name}`,
+      sourceRoot,
+      "check-research-evidence.ts",
+      1,
+      "research.source_ledger_url_source_id.missing",
+    );
+    if (name === "backtick fence") {
+      runFixture(
+        "a date inside a fenced Source Ledger cannot satisfy dated evidence",
+        sourceRoot,
+        "check-research-evidence.ts",
+        1,
+        "research.no_dated_evidence",
+      );
+    }
+
+    const revenueRoot = makeCompletedResearch(`research-category-revenue-hidden-${name.replace(/\s+/g, "-")}`);
+    replaceResearchBlock(revenueRoot, categoryRevenueProofLines, [
+      categoryRevenueProofLines[0]!,
+      opening,
+      ...categoryRevenueProofLines.slice(1, 4),
+      closing,
+      ...categoryRevenueProofLines.slice(4),
+    ]);
+    runFixture(
+      `Category Revenue Reality cannot be satisfied by a table inside a ${name}`,
+      revenueRoot,
+      "check-research-evidence.ts",
+      1,
+      "research.category_revenue_reality.section_missing",
+    );
+
+    const verdictRoot = makeCompletedResearch(`research-verdict-hidden-${name.replace(/\s+/g, "-")}`);
+    replaceResearchBlock(verdictRoot, verdictProofLines, [verdictProofLines[0]!, opening, ...verdictProofLines.slice(1), closing]);
+    runFixture(
+      `Go, Pivot, Or Kill cannot be satisfied by a table inside a ${name}`,
+      verdictRoot,
+      "check-research-evidence.ts",
+      1,
+      "research.go_pivot_or_kill.section_missing",
+    );
+  }
+
+  const researchSourceIndented = makeCompletedResearch("research-source-ledger-indented");
+  replaceResearchBlock(researchSourceIndented, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    ...sourceLedgerProofLines.slice(1).map((line) => `    ${line}`),
+  ]);
+  runFixture(
+    "an indented Source Ledger example cannot satisfy strict provenance",
+    researchSourceIndented,
+    "check-research-evidence.ts",
+    1,
+    "research.source_ledger_url_source_id.missing",
+  );
+
+  const researchRevenueIndented = makeCompletedResearch("research-category-revenue-indented");
+  replaceResearchBlock(researchRevenueIndented, categoryRevenueProofLines, [
+    categoryRevenueProofLines[0]!,
+    ...categoryRevenueProofLines.slice(1, 4).map((line) => `    ${line}`),
+    ...categoryRevenueProofLines.slice(4),
+  ]);
+  runFixture(
+    "an indented Category Revenue Reality example cannot satisfy the gate",
+    researchRevenueIndented,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_reality.section_missing",
+  );
+
+  const researchVerdictIndented = makeCompletedResearch("research-verdict-indented");
+  replaceResearchBlock(researchVerdictIndented, verdictProofLines, [verdictProofLines[0]!, ...verdictProofLines.slice(1).map((line) => `    ${line}`)]);
+  runFixture(
+    "an indented Go, Pivot, Or Kill example cannot satisfy the gate",
+    researchVerdictIndented,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_or_kill.section_missing",
+  );
+
+  const researchSourceDuplicate = makeCompletedResearch("research-source-ledger-duplicate");
+  replaceResearchBlock(researchSourceDuplicate, sourceLedgerProofLines, [...sourceLedgerProofLines, ...sourceLedgerProofLines]);
+  runFixture(
+    "duplicate rendered Source Ledger headings fail closed",
+    researchSourceDuplicate,
+    "check-research-evidence.ts",
+    1,
+    "research.source_ledger_url_source_id.missing",
+  );
+
+  const researchRevenueDuplicate = makeCompletedResearch("research-category-revenue-duplicate");
+  replaceResearchBlock(researchRevenueDuplicate, categoryRevenueProofLines, [...categoryRevenueProofLines, ...categoryRevenueProofLines]);
+  runFixture(
+    "duplicate rendered Category Revenue Reality headings fail closed",
+    researchRevenueDuplicate,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_reality.section_missing",
+  );
+
+  const researchVerdictDuplicate = makeCompletedResearch("research-verdict-duplicate");
+  replaceResearchBlock(researchVerdictDuplicate, verdictProofLines, [...verdictProofLines, ...verdictProofLines]);
+  runFixture(
+    "duplicate rendered Go, Pivot, Or Kill headings fail closed",
+    researchVerdictDuplicate,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_or_kill.section_missing",
+  );
+
+  const researchSourceWidth = makeCompletedResearch("research-source-ledger-width");
+  replaceResearchBlock(researchSourceWidth, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    sourceLedgerProofLines[1]!.replace(" | Artifact / trace |", " | Artifact / trace | Notes |"),
+    sourceLedgerProofLines[2]!.replace(" | --- |", " | --- | --- |"),
+    sourceLedgerProofLines[3]!,
+  ]);
+  runFixture(
+    "a Source Ledger row shorter than its extended header fails",
+    researchSourceWidth,
+    "check-research-evidence.ts",
+    1,
+    "research.source_ledger_row_missing",
+  );
+
+  const researchRevenueWidth = makeCompletedResearch("research-category-revenue-width");
+  replaceResearchBlock(researchRevenueWidth, categoryRevenueProofLines, [
+    categoryRevenueProofLines[0]!,
+    categoryRevenueProofLines[1]!.replace(" | Source / observed at |", " | Source / observed at | Notes |"),
+    categoryRevenueProofLines[2]!.replace(" | --- |", " | --- | --- |"),
+    categoryRevenueProofLines[3]!,
+    ...categoryRevenueProofLines.slice(4),
+  ]);
+  runFixture(
+    "a Category Revenue Reality row shorter than its extended header fails",
+    researchRevenueWidth,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_row_missing",
+  );
+
+  const researchVerdictWidth = makeCompletedResearch("research-verdict-width");
+  replaceResearchBlock(researchVerdictWidth, verdictProofLines, [
+    verdictProofLines[0]!,
+    verdictProofLines[1]!.replace(" | Decided by |", " | Decided by | Notes |"),
+    verdictProofLines[2]!.replace(" | --- |", " | --- | --- |"),
+    verdictProofLines[3]!,
+  ]);
+  runFixture(
+    "a Go, Pivot, Or Kill row shorter than its extended header fails",
+    researchVerdictWidth,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_row_malformed",
+  );
+
+  const researchSourceReordered = makeCompletedResearch("research-source-ledger-reordered");
+  replaceResearchBlock(researchSourceReordered, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    "| Notes | Artifact / trace | Confidence | Inference | Observation | Transcript / visual / sample limit | Tool / backend / query | Observed at | URL / source ID | Platform / type | Source |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| retained evidence | strategy/RESEARCH.md / TRACE-002 | high | category supports testing paywall-first | top 10 revenue apps use a first-session paywall | structured rows / top 10 | AppKittie / search_apps habit tracker | 2026-07-01T12:00:00Z | SOURCE-001 | app-store estimate | AppKittie category scan |",
+  ]);
+  {
+    const researchPath = path.join(researchSourceReordered, "strategy/RESEARCH.md");
+    const research = readFileSync(researchPath, "utf8").replace(
+      "| 840 qualified visits and 31 signups | SIG-001 |",
+      "| 840 qualified visits and 31 signups | SOURCE-001 |",
+    );
+    writeFileSync(researchPath, research, "utf8");
+  }
+  runFixture(
+    "reordered extended Source Ledger columns serve strict proof and Distribution ID resolution",
+    researchSourceReordered,
+    "check-research-evidence.ts",
+    0,
+  );
+
+  const researchSourceTranscriptAlias = makeCompletedResearch("research-source-ledger-transcript-alias");
+  replaceResearchBlock(researchSourceTranscriptAlias, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    sourceLedgerProofLines[1]!.replace("Transcript / visual / sample limit", "Transcript / visual"),
+    sourceLedgerProofLines[2]!,
+    sourceLedgerProofLines[3]!,
+  ]);
+  runFixture("Source Ledger preserves the Transcript / visual header alias", researchSourceTranscriptAlias, "check-research-evidence.ts", 0);
+
+  const researchRevenueReordered = makeCompletedResearch("research-category-revenue-reordered");
+  replaceResearchBlock(researchRevenueReordered, categoryRevenueProofLines, [
+    categoryRevenueProofLines[0]!,
+    "| Notes | Source / observed at | Est. annual revenue | Competitor | Rank |",
+    "| --- | --- | --- | --- | --- |",
+    "| retained evidence | AppKittie revenue estimate, observed 2026-07-20 | $2.4M/yr | HabitKit | 1 |",
+    ...categoryRevenueProofLines.slice(4),
+  ]);
+  runFixture("Category Revenue Reality resolves reordered named columns and permits extensions", researchRevenueReordered, "check-research-evidence.ts", 0);
+
+  const researchVerdictReordered = makeCompletedResearch("research-verdict-reordered");
+  replaceResearchBlock(researchVerdictReordered, verdictProofLines, [
+    verdictProofLines[0]!,
+    "| Notes | Decided by | Verdict | Offer test | Distribution | Demand | Wedge | Revenue reality | Date |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| retained evidence | founder | Go | 31 of 840 visitors joined the owned waitlist | r/habits native case-study post reached 840 visits | 412-person waitlist from social mining | streak-insurance mechanic incumbents price-gate | pass — $14.2M top-10 | 2026-07-21 |",
+  ]);
+  runFixture("Go, Pivot, Or Kill resolves reordered named columns and documented aliases", researchVerdictReordered, "check-research-evidence.ts", 0);
+
+  const researchRevenueFencedJudgment = makeCompletedResearch("research-category-revenue-fenced-judgment");
+  replaceResearchBlock(researchRevenueFencedJudgment, categoryRevenueProofLines, [
+    ...categoryRevenueProofLines.slice(0, 4),
+    "```md",
+    ...categoryRevenueProofLines.slice(4),
+    "```",
+  ]);
+  runFixture(
+    "fenced revenue bar and pass-fail prose cannot satisfy the judgment",
+    researchRevenueFencedJudgment,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_bar_unjudged",
+  );
+
+  const researchVerdictFencedLater = makeCompletedResearch("research-verdict-fenced-later-row");
+  replaceResearchBlock(researchVerdictFencedLater, verdictProofLines, [
+    ...verdictProofLines,
+    "```md",
+    "| 2026-07-22 | fail — $180K top-10 | wedge collapsed | waitlist was bot-inflated | channel traffic was bots | offer response was invalid | Kill | founder |",
+    "```",
+  ]);
+  runFixture("a later verdict row inside a fence cannot supersede the rendered founder decision", researchVerdictFencedLater, "check-research-evidence.ts", 0);
+
+  const researchPartialStructuralLedger = makeCompletedResearch("research-partial-structural-ledger");
+  {
+    const state = readState(researchPartialStructuralLedger);
+    getLane(state, "research")["status"] = "partial";
+    writeState(researchPartialStructuralLedger, state);
+  }
+  replaceResearchBlock(researchPartialStructuralLedger, sourceLedgerProofLines, [...sourceLedgerProofLines, ...sourceLedgerProofLines]);
+  runFixture(
+    "phase-one partial research does not gain premature strict Source Ledger errors",
+    researchPartialStructuralLedger,
+    "check-research-evidence.ts",
+    0,
+  );
+  runFixture(
+    "the workflow-output wrapper makes the same partial Source Ledger strict",
+    researchPartialStructuralLedger,
+    "check-research-evidence.ts",
+    1,
+    "research.source_ledger_url_source_id.missing",
+    ["--require-workflow-outputs"],
+  );
 
   for (const [name, fence] of [
     ["backtick", "```md"],

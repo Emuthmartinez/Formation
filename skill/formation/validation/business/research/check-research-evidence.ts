@@ -61,6 +61,32 @@ const DISTRIBUTION_PROOF_HEADERS = [
   ["Measured signal"],
   ["Evidence IDs", "Evidence ID"],
 ] as const;
+const SOURCE_LEDGER_HEADERS = {
+  source: ["Source"],
+  platform: ["Platform / type"],
+  identity: ["URL / source ID"],
+  observedAt: ["Observed at"],
+  backendQuery: ["Tool / backend / query"],
+  transcriptVisual: ["Transcript / visual / sample limit", "Transcript / visual"],
+  observation: ["Observation"],
+  inference: ["Inference"],
+  confidence: ["Confidence"],
+  artifactTrace: ["Artifact / trace"],
+} as const;
+const CATEGORY_REVENUE_HEADERS = {
+  revenue: ["Est. annual revenue", "Estimated annual revenue", "Annual revenue", "Revenue"],
+  source: ["Source / observed at", "Source"],
+} as const;
+const VERDICT_HEADERS = {
+  date: ["Date"],
+  categoryRevenue: ["Category revenue reality", "Category revenue", "Revenue reality"],
+  wedge: ["Wedge"],
+  demand: ["Demand signal", "Demand"],
+  distribution: ["Distribution proof", "Distribution"],
+  offerTest: ["Offer test"],
+  verdict: ["Verdict (Go / Pivot / Kill)", "Verdict"],
+  decidedBy: ["Decided by"],
+} as const;
 
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
@@ -84,6 +110,9 @@ const verdictRequired = strictResearch || buildPhase || downstreamActive;
 const text = readText(args.root, "strategy/RESEARCH.md");
 const signalText = readText(args.root, "strategy/SIGNAL_CORPUS.md");
 const offerText = readText(args.root, "strategy/OFFER_TEST.md");
+const sourceLedgerResult = text ? parseRequiredTableSection(text, "Source Ledger") : undefined;
+const sourceLedgerSection = sourceLedgerResult?.ok ? sourceLedgerResult.section : undefined;
+const sourceLedgerEvidence = buildSourceLedgerEvidence(sourceLedgerSection);
 const signalEvidence = verdictRequired ? validateSignalCorpus(signalText, issues, strictResearch) : emptySignalCorpusIndex();
 
 // A deferred/not_needed research lane suppresses the missing-file error only
@@ -139,8 +168,17 @@ if (text) {
   }
 
   if (strictResearch) {
-    for (const column of ["URL / source ID", "Observed at", "Tool / backend / query", "Transcript / visual", "Observation", "Inference", "Artifact / trace"]) {
-      if (!text.toLowerCase().includes(column.toLowerCase())) {
+    const strictProvenanceColumns = [
+      ["URL / source ID", sourceLedgerEvidence.columns.identity],
+      ["Observed at", sourceLedgerEvidence.columns.observedAt],
+      ["Tool / backend / query", sourceLedgerEvidence.columns.backendQuery],
+      ["Transcript / visual", sourceLedgerEvidence.columns.transcriptVisual],
+      ["Observation", sourceLedgerEvidence.columns.observation],
+      ["Inference", sourceLedgerEvidence.columns.inference],
+      ["Artifact / trace", sourceLedgerEvidence.columns.artifactTrace],
+    ] as const;
+    for (const [column, index] of strictProvenanceColumns) {
+      if (index < 0) {
         issues.push(
           issue(
             "error",
@@ -161,7 +199,7 @@ if (text) {
         ),
       );
     }
-    if (!/\b20\d{2}-\d{2}-\d{2}\b/.test(text)) {
+    if (!sourceLedgerEvidence.hasDatedEvidence) {
       issues.push(
         issue(
           "error",
@@ -183,8 +221,8 @@ if (text) {
     // or Pivot at this checkpoint is the process working, not failing.
     const PLACEHOLDER_TEXT = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
 
-    const revenueSection = markdownSection(text, "Category Revenue Reality");
-    if (!revenueSection) {
+    const revenueResult = parseRequiredTableSection(text, "Category Revenue Reality");
+    if (!revenueResult.ok) {
       // The phrase in prose is not the section: a done lane needs the parsed
       // heading, or every substance check below silently skips.
       issues.push(
@@ -196,15 +234,16 @@ if (text) {
         ),
       );
     } else {
+      const revenueSection = revenueResult.section;
       // The revenue estimate and its source are parsed from their intended
       // columns: a dollar amount drifting in an unrelated cell, or a blank
       // source, is data-shaped text rather than a sourced estimate.
-      const revenueColumn = tableColumnIndex(revenueSection, /revenue/i);
-      const sourceColumn = tableColumnIndex(revenueSection, /source/i);
-      const revenueRows = tableDataRows(revenueSection).filter((row) => !/_example/i.test(row.join(" ")));
-      const sourcedRow = (row: string[]): boolean => {
-        const revenueCell = revenueColumn > 0 ? (row[revenueColumn] ?? "") : "";
-        const sourceCell = sourceColumn > 0 ? (row[sourceColumn] ?? "") : "";
+      const revenueColumn = tableColumnAny(revenueSection, CATEGORY_REVENUE_HEADERS.revenue);
+      const sourceColumn = tableColumnAny(revenueSection, CATEGORY_REVENUE_HEADERS.source);
+      const revenueRows = revenueSection.rows.filter((row) => !/_example/i.test(row.cells.join(" ")));
+      const sourcedRow = (row: (typeof revenueRows)[number]): boolean => {
+        const revenueCell = revenueColumn >= 0 ? (row.cells[revenueColumn] ?? "") : "";
+        const sourceCell = sourceColumn >= 0 ? (row.cells[sourceColumn] ?? "") : "";
         return (
           /\$\s*\d[\d,]*(?:\.\d+)?/.test(revenueCell) &&
           sourceCell.trim().length > 0 &&
@@ -212,7 +251,7 @@ if (text) {
           /\d{4}-\d{2}-\d{2}/.test(sourceCell)
         );
       };
-      if (revenueColumn <= 0 || sourceColumn <= 0 || !revenueRows.some(sourcedRow)) {
+      if (revenueColumn < 0 || sourceColumn < 0 || !rowsMatchTableWidth(revenueSection) || !revenueRows.some(sourcedRow)) {
         issues.push(
           issue(
             "error",
@@ -224,10 +263,10 @@ if (text) {
           ),
         );
       }
-      const barLine = revenueSection.split(/\r?\n/).find((line) => /stated bar/i.test(line) && line.includes(":"));
+      const barLine = revenueSection.renderedBody.split(/\r?\n/).find((line) => /stated bar/i.test(line) && line.includes(":"));
       const barValue = barLine ? (barLine.split(/:(.*)/s)[1] ?? "").trim() : "";
       const barStated = barValue.length > 0 && /\d/.test(barValue) && !PLACEHOLDER_TEXT.test(barValue);
-      if (!barStated || !/pass or fail[^:\n]*:\s*(pass|fail)/i.test(revenueSection)) {
+      if (!barStated || !/pass or fail[^:\n]*:\s*(pass|fail)/i.test(revenueSection.renderedBody)) {
         issues.push(
           issue(
             "error",
@@ -254,7 +293,7 @@ if (text) {
       );
     } else {
       const rows = distributionSection.rows;
-      const sourceLedgerIds = eligibleSourceLedgerIds(text);
+      const sourceLedgerIds = sourceLedgerEvidence.eligibleIds;
       const genericLocation = /^(social media|online|internet|web|app store|community|creator audience)$/i;
       const rowsValid =
         rows.length > 0 &&
@@ -294,8 +333,8 @@ if (text) {
       }
     }
 
-    const verdictSection = markdownSection(text, "Go, Pivot, Or Kill");
-    if (!verdictSection) {
+    const verdictResult = parseRequiredTableSection(text, "Go, Pivot, Or Kill");
+    if (!verdictResult.ok) {
       issues.push(
         issue(
           "error",
@@ -305,42 +344,46 @@ if (text) {
         ),
       );
     } else {
-      const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
-      // The three named evidence columns must exist between Date and Verdict:
-      // a table renamed to Notes | Opinion | Summary carries cells, not the
-      // required inputs, and a stripped table carries nothing at all.
-      const evidenceColumnPatterns: RegExp[] = [/category revenue|revenue reality/i, /wedge/i, /demand/i, /distribution/i, /offer test/i];
-      const evidenceColumnsPresent = evidenceColumnPatterns.every((pattern) => {
-        const index = tableColumnIndex(verdictSection, pattern);
-        return index > 1 && (verdictColumn === -1 || index < verdictColumn);
-      });
-      if (verdictColumn !== -1 && !evidenceColumnsPresent) {
+      const verdictSection = verdictResult.section;
+      const dateColumn = tableColumnAny(verdictSection, VERDICT_HEADERS.date);
+      const verdictColumn = tableColumnAny(verdictSection, VERDICT_HEADERS.verdict);
+      const decidedColumn = tableColumnAny(verdictSection, VERDICT_HEADERS.decidedBy);
+      const evidenceColumns = [
+        tableColumnAny(verdictSection, VERDICT_HEADERS.categoryRevenue),
+        tableColumnAny(verdictSection, VERDICT_HEADERS.wedge),
+        tableColumnAny(verdictSection, VERDICT_HEADERS.demand),
+        tableColumnAny(verdictSection, VERDICT_HEADERS.distribution),
+        tableColumnAny(verdictSection, VERDICT_HEADERS.offerTest),
+      ];
+      const evidenceColumnsPresent = evidenceColumns.every((column) => column >= 0);
+      if (!evidenceColumnsPresent) {
         issues.push(
           issue(
             "error",
             "research.go_pivot_kill_evidence_columns_missing",
             "The Go, Pivot, Or Kill table is missing its named evidence columns. Category revenue, wedge, demand, distribution, and offer test must " +
-              "each have a column between Date and Verdict — a verdict table with the reasons renamed or removed is a decision without its inputs.",
+              "each have a named column — a verdict table with the reasons renamed or removed is a decision without its inputs.",
             "strategy/RESEARCH.md",
           ),
         );
       }
-      const parsedRows = tableDataRows(verdictSection).map((cells) => ({
-        cells,
-        date: /^\d{4}-\d{2}-\d{2}$/.test(cells[1]?.trim() ?? "") ? (cells[1]?.trim() ?? "") : undefined,
+      const parsedRows = verdictSection.rows.map((row) => ({
+        cells: row.cells,
+        widthValid: row.rawCellCount === verdictSection.width,
+        date: dateColumn >= 0 && /^\d{4}-\d{2}-\d{2}$/.test(row.cells[dateColumn]?.trim() ?? "") ? (row.cells[dateColumn]?.trim() ?? "") : undefined,
         verdict:
-          verdictColumn === -1
+          verdictColumn < 0
             ? undefined
-            : (cells[verdictColumn] ?? "")
+            : (row.cells[verdictColumn] ?? "")
                 .trim()
                 .match(/^(go|pivot|kill)\b/i)?.[1]
                 ?.toLowerCase(),
       }));
-      const verdictRows = parsedRows.filter((row) => row.date && row.verdict);
+      const verdictRows = parsedRows.filter((row) => row.widthValid && row.date && row.verdict);
       // A malformed decision row (mistyped date, missing verdict keyword) is
       // reported, never silently dropped — dropping it would fall back to an
       // older verdict the founder already superseded.
-      const malformedRows = parsedRows.filter((row) => !(row.date && row.verdict) && row.cells.some((cell) => cell.trim().length > 0));
+      const malformedRows = parsedRows.filter((row) => !(row.widthValid && row.date && row.verdict) && row.cells.some((cell) => cell.trim().length > 0));
       if (malformedRows.length > 0) {
         issues.push(
           issue(
@@ -371,8 +414,7 @@ if (text) {
         // The decision-maker is read from the named "Decided by" column, never
         // positionally — an unrelated Notes column sitting after Verdict must
         // not be able to satisfy the founder-only gate.
-        const decidedColumn = tableColumnIndex(verdictSection, /decided by/i);
-        const decidedByCell = decidedColumn === -1 ? "" : (latest.cells[decidedColumn] ?? "").trim();
+        const decidedByCell = decidedColumn < 0 ? "" : (latest.cells[decidedColumn] ?? "").trim();
         if (decidedByCell.length === 0 || PLACEHOLDER_TEXT.test(decidedByCell) || !isFounderDecider(decidedByCell)) {
           issues.push(
             issue(
@@ -384,8 +426,8 @@ if (text) {
             ),
           );
         }
-        const evidenceCells = verdictColumn > 2 ? latest.cells.slice(2, verdictColumn) : [];
-        if (evidenceCells.some((cell) => cell.trim().length === 0 || PLACEHOLDER_TEXT.test(cell))) {
+        const evidenceCells = evidenceColumnsPresent ? evidenceColumns.map((column) => latest.cells[column] ?? "") : [];
+        if (evidenceColumnsPresent && evidenceCells.some((cell) => cell.trim().length === 0 || PLACEHOLDER_TEXT.test(cell))) {
           issues.push(
             issue(
               "error",
@@ -437,9 +479,7 @@ if (text) {
   }
 
   if (strictResearch) {
-    const rows = sourceLedgerRows(text);
-    const completeRows = rows.filter(isCompleteSourceLedgerRow);
-    if (completeRows.length === 0) {
+    if (sourceLedgerEvidence.completeRowCount === 0) {
       issues.push(
         issue(
           "error",
@@ -976,18 +1016,63 @@ function isFounderDecider(value: string): boolean {
   return /\b(founder|owner)\b/i.test(candidate) || (projectOwner.length > 2 && candidate.toLowerCase().includes(projectOwner.toLowerCase()));
 }
 
-function eligibleSourceLedgerIds(value: string): Set<string> {
-  const ids = new Set<string>();
-  for (const row of sourceLedgerRows(value).filter(isCompleteSourceLedgerRow)) {
-    for (const sourceId of extractStableIds(row[2] ?? "")) ids.add(sourceId);
-    for (const traceId of extractStableIds(row[9] ?? "")) ids.add(traceId);
-  }
-  return ids;
+interface SourceLedgerColumns {
+  source: number;
+  platform: number;
+  identity: number;
+  observedAt: number;
+  backendQuery: number;
+  transcriptVisual: number;
+  observation: number;
+  inference: number;
+  confidence: number;
+  artifactTrace: number;
 }
 
-function isCompleteSourceLedgerRow(row: string[]): boolean {
-  if (row.length < 10) return false;
-  const [source, , identity, observedAt, backendQuery, transcriptVisual, observation, inference, confidence, artifactTrace] = row;
+interface SourceLedgerEvidence {
+  columns: SourceLedgerColumns;
+  completeRowCount: number;
+  hasDatedEvidence: boolean;
+  eligibleIds: Set<string>;
+}
+
+function buildSourceLedgerEvidence(section: RequiredTableSection | undefined): SourceLedgerEvidence {
+  const columns: SourceLedgerColumns = {
+    source: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.source) : -1,
+    platform: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.platform) : -1,
+    identity: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.identity) : -1,
+    observedAt: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.observedAt) : -1,
+    backendQuery: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.backendQuery) : -1,
+    transcriptVisual: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.transcriptVisual) : -1,
+    observation: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.observation) : -1,
+    inference: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.inference) : -1,
+    confidence: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.confidence) : -1,
+    artifactTrace: section ? tableColumnAny(section, SOURCE_LEDGER_HEADERS.artifactTrace) : -1,
+  };
+  const eligibleIds = new Set<string>();
+  if (!section || Object.values(columns).some((column) => column < 0) || !rowsMatchTableWidth(section)) {
+    return { columns, completeRowCount: 0, hasDatedEvidence: false, eligibleIds };
+  }
+
+  const hasDatedEvidence = section.rows.some((row) => isDateTime(row.cells[columns.observedAt]));
+  const completeRows = section.rows.filter((row) => isCompleteSourceLedgerRow(row.cells, columns));
+  for (const row of completeRows) {
+    for (const sourceId of extractStableIds(row.cells[columns.identity] ?? "")) eligibleIds.add(sourceId);
+    for (const traceId of extractStableIds(row.cells[columns.artifactTrace] ?? "")) eligibleIds.add(traceId);
+  }
+  return { columns, completeRowCount: completeRows.length, hasDatedEvidence, eligibleIds };
+}
+
+function isCompleteSourceLedgerRow(cells: readonly string[], columns: SourceLedgerColumns): boolean {
+  const source = cells[columns.source];
+  const identity = cells[columns.identity];
+  const observedAt = cells[columns.observedAt];
+  const backendQuery = cells[columns.backendQuery];
+  const transcriptVisual = cells[columns.transcriptVisual];
+  const observation = cells[columns.observation];
+  const inference = cells[columns.inference];
+  const confidence = cells[columns.confidence];
+  const artifactTrace = cells[columns.artifactTrace];
   return Boolean(
     source?.trim() &&
     identity?.trim() &&
@@ -998,7 +1083,7 @@ function isCompleteSourceLedgerRow(row: string[]): boolean {
     inference?.trim() &&
     /^(low|medium|high)$/i.test(confidence?.trim() ?? "") &&
     artifactTrace?.trim() &&
-    !/\b(pending|todo|tbd|placeholder|replace with|n\/a without reason)\b|<[^>]+>/i.test(row.join(" ")),
+    !/\b(pending|todo|tbd|placeholder|replace with|n\/a without reason)\b|<[^>]+>/i.test(cells.join(" ")),
   );
 }
 
@@ -1028,24 +1113,6 @@ function extractStableIds(value: string): string[] {
   return [...value.matchAll(/\b[A-Z][A-Z0-9_-]*-[A-Z0-9][A-Z0-9_-]*\b/gi)].map((match) => (match[0] ?? "").toUpperCase());
 }
 
-function sourceLedgerRows(value: string): string[][] {
-  const lines = value.split(/\r?\n/);
-  const header = lines.findIndex((line) => line.includes("URL / source ID") && line.includes("Artifact / trace"));
-  if (header < 0) return [];
-  const rows: string[][] = [];
-  for (const line of lines.slice(header + 1)) {
-    if (!line.trim().startsWith("|")) break;
-    if (/^\|\s*:?-+/.test(line)) continue;
-    rows.push(
-      line
-        .split("|")
-        .slice(1, -1)
-        .map((cell) => cell.trim()),
-    );
-  }
-  return rows;
-}
-
 function isDateTime(value: string | undefined): boolean {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && !Number.isNaN(new Date(value).getTime()));
 }
@@ -1060,47 +1127,4 @@ function isValidPastIsoDateRange(value: string): boolean {
   const dates = value.match(/\b\d{4}-\d{2}-\d{2}\b/g) ?? [];
   if (dates.length < 1 || dates.length > 2 || !dates.every(isValidPastIsoDate)) return false;
   return dates.length === 1 || dates[0]! <= dates[1]!;
-}
-
-/** The block from a `## <heading>` line to the next `## ` heading (or EOF). */
-function markdownSection(markdown: string, heading: string): string {
-  const lines = markdown.split(/\r?\n/);
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const headingPattern = new RegExp(`^##\\s*${escaped}`, "i");
-  const start = lines.findIndex((line) => headingPattern.test(line.trim()));
-  if (start === -1) return "";
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i += 1) {
-    if (/^## /.test(lines[i] ?? "")) {
-      end = i;
-      break;
-    }
-  }
-  return lines.slice(start, end).join("\n");
-}
-
-/** Data rows of the section's first table: header and separator rows skipped, cells split raw (index 1 is the first real cell). */
-function tableDataRows(section: string): string[][] {
-  const rows: string[][] = [];
-  let headerSeen = false;
-  for (const line of section.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith("|")) continue;
-    if (/^\|\s*:?-+/.test(trimmed)) continue;
-    if (!headerSeen) {
-      headerSeen = true;
-      continue;
-    }
-    rows.push(trimmed.split("|").map((cell) => cell.trim()));
-  }
-  return rows;
-}
-
-/** Index of the column matching `pattern` in the section's first table HEADER
- * row only — data cells that happen to contain a header keyword must never
- * satisfy a column requirement. */
-function tableColumnIndex(section: string, pattern: RegExp): number {
-  const header = section.split(/\r?\n/).find((line) => line.trim().startsWith("|"));
-  if (!header) return -1;
-  return header.split("|").findIndex((cell) => pattern.test(cell));
 }
