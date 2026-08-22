@@ -5,6 +5,7 @@ import {
   expectRecord,
   getLane,
   readState,
+  rewriteFixtureArchiveInfoPlist,
   writeCompleteAppleRequirements,
   writeCompleteStoreConsole,
   writeCompleteStoreScreenshots,
@@ -330,12 +331,50 @@ export function register(h: Harness): void {
   const strictCompleteAppleSigning = makeFixture("apple-requirements-strict-complete");
   writeCompleteAppleRequirements(strictCompleteAppleSigning);
   runFixture(
-    "strict Apple signing readiness accepts complete resolved evidence",
+    "strict Apple signing readiness accepts complete evidence with distinct archive and Info.plist mtimes",
     strictCompleteAppleSigning,
     "check-apple-app-store-requirements.ts",
     0,
     undefined,
     ["--require-signing-ready"],
+  );
+
+  const archiveIdentityMismatch = makeFixture("apple-requirements-archive-identity-mismatch");
+  writeCompleteAppleRequirements(archiveIdentityMismatch);
+  rewriteFixtureArchiveInfoPlist(archiveIdentityMismatch, (contents) => contents.replace("com.example.fixture", "com.example.archived"));
+  runFixture(
+    "Apple signing rejects identity claims that differ from the parsed archive Info.plist",
+    archiveIdentityMismatch,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_identity_bundle_id_mismatch",
+  );
+
+  const archiveSdkKeyMissing = makeFixture("apple-requirements-archive-sdk-key-missing");
+  writeCompleteAppleRequirements(archiveSdkKeyMissing);
+  rewriteFixtureArchiveInfoPlist(archiveSdkKeyMissing, (contents) => contents.replace("<key>POSTHOG_API_KEY</key><string>phc_fixture</string>\n", ""));
+  runFixture(
+    "Apple signing rejects item 7 when a named SDK key is absent from the parsed archive Info.plist",
+    archiveSdkKeyMissing,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_sdk_keys_mismatch",
+  );
+
+  const archiveMutatedAfterEvidence = makeFixture("apple-requirements-archive-mutated-after-evidence");
+  writeCompleteAppleRequirements(archiveMutatedAfterEvidence);
+  const mutatedAfterEvidenceTime = new Date(Date.now() + 10_000);
+  utimesSync(
+    path.join(archiveMutatedAfterEvidence, "build/FixtureRelease.xcarchive/Products/Applications/Fixture.app/Info.plist"),
+    mutatedAfterEvidenceTime,
+    mutatedAfterEvidenceTime,
+  );
+  runFixture(
+    "Apple signing rejects an archive artifact modified after its evidence timestamp tolerance",
+    archiveMutatedAfterEvidence,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_artifact_stale",
   );
 
   const strictScaffoldAppleSigning = makeFixture("apple-requirements-strict-scaffold");

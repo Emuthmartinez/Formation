@@ -35,11 +35,23 @@ export function writeCompleteAppleSigning(root: string): void {
   mkdirSync(path.dirname(archiveInfoPlistPath), { recursive: true });
   writeFileSync(
     archiveInfoPlistPath,
-    '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.example.fixture</string></dict></plist>',
+    [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<plist version="1.0"><dict>',
+      "<key>CFBundleIdentifier</key><string>com.example.fixture</string>",
+      "<key>CFBundleShortVersionString</key><string>1.2.3</string>",
+      "<key>CFBundleVersion</key><string>42</string>",
+      "<key>REVENUECAT_API_KEY</key><string>appl_fixture</string>",
+      "<key>POSTHOG_API_KEY</key><string>phc_fixture</string>",
+      "<key>SUPABASE_URL</key><string>https://fixture.supabase.co</string>",
+      "</dict></plist>",
+    ].join("\n"),
     "utf8",
   );
-  utimesSync(archiveInfoPlistPath, artifactDate, artifactDate);
-  utimesSync(archiveDirectory, artifactDate, artifactDate);
+  const infoPlistTime = new Date(artifactDate.getTime() - 2 * 60 * 1_000);
+  const archiveDirectoryTime = new Date(artifactDate.getTime() - 60 * 1_000);
+  utimesSync(archiveInfoPlistPath, infoPlistTime, infoPlistTime);
+  utimesSync(archiveDirectory, archiveDirectoryTime, archiveDirectoryTime);
   const archiveInfoPlistSha = createHash("sha256").update(readFileSync(archiveInfoPlistPath)).digest("hex");
   writeFileSync(
     path.join(root, "store/APPLE_SIGNING.md"),
@@ -82,6 +94,23 @@ export function writeCompleteAppleSigning(root: string): void {
     ].join("\n"),
     "utf8",
   );
+}
+
+export function rewriteFixtureArchiveInfoPlist(root: string, transform: (contents: string) => string): void {
+  const archiveDirectory = path.join(root, "build/FixtureRelease.xcarchive");
+  const archiveInfoPlistPath = path.join(archiveDirectory, "Products/Applications/Fixture.app/Info.plist");
+  const signingPath = path.join(root, "store/APPLE_SIGNING.md");
+  const signing = readFileSync(signingPath, "utf8");
+  const recordedTimestamp = /created_at=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/.exec(signing)?.[1];
+  if (!recordedTimestamp) throw new Error("fixture Apple signing record is missing created_at");
+  writeFileSync(archiveInfoPlistPath, transform(readFileSync(archiveInfoPlistPath, "utf8")), "utf8");
+  const recordedTime = new Date(recordedTimestamp);
+  const infoPlistTime = new Date(recordedTime.getTime() - 2 * 60 * 1_000);
+  const archiveDirectoryTime = new Date(recordedTime.getTime() - 60 * 1_000);
+  utimesSync(archiveInfoPlistPath, infoPlistTime, infoPlistTime);
+  utimesSync(archiveDirectory, archiveDirectoryTime, archiveDirectoryTime);
+  const archiveInfoPlistSha = createHash("sha256").update(readFileSync(archiveInfoPlistPath)).digest("hex");
+  writeFileSync(signingPath, signing.replaceAll(/Info\.plist SHA-256=[a-f\d]{64}/gi, `Info.plist SHA-256=${archiveInfoPlistSha}`), "utf8");
 }
 
 export function writeCompleteAppleRequirements(root: string): void {

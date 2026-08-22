@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
 import path from "node:path";
 import {
@@ -165,6 +166,68 @@ function isWithinDirectory(root: string, candidate: string): boolean {
   return relativePath !== "" && relativePath !== ".." && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath);
 }
 
+type PlistScalar = string | number | boolean;
+
+const ARCHIVE_EVIDENCE_FUTURE_SKEW_MS = 5_000;
+const ARCHIVE_EVIDENCE_MAX_AGE_MS = 60 * 60 * 1_000;
+
+function scalarPlistRecord(value: unknown): Record<string, PlistScalar> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const entries = Object.entries(value).filter((entry): entry is [string, PlistScalar] => {
+    const item = entry[1];
+    return typeof item === "string" || typeof item === "number" || typeof item === "boolean";
+  });
+  return Object.fromEntries(entries);
+}
+
+function decodeXmlText(value: string): string {
+  return value.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", '"').replaceAll("&apos;", "'").replaceAll("&amp;", "&");
+}
+
+function parseXmlPlistScalars(contents: string): Record<string, PlistScalar> | undefined {
+  if (!/<plist\b/i.test(contents)) return undefined;
+  const values: Record<string, PlistScalar> = {};
+  const scalarPattern =
+    /<key>\s*([^<]+?)\s*<\/key>\s*(?:<string>([\s\S]*?)<\/string>|<integer>\s*([^<]+?)\s*<\/integer>|<real>\s*([^<]+?)\s*<\/real>|<(true|false)\s*\/>)/gi;
+  for (const match of contents.matchAll(scalarPattern)) {
+    const key = decodeXmlText(match[1] ?? "").trim();
+    if (!key) continue;
+    if (match[2] !== undefined) values[key] = decodeXmlText(match[2]).trim();
+    else if (match[3] !== undefined) values[key] = Number(match[3]);
+    else if (match[4] !== undefined) values[key] = Number(match[4]);
+    else values[key] = match[5]?.toLowerCase() === "true";
+  }
+  return Object.keys(values).length > 0 ? values : undefined;
+}
+
+function parseInfoPlist(infoPlistPath: string): Record<string, PlistScalar> {
+  const converted = spawnSync("plutil", ["-convert", "json", "-o", "-", infoPlistPath], { encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
+  if (converted.status === 0 && converted.stdout.trim()) {
+    try {
+      const parsed = scalarPlistRecord(JSON.parse(converted.stdout));
+      if (parsed) return parsed;
+    } catch {
+      // Fall through to the XML parser used by cross-platform fixtures.
+    }
+  }
+  const parsed = parseXmlPlistScalars(readFileSync(infoPlistPath, "utf8"));
+  if (!parsed) throw new Error("compiled Info.plist could not be parsed");
+  return parsed;
+}
+
+function plistScalarText(value: PlistScalar | undefined): string {
+  return value === undefined ? "" : String(value).trim();
+}
+
+function normalizedSdkKey(value: string): string {
+  return value.replace(/[^a-z\d]/gi, "").toUpperCase();
+}
+
+function sdkValueIsResolved(value: PlistScalar): boolean {
+  const text = plistScalarText(value);
+  return Boolean(text) && !/\$\([^)]+\)|\$\{[^}]+\}|\{\{[^}]+\}\}/.test(text);
+}
+
 function checkResolvedAppleSignOff(markdown: string): void {
   if (hasUnresolvedTemplateState(markdown)) {
     issues.push(
@@ -256,8 +319,9 @@ function checkResolvedAppleSignOff(markdown: string): void {
     );
   }
   let archiveArtifactFound = false;
-  let archiveArtifactTimestampMatches = false;
+  let archiveArtifactIsFresh = false;
   let actualArchiveInfoPlistSha: string | undefined;
+  let actualArchiveInfoPlist: Record<string, PlistScalar> | undefined;
   if (archivePath && parsedArchiveTimestamp && !Number.isNaN(parsedArchiveTimestamp.getTime())) {
     try {
       const businessRoot = realpathSync(args.root);
@@ -287,9 +351,12 @@ function checkResolvedAppleSignOff(markdown: string): void {
         throw new Error("compiled Info.plist is not a file");
       }
       const recordedTime = parsedArchiveTimestamp.getTime();
+      const latestArtifactTime = Math.max(archiveStat.mtimeMs, infoPlistStat.mtimeMs);
       archiveArtifactFound = true;
-      archiveArtifactTimestampMatches = Math.abs(archiveStat.mtimeMs - recordedTime) < 1_000 && Math.abs(infoPlistStat.mtimeMs - recordedTime) < 1_000;
+      archiveArtifactIsFresh =
+        latestArtifactTime <= recordedTime + ARCHIVE_EVIDENCE_FUTURE_SKEW_MS && recordedTime - latestArtifactTime <= ARCHIVE_EVIDENCE_MAX_AGE_MS;
       actualArchiveInfoPlistSha = createHash("sha256").update(readFileSync(resolvedInfoPlist)).digest("hex");
+      actualArchiveInfoPlist = parseInfoPlist(resolvedInfoPlist);
     } catch {
       archiveArtifactFound = false;
     }
@@ -303,12 +370,12 @@ function checkResolvedAppleSignOff(markdown: string): void {
         signingRelative,
       ),
     );
-  } else if (!archiveArtifactTimestampMatches) {
+  } else if (!archiveArtifactIsFresh) {
     issues.push(
       issue(
         "error",
         "apple_requirements.post_archive_artifact_stale",
-        "The recorded archive timestamp must match both the .xcarchive and its compiled Info.plist modification time.",
+        "The recorded archive timestamp must follow the newest .xcarchive or compiled Info.plist modification time within five seconds of clock skew and one hour of evidence-capture latency.",
         signingRelative,
       ),
     );
@@ -324,6 +391,11 @@ function checkResolvedAppleSignOff(markdown: string): void {
     );
   }
   const itemSevenLine = itemSevenIndex === -1 ? "" : (lines[itemSevenIndex] ?? "");
+  const itemSevenSdkKeys = /Info\.plist identity and SDK keys\s*\(([^)]+)\)/i
+    .exec(itemSevenLine)?.[1]
+    ?.split(/,|\band\b/i)
+    .map((value) => value.trim())
+    .filter(Boolean);
   const itemSevenEvidenceMatch = /archive path=([^;\r\n]+\.xcarchive)\s*;\s*Info\.plist SHA-256=([a-f\d]{64})\s*:\s*(?:pass|ready|ok)\.?\s*$/i.exec(
     itemSevenLine,
   );
@@ -335,6 +407,26 @@ function checkResolvedAppleSignOff(markdown: string): void {
         "error",
         "apple_requirements.post_archive_evidence_mismatch",
         "Apple signing item 7 must repeat the exact archive path and Info.plist SHA-256 from the post-archive evidence record.",
+        signingRelative,
+      ),
+    );
+  }
+  if (
+    archiveArtifactFound &&
+    (!actualArchiveInfoPlist ||
+      !itemSevenSdkKeys?.length ||
+      itemSevenSdkKeys.some((requiredKey) => {
+        const fragment = normalizedSdkKey(requiredKey);
+        return (
+          !fragment || !Object.entries(actualArchiveInfoPlist!).some(([key, value]) => normalizedSdkKey(key).includes(fragment) && sdkValueIsResolved(value))
+        );
+      }))
+  ) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_sdk_keys_mismatch",
+        "Every SDK key named in Apple signing item 7 must exist in the compiled Info.plist with a resolved value.",
         signingRelative,
       ),
     );
@@ -412,6 +504,8 @@ function checkResolvedAppleSignOff(markdown: string): void {
     const resultResolved = isBuildIdentity
       ? /^(?:unique|pass)\.?$/i.test(result) && !hasUnresolvedEvidence(result)
       : /^(?:pass|ready|ok|verified|matched)\.?$/i.test(result) && !hasUnresolvedEvidence(result);
+    const actualCompiled = plistScalarText(actualArchiveInfoPlist?.[key]);
+    const actualCompiledMatches = !archiveArtifactFound || (Boolean(actualArchiveInfoPlist) && actualCompiled === compiled);
     if (!cells || cells.length !== 5 || !valuesMatch || !appStoreAvailabilityResolved || !validateFormat(intended) || !resultResolved) {
       issues.push(
         issue(
@@ -420,6 +514,16 @@ function checkResolvedAppleSignOff(markdown: string): void {
           isBuildIdentity
             ? "CFBundleVersion must have matching, valid intended and compiled values, explicit App Store Connect availability evidence, and a unique/pass result."
             : `${key} must have matching, resolved intended, compiled archive, and App Store Connect values plus a valid result in store/APPLE_SIGNING.md.`,
+          signingRelative,
+        ),
+      );
+    }
+    if (!actualCompiledMatches) {
+      issues.push(
+        issue(
+          "error",
+          `apple_requirements.post_archive_identity_${code}_mismatch`,
+          `${key} in the signing identity table must match the value parsed from the compiled archive Info.plist.`,
           signingRelative,
         ),
       );

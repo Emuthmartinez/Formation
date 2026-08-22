@@ -80,18 +80,13 @@ Pre-archive sign-off (recorded on the archive date):
 5. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
 6. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.
 
-Post-archive evidence:
-- Archive path: {{RELEASE_ARCHIVE_PATH_XCARCHIVE}}
-- Archive created at: {{RELEASE_ARCHIVE_CREATED_AT_ISO_8601_UTC}}
-- Info.plist SHA-256: {{RELEASE_ARCHIVE_INFO_PLIST_SHA256_64_HEX}}
+Archive evidence: path={{RELEASE_ARCHIVE_PATH_XCARCHIVE}}; created_at={{RELEASE_ARCHIVE_EVIDENCE_CAPTURED_AT_ISO_8601_UTC}}; Info.plist SHA-256={{RELEASE_ARCHIVE_INFO_PLIST_SHA256_64_HEX}}
 
 Post-archive sign-off (recorded before export/upload):
-7. Archive path: {{RELEASE_ARCHIVE_PATH_XCARCHIVE}}
-7. Info.plist SHA-256: {{RELEASE_ARCHIVE_INFO_PLIST_SHA256_64_HEX}}
-7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase): pass.
+7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase); archive path={{RELEASE_ARCHIVE_PATH_XCARCHIVE}}; Info.plist SHA-256={{RELEASE_ARCHIVE_INFO_PLIST_SHA256_64_HEX}}: pass.
 ```
 
-The archive path is relative to the business root and must end in `.xcarchive`. The timestamp must use ISO 8601 UTC. The SHA-256 must contain 64 hexadecimal characters. Item 7 must repeat the same archive path and SHA-256 as the post-archive evidence record. The validator resolves that path inside the business root, locates the actual compiled `Products/Applications/*.app/Info.plist`, calculates its SHA-256, reads the archive artifact time, and compares the actual values with this record. Typed values alone are not proof; this evidence cannot be self-attested. Regenerate the complete current-release evidence record after every re-archive; never reuse evidence from an older archive.
+Keep the archive evidence and item 7 records on one line each in the exact formats shown. The archive path is relative to the business root and must end in `.xcarchive`. Record `created_at` in ISO 8601 UTC immediately after archive completion. The SHA-256 must contain 64 hexadecimal characters. Item 7 must repeat the same archive path and SHA-256 as the archive evidence record. The validator resolves that path inside the business root, locates the actual compiled `Products/Applications/*.app/Info.plist`, and calculates its SHA-256. It sets `latestArtifactMtime` to the later modification time of the `.xcarchive` directory and compiled `Info.plist`. The evidence passes only when `latestArtifactMtime` is no later than five seconds after `created_at`, `created_at` is no more than one hour after `latestArtifactMtime`, and both times are on the same UTC day. Typed values alone are not proof; this evidence cannot be self-attested. Regenerate the complete current-release evidence record after every re-archive; never reuse evidence from an older archive.
 
 See the "Archive, Export, And Upload Preflight Checklist" section in `apple-signing-release.md` for commands and acceptance criteria for each item.
 

@@ -423,18 +423,15 @@ Screenshot dimension preflight: pass (<device> native: <WxH>) | BLOCKED — <dev
 
 ### Post-Archive Evidence Contract
 
-After the archive succeeds, record the exact artifact before item 7. Record the archive path relative to the business root; it must end in `.xcarchive`. Use an ISO 8601 UTC timestamp for the archive creation time. Hash the actual compiled `Products/Applications/*.app/Info.plist` with SHA-256 and record all 64 hexadecimal characters.
+After the archive succeeds, record the exact artifact before item 7. Record the archive path relative to the business root; it must end in `.xcarchive`. Set `created_at` to the ISO 8601 UTC evidence-capture time immediately after archive completion. Hash the actual compiled `Products/Applications/*.app/Info.plist` with SHA-256 and record all 64 hexadecimal characters.
 
 ```text
-Post-archive evidence:
-- Archive path: build/MyApp.xcarchive
-- Archive created at: YYYY-MM-DDTHH:MM:SSZ
-- Info.plist SHA-256: <64 lowercase hexadecimal characters>
+Archive evidence: path=build/MyApp.xcarchive; created_at=YYYY-MM-DDTHH:MM:SSZ; Info.plist SHA-256=<64 lowercase hexadecimal characters>
 ```
 
-Regenerate this current-release evidence after every re-archive. Do not carry the path, creation time, hash, or item 7 result forward from an earlier archive.
+Regenerate this current-release evidence after every re-archive. Do not carry the path, evidence-capture time, hash, or item 7 result forward from an earlier archive.
 
-The validator resolves the recorded archive path inside the business root. It locates the compiled `Products/Applications/*.app/Info.plist`, calculates the SHA-256 from that file, reads the archive artifact time, and compares the calculated values with the record. Typed values alone are not proof. This evidence cannot be self-attested.
+Keep the evidence on one line in the exact format above. The validator resolves the recorded archive path inside the business root. It locates the compiled `Products/Applications/*.app/Info.plist` and calculates the SHA-256 from that file. It sets `latestArtifactMtime` to the later modification time of the `.xcarchive` directory and compiled `Info.plist`. The evidence passes only when `latestArtifactMtime` is no later than five seconds after `created_at`, `created_at` is no more than one hour after `latestArtifactMtime`, and both times are on the same UTC day. Typed values alone are not proof. This evidence cannot be self-attested.
 
 ### 7. Inspect The New Compiled Archive
 
@@ -453,12 +450,10 @@ If any expected key is absent or shows the raw `$(VAR_NAME)` placeholder, the ar
 Record result:
 
 ```text
-7. Archive path: build/MyApp.xcarchive
-7. Info.plist SHA-256: <same 64-character SHA-256 recorded in post-archive evidence>
-7. Compiled archive identity and SDK keys: pass | BLOCKED — <mismatch, missing key, or unexpanded value>
+7. New compiled archive Info.plist identity and SDK keys; archive path=build/MyApp.xcarchive; Info.plist SHA-256=<same 64-character SHA-256 recorded in archive evidence>: pass.
 ```
 
-The item 7 path and SHA-256 must match the post-archive evidence record. This correlation binds the validation to the release artifact. Do not export or upload until item 7 passes. If item 7 fails, fix the build input, create a new archive, and regenerate the complete post-archive evidence record.
+Keep item 7 on one line in the exact format above. Its path and SHA-256 must match the archive evidence record. This correlation binds the validation to the release artifact. Do not export or upload until item 7 passes. If item 7 fails, fix the build input, create a new archive, and regenerate the complete post-archive evidence record.
 
 ## Archive, Export, And Upload
 
