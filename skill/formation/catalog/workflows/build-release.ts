@@ -430,7 +430,7 @@ export const workflows = [
     areaIds: ["area.build-release"],
     trigger: "Before beta or store submission on every mobile launch",
     instructions:
-      "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. Do not replace measured results with general guidance.",
+      "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. When beta testing is in scope, use a persona-balanced group that covers a target novice, a target experienced user, a device or accessibility risk, and a domain or usability reviewer; adapt the group size to the product and record each tester's perspective with each issue. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. Do not replace measured results with general guidance.",
     reads: ["engineering/PRODUCTION_READINESS.md", "engineering/TECH_SPEC.md"],
     roleId: "role.engineering-leader",
     laneIds: ["engineering"],

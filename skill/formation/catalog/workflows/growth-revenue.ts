@@ -74,8 +74,14 @@ export const workflows = [
     areaIds: ["area.growth-revenue"],
     trigger: "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
     instructions:
-      "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
-    reads: ["design/design.md", "growth/VIRAL_GROWTH.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
+      "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Build the content direction from strategy/SIGNAL_CORPUS.md and the distribution evidence in strategy/RESEARCH.md. Keep a structured content-intelligence table with source, account baseline, audience fit, hook, structure, emotion, format, sales intent, and downstream result. Normalize outliers against the source account's normal result, and extract patterns without copying words, identity, assets, or exact composition. Judge audience quality through owned contacts, activation, and revenue when those values exist. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
+    reads: [
+      "design/design.md",
+      "growth/VIRAL_GROWTH.md",
+      "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+      "strategy/RESEARCH.md",
+      "strategy/SIGNAL_CORPUS.md",
+    ],
     // CONTENT_ASSETS.md is a consult: this node's phase-1e narrative-thesis firing predates the
     // producer (phase 2/3); the phase-3/6 firings pick the hero asset up once it exists.
     consults: ["growth/content-assets/CONTENT_ASSETS.md"],
@@ -83,7 +89,7 @@ export const workflows = [
     laneIds: ["growth"],
     phaseIds: ["phase.1e", "phase.3", "phase.6"],
     dependencies: ["workflow.data.analytics-and-attribution-blueprint", "workflow.growth.viral-growth-loop"],
-    outputPaths: ["growth/LAUNCH_NARRATIVE.md"],
+    outputPaths: ["growth/LAUNCH_NARRATIVE.md", "growth/content-intelligence.csv"],
     founderOnlyActions: ["approve public launch posting"],
     actionClass: "publish",
     protectedCategory: "public_actions",
@@ -195,8 +201,15 @@ export const workflows = [
     areaIds: ["area.growth-revenue"],
     trigger: "Before founder-led organic social, creator sourcing/contracts, format-discovery tests",
     instructions:
-      "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install/referral/revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
-    reads: ["design/design.md", "growth/VIRAL_GROWTH.md", "growth/LAUNCH_NARRATIVE.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
+      "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then use strategy/SIGNAL_CORPUS.md and structured content intelligence to select formats. Normalize outliers against each source account's baseline, and extract patterns without copying words, people, assets, or exact compositions. Run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, and 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install, owned-contact, activation, referral, or revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
+    reads: [
+      "design/design.md",
+      "growth/VIRAL_GROWTH.md",
+      "growth/LAUNCH_NARRATIVE.md",
+      "growth/content-intelligence.csv",
+      "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+      "strategy/SIGNAL_CORPUS.md",
+    ],
     roleId: "role.marketing-guru",
     laneIds: ["growth"],
     phaseIds: ["phase.6"],
@@ -219,7 +232,7 @@ export const workflows = [
     // growth/UGC_PLAYBOOK.md is deliberately NOT in reads: ugc-creator-engine (its producer)
     // shares phase.6 with this node but is not a dependency, so the file may not exist when this
     // fires — Fastlane sourcing works from the narrative and script bank it can rely on.
-    reads: ["design/design.md", "growth/LAUNCH_NARRATIVE.md", "ugc/script-bank.md"],
+    reads: ["design/design.md", "growth/LAUNCH_NARRATIVE.md", "growth/content-intelligence.csv", "ugc/script-bank.md"],
     roleId: "role.marketing-guru",
     laneIds: ["growth", "post_launch_ops"],
     phaseIds: ["phase.6"],

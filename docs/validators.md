@@ -96,7 +96,7 @@ npm run validate:launch-state -- --root /path/to/app
 
 | Command | What it checks |
 | --- | --- |
-| `check:research` | Launch evidence exists and is attributable |
+| `check:research` | Research has source provenance, category economics, distribution proof, signal lifecycle, measured offer response or a founder waiver, and a founder Go verdict |
 
 ## Design
 

@@ -508,6 +508,29 @@ function slowSilentCatalog(): CatalogInput {
   };
 }
 
+/** A slow executor leaves enough time to request an interactive yield while this judgment node's attempt is running. */
+function slowSilentFreshContextCatalog(): CatalogInput {
+  return {
+    version: "catalog.session-fixture.slow-silent-fresh-context",
+    artifacts: [{ id: "artifact.research-scan", path: "research/scan.md" }],
+    workflows: [
+      {
+        id: "workflow.research-scan",
+        title: "Research what people need",
+        domainId: "domain.research",
+        actionClass: "draft",
+        dependencies: [],
+        outputPaths: ["research/scan.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+    ],
+  };
+}
+
 export function register(harness: Harness): void {
   // --- scenario 1: all nodes gated exits cleanly with a parked digest, not silence -----------
 
@@ -922,6 +945,138 @@ main().catch((error) => { console.error(String((error && error.stack) || error))
       );
     },
   );
+
+  harness.check("session: a cooperative yield requested during a fresh-context attempt still verifies the completed batch before yielding", () => {
+    const handle = bootstrapWorkspace(harness, "yield-final-verification", slowSilentFreshContextCatalog(), {
+      grants: { "domain.research": grant("domain.research", "run-with-guardrails") },
+    });
+    const lockPath = path.join(handle.dir, "control", "session.lock");
+    const runStatePath = path.join(handle.dir, "run", "run-state.json");
+    const sessionId = "sess-yield-final-verification-1";
+    const slowDelayMs = 1500;
+    const watchdogMs = slowDelayMs + 10_000;
+    const lockModuleUrl = pathToFileURL(path.join(skillRoot, "core/reducer/lock.ts")).href;
+
+    // The shared harness is synchronous, so a small async driver owns the running child and
+    // asks it to yield only after durable run-state proves the producer attempt is in flight.
+    const driverPath = path.join(harness.makeTempDir("session-yield-final-verification-driver"), "drive-yield.mts");
+    const driverSource = `
+import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { requestInteractive } from ${JSON.stringify(lockModuleUrl)};
+
+const tsxBin = ${JSON.stringify(tsxBin)};
+const runCliPath = ${JSON.stringify(runCliPath)};
+const skillRoot = ${JSON.stringify(skillRoot)};
+const workspace = ${JSON.stringify(handle.dir)};
+const briefPath = ${JSON.stringify(handle.briefPath)};
+const lockPath = ${JSON.stringify(lockPath)};
+const runStatePath = ${JSON.stringify(runStatePath)};
+const sessionId = ${JSON.stringify(sessionId)};
+const slowDelayMs = ${slowDelayMs};
+const watchdogMs = ${watchdogMs};
+
+function attemptIsRunning() {
+  if (!existsSync(runStatePath)) return false;
+  try {
+    const run = JSON.parse(readFileSync(runStatePath, "utf8"));
+    return Object.values(run.nodes ?? {}).some((state) => {
+      const attempts = Array.isArray(state?.attempts) ? state.attempts : [];
+      return attempts.length > 0 && attempts[attempts.length - 1]?.status === "running";
+    });
+  } catch {
+    return false;
+  }
+}
+
+async function main() {
+  const env = { ...process.env };
+  delete env.RESEND_API_KEY;
+  const child = spawn(tsxBin, [
+    runCliPath,
+    "--workspace", workspace,
+    "--brief", briefPath,
+    "--session", sessionId,
+    "--executor", "slow-silent",
+    "--slow-delay-ms", String(slowDelayMs),
+    "--verifier", "fixture",
+    "--lock-retries", "0",
+  ], { cwd: skillRoot, env });
+
+  let stdout = "";
+  let stderr = "";
+  child.stdout.setEncoding("utf8");
+  child.stderr.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => { stdout += chunk; });
+  child.stderr.on("data", (chunk) => { stderr += chunk; });
+
+  const exitInfoPromise = new Promise((resolve, reject) => {
+    const watchdog = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new Error("runner did not exit within the cooperative-yield watchdog window (" + watchdogMs + "ms)"));
+    }, watchdogMs);
+    watchdog.unref();
+    child.on("exit", (code, signal) => {
+      clearTimeout(watchdog);
+      resolve({ code, signal });
+    });
+    child.on("error", (error) => {
+      clearTimeout(watchdog);
+      reject(error);
+    });
+  });
+
+  const runningDeadline = Date.now() + 8_000;
+  while (!attemptIsRunning()) {
+    if (child.exitCode !== null) {
+      throw new Error("runner exited before its attempt reached running state (code " + child.exitCode + ")\\n" + stdout + "\\n" + stderr);
+    }
+    if (Date.now() >= runningDeadline) {
+      child.kill("SIGKILL");
+      throw new Error("timed out waiting for the slow-silent attempt to reach running state\\n" + stdout + "\\n" + stderr);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+
+  requestInteractive(lockPath);
+  const exitInfo = await exitInfoPromise;
+  if (exitInfo.code !== 0) {
+    throw new Error("expected runner exit 0 after cooperative yield, got " + exitInfo.code + " signal " + String(exitInfo.signal) + "\\n" + stdout + "\\n" + stderr);
+  }
+  console.log("COOPERATIVE_YIELD_DRIVER_OK");
+}
+main().catch((error) => { console.error(String((error && error.stack) || error)); process.exit(1); });
+`;
+    writeFileSync(driverPath, driverSource, "utf8");
+    const driven = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8", timeout: watchdogMs + 15_000 });
+    const drivenOutput = `${driven.stdout ?? ""}\n${driven.stderr ?? ""}`;
+    assert(
+      driven.status === 0 && drivenOutput.includes("COOPERATIVE_YIELD_DRIVER_OK"),
+      `cooperative-yield driver failed (exit ${driven.status}, signal ${driven.signal}):\n${drivenOutput}`,
+    );
+
+    const boundary = runBoundary(["--workspace", handle.dir]);
+    assert(boundary.code === 0, `expected exit 0 from the boundary after yielding, got ${boundary.code}: ${boundary.stderr}`);
+    const report = JSON.parse(boundary.stdout);
+    assert(report.results.length === 1, `the completed batch must export exactly one verified result before yielding, got: ${JSON.stringify(report.results)}`);
+    const result = report.results[0];
+    assert(result.verification === "fresh_context", `the exported result must be fresh-context verified, got: ${JSON.stringify(result)}`);
+    assert(
+      result.producedBySessionId === sessionId && result.verifiedBySessionId === `${sessionId}.verifier`,
+      `the producer and independent verifier provenance must survive the cooperative yield, got: ${JSON.stringify(result)}`,
+    );
+
+    const text = readDigest(handle, sessionId);
+    assert(
+      text.includes("I stepped aside partway through because this business is being worked on directly right now."),
+      `expected the cooperative-yield outcome in the digest, got:\n${text}`,
+    );
+    assert(
+      text.includes("I stopped partway through because this business started being worked on directly."),
+      `expected the cooperative-yield reason in the digest, got:\n${text}`,
+    );
+    assertNoInternalVocabulary("yield-final-verification", text);
+  });
 
   // --- judgment scenario: founder-vocabulary blocklist is real, not vacuous -------------------
 

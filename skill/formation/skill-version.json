@@ -1,12 +1,16 @@
 {
   "skill": "formation",
-  "version": "0.160.0",
+  "version": "0.164.0",
   "updatedAt": "2026-08-21",
   "sourcePath": "skill/formation",
   "releaseNotes": [
     "Added an evidence-led editorial scrollytelling capability that maps situation, mechanism, outcome, and proof to stable semantic scene states without copying a source site's visual identity.",
     "Replaced equal-section scroll quantization with measured step-center geometry, one shared reversible controller, responsive stage composition, and explicit no-JavaScript, reduced-motion, and Save-Data behavior.",
     "Added a typed landing surface contract, static validator, pure geometry fixtures, and LaunchBench failures for synchronization drift, short mobile layouts, copy-to-visual disconnects, and incomplete fallbacks.",
-    "Bound the capability to the existing Design Room and local landing workflow, with browser evidence required before an active landing can pass."
+    "Bound the capability to the existing Design Room and local landing workflow, with browser evidence required before an active landing can pass.",
+    "Added the Formation Craft Lens and a validator-backed reasoning contract for physical models, structural motion, mobile recomposition, native-medium presentation, restraint, precise microinteractions, concept comparison, and convergence.",
+    "Added distribution proof, a lifecycle-aware signal corpus, and traffic-backed offer testing to the founder-owned pre-build Go, Pivot, or Kill decision.",
+    "Added structured content intelligence, owned-relationship metrics, manual-before-automation proof, and persona-balanced beta guidance without weakening existing launch, UGC, operations, or release requirements.",
+    "Preserved fresh-context verification for completed final-batch work when a session ends through cooperative yield."
   ]
 }

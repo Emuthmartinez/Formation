@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.160.0",
+  "version": "0.164.0",
   "description": "Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into autonomous operation, with deterministic validators between every claim and done.",
   "keywords": [
     "formation",

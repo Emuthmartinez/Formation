@@ -46,7 +46,7 @@ Logo-swap test: strip the wordmark from five screens and state whether the targe
 
 ## Reference Evidence
 
-Complete this evidence pass before a design mutation. Triage every source. Open only the sources that fit the decision. Use two complementary sources for onboarding, a paywall, the core loop, an AI trust surface, or the first frames of a store listing.
+Complete this evidence pass before a design mutation. Apply the Formation Craft Lens to substantive work. Triage every external source. Open only the sources that fit the decision. Use two complementary evidence sources for onboarding, a paywall, the core loop, an AI trust surface, or the first frames of a store listing. Internal craft doctrine does not replace behavior or structure evidence.
 
 Change classification: Not defined
 Change scope: Not defined
@@ -63,6 +63,14 @@ Use `small token-preserving correction`, `new or materially changed surface`, or
 | UI Playbook | Not reviewed | Classify standard component, state, focus, keyboard, and accessibility needs. | Not defined | Not recorded |
 
 Use only `required`, `not applicable`, or `unavailable` for an authored status. Give a reason. Treat an experiment result or breakdown as a hypothesis until local evidence supports it.
+
+### Craft reasoning
+
+For substantive work, record at least three distinct concepts and complete every field below. Objects have physical presence. Motion explains structure. Mobile is recomposed. Each medium feels native. Quiet space protects hierarchy. Microinteractions are precise and responsive. Record quality facets, reductions, and the reason for convergence.
+
+| Surface | Concepts compared | Physical model | Structural motion | Mobile recomposition | Native medium | Restraint | Microinteraction | Quality facets | Reductions | Convergence reason | State paths | Validation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined |
 
 | Surface or decision | Source | Observation | Adopt or reject | Adaptation | State path | Validation | Surface key |
 | --- | --- | --- | --- | --- | --- | --- | --- |

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.160.0",
+  "skillVersion": "0.164.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -777,6 +777,8 @@
       ],
       "outputPathPrefixes": [
         "strategy/RESEARCH.md",
+        "strategy/SIGNAL_CORPUS.md",
+        "strategy/OFFER_TEST.md",
         "strategy/localization-market-research/",
         "product/SPEC.md"
       ]
@@ -1474,6 +1476,7 @@
       "title": "Research",
       "referenceIds": [
         "reference.process.tool-recipes.research-intelligence",
+        "reference.research.distribution-offer-signal",
         "reference.research.go-pivot-or-kill",
         "reference.research.localization-market-research"
       ]
@@ -4829,6 +4832,28 @@
       "replacementIds": []
     },
     {
+      "id": "reference.research.distribution-offer-signal",
+      "title": "Distribution, Offer, And Signal Validation",
+      "domainId": "domain.research",
+      "path": "knowledge/research/distribution-offer-signal.md",
+      "loadWhen": "before a Go, Pivot, or Kill decision; when founder posts, transcripts, reviews, interviews, support records, or prior launch material can inform the business; before automating a value-producing business loop",
+      "lifecycle": "active",
+      "applicabilityNotes": "Apply the pre-build distribution and offer rules to every business. Require a signal-corpus artifact; when no reusable founder or market source material exists, record an explicit not-applicable status with an authored reason instead of fabricating rows. Apply content, automation, and beta sections only when their activities exist.",
+      "sources": [
+        {
+          "id": "eptwts-signal-knowledgebase",
+          "name": "EP's Signal Knowledgebase",
+          "sourceType": "founder_corpus_case_study",
+          "url": "https://www.eptwts.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Primary example of corpus compression, dated inline claims, question-led publishing, portable Markdown, distribution hypotheses, owned-channel guidance, and manual-before-automation guidance. Treat business claims as personal hypotheses, not verified facts. Do not transfer deceptive, unsafe, or platform-circumvention tactics.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
       "id": "reference.research.go-pivot-or-kill",
       "title": "Go, Pivot, Or Kill: The Pre-Build Research Verdict",
       "domainId": "domain.research",
@@ -6825,7 +6850,7 @@
         "area.business-operations-trust"
       ],
       "trigger": "App live (phase_6/6b), \"what now\", weekly ops, incident response, retention reviews",
-      "instructions": "Run the named Weekly Ops Review in fixed order — metrics pull (PostHog/RevenueCat/console numbers, not adjectives), crash/review triage, support sweep, ASO delta, growth/spend review against `growth/PAID_UA.md`'s stop/scale rules, then ship one user-visible improvement — and log a one-line delta per step in `operations/POST_LAUNCH_OPS.md` dated against `lanes.post_launch_ops.live_since`. Route involuntary billing churn through the recovery levers, not written off as normal, and when retention cohorts show a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. At the day-30 and day-90 checkpoints, prepare the Kill/Hold/Fix/Scale evidence pack (MRR trajectory, D7/D30 retention trend, CAC/LTV payback, founder hours) in `operations/LAUNCH_RETRO.md` — the agent assembles evidence, the founder makes the verdict. `check:post-launch` fails a checkpoint left uncompleted past its due date or a metric cell holding a placeholder instead of a number.",
+      "instructions": "Run the named Weekly Ops Review in fixed order — metrics pull (PostHog/RevenueCat/console numbers, not adjectives), crash/review triage, support sweep, ASO delta, growth/spend review against `growth/PAID_UA.md`'s stop/scale rules, then ship one user-visible improvement — and log a one-line delta per step in `operations/POST_LAUNCH_OPS.md` dated against `lanes.post_launch_ops.live_since`. Before automating a value-producing loop, record one manual run with its input, output, result, cost, and failure mode; exempt necessary security, compliance, backup, and monitoring controls. Track discovery-to-owned-contact, owned-contact-to-activation, owned-contact-to-paid, and external-platform concentration when those metrics apply. Route involuntary billing churn through the recovery levers, not written off as normal, and when retention cohorts show a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. At the day-30 and day-90 checkpoints, prepare the Kill/Hold/Fix/Scale evidence pack (MRR trajectory, D7/D30 retention trend, CAC/LTV payback, founder hours) in `operations/LAUNCH_RETRO.md` — the agent assembles evidence, the founder makes the verdict. `check:post-launch` fails a checkpoint left uncompleted past its due date or a metric cell holding a placeholder instead of a number.",
       "reads": [
         "state/PROJECT_STATE.yaml",
         "operations/POST_LAUNCH_OPS.md",
@@ -6842,6 +6867,7 @@
         "reference.money.billing-health-and-reactivation",
         "reference.operations.post-launch-operations",
         "reference.process.change-cascade",
+        "reference.research.distribution-offer-signal",
         "reference.store.aso-store-ops"
       ],
       "roleId": "role.orchestrator",
@@ -7287,7 +7313,7 @@
         "area.product-experience"
       ],
       "trigger": "Need category economics, competitor, review/social-language, keyword, or name-collision evidence",
-      "instructions": "Assemble category-economics, competitor, review/social-language, keyword, and name-collision evidence into strategy/RESEARCH.md's Category Revenue Reality table — a sourced, dated revenue estimate per competitor row judged against a stated bar (default: top-10 category gross ≥$5M/year combined with 2+ apps clearing $1M/year each) — then run the mandatory Go/Pivot/Kill table; check:research fails a pass verdict with no stated threshold or a table with rows but no judgment line. Before product/SPEC.md hardens, run the product-moat one-week-copy test naming which moat class the wedge is building toward and the specific beat moment against the top incumbents; a wedge with no surviving beat moment is Go/Pivot/Kill evidence, not a reason to soften the table. For a product that doesn't match one of the four shipped archetypes, use core-loop-and-v1-scope's general method to name the core loop and draw the V1 line instead of improvising. The founder alone decides Go, Pivot, or Kill — present the evidence, do not decide for them.",
+      "instructions": "Assemble category-economics, competitor, review/social-language, keyword, and name-collision evidence into strategy/RESEARCH.md's Category Revenue Reality table — a sourced, dated revenue estimate per competitor row judged against a stated bar (default: top-10 category gross ≥$5M/year combined with 2+ apps clearing $1M/year each) — then run the mandatory Go/Pivot/Kill table; check:research fails a pass verdict with no stated threshold or a table with rows but no judgment line. Write strategy/SIGNAL_CORPUS.md from available founder and market material, keeping one claim per row and preserving dates, confidence, conflicts, and supersession; when no reusable source exists, record an explicit not-applicable status with an authored reason instead of fabricating rows. Write strategy/OFFER_TEST.md before the verdict. Measure one exact audience, discovery location, native format, owned-relationship route, exposure value, and CTA response; if the founder declines the test, record a dated founder waiver and the residual risk. Add Distribution proof and Offer test evidence to the Go, Pivot, Or Kill row. Before product/SPEC.md hardens, run the product-moat one-week-copy test naming which moat class the wedge is building toward and the specific beat moment against the top incumbents; a wedge with no surviving beat moment is Go/Pivot/Kill evidence, not a reason to soften the table. For a product that doesn't match one of the four shipped archetypes, use core-loop-and-v1-scope's general method to name the core loop and draw the V1 line instead of improvising. The founder alone decides Go, Pivot, or Kill — present the evidence, do not decide for them. check:research rejects a verdict with missing category, wedge, demand, distribution, offer, provenance, or founder-decision evidence.",
       "reads": [
         "state/PROJECT_STATE.yaml"
       ],
@@ -7296,6 +7322,7 @@
         "reference.process.tool-recipes.research-intelligence",
         "reference.product.core-loop-and-v1-scope",
         "reference.product.product-moat",
+        "reference.research.distribution-offer-signal",
         "reference.research.go-pivot-or-kill"
       ],
       "roleId": "role.research-strategist",
@@ -7309,6 +7336,8 @@
       "dependencies": [],
       "outputPaths": [
         "strategy/RESEARCH.md",
+        "strategy/SIGNAL_CORPUS.md",
+        "strategy/OFFER_TEST.md",
         "product/SPEC.md"
       ],
       "gateCommands": [
@@ -7543,7 +7572,7 @@
         "area.product-experience"
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
-      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. During STATE, load design-evidence-stack.md, record the change classification and affected scope, classify the decision, mark all six evidence sources required, not applicable, or unavailable with a reason, and record the evidence pass in design/design.md before mutation. Open only relevant sources. Use one relevant source for every new or materially changed surface, and two complementary sources for onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions. Treat abtest.design results as hypothesis seeds, not transferable causal proof. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. When the 60fps.design MCP is connected, ground screen and interaction direction in real exemplars before locking states (60fps_search_shots, 60fps_get_shot, 60fps_get_motion_breakdown, 60fps_get_related_shots) and record each adopted principle in design/design.md — translate mechanics only, never another product's brand, assets, copy, or exact layout; when it is not connected, motion-craft-benchmarks.md's distilled recipes remain the contract. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
+      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. During STATE, load design-evidence-stack.md, record the change classification and affected scope, classify the decision, mark all six evidence sources required, not applicable, or unavailable with a reason, and record the evidence pass in design/design.md before mutation. Apply the Formation Craft Lens to substantive work. Explore three distinct concepts. Give objects a defined physical model. Use motion to explain structure. Recompose mobile instead of shrinking desktop. Make articles, walkthroughs, and videos native to their medium. Use quiet space to protect hierarchy. Specify immediate, interruptible microinteractions with subtle spring behavior instead of default slow fades. Record quality facets, reductions, convergence reason, state paths, and validation in the craft-reasoning table. Open only relevant external sources. Use one relevant source for every new or materially changed surface, and two complementary sources for onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions; internal craft doctrine does not replace behavior or structure evidence. Treat abtest.design results as hypothesis seeds, not transferable causal proof. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. When the 60fps.design MCP is connected, ground screen and interaction direction in real exemplars before locking states (60fps_search_shots, 60fps_get_shot, 60fps_get_motion_breakdown, 60fps_get_related_shots) and record each adopted principle in design/design.md — translate mechanics only, never another product's brand, assets, copy, or exact layout; when it is not connected, motion-craft-benchmarks.md's distilled recipes remain the contract. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
       "reads": [
         "design/design.md",
         "studio/seed/business.json",
@@ -9723,14 +9752,15 @@
         "area.build-release"
       ],
       "trigger": "Before beta or store submission on every mobile launch",
-      "instructions": "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. Do not replace measured results with general guidance.",
+      "instructions": "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. When beta testing is in scope, use a persona-balanced group that covers a target novice, a target experienced user, a device or accessibility risk, and a domain or usability reviewer; adapt the group size to the product and record each tester's perspective with each issue. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. Do not replace measured results with general guidance.",
       "reads": [
         "engineering/PRODUCTION_READINESS.md",
         "engineering/TECH_SPEC.md"
       ],
       "consults": [],
       "referenceIds": [
-        "reference.engineering.app-quality"
+        "reference.engineering.app-quality",
+        "reference.research.distribution-offer-signal"
       ],
       "roleId": "role.engineering-leader",
       "laneIds": [
@@ -9962,11 +9992,13 @@
         "area.growth-revenue"
       ],
       "trigger": "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
-      "instructions": "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
+      "instructions": "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Build the content direction from strategy/SIGNAL_CORPUS.md and the distribution evidence in strategy/RESEARCH.md. Keep a structured content-intelligence table with source, account baseline, audience fit, hook, structure, emotion, format, sales intent, and downstream result. Normalize outliers against the source account's normal result, and extract patterns without copying words, identity, assets, or exact composition. Judge audience quality through owned contacts, activation, and revenue when those values exist. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
       "reads": [
         "design/design.md",
         "growth/VIRAL_GROWTH.md",
-        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "strategy/RESEARCH.md",
+        "strategy/SIGNAL_CORPUS.md"
       ],
       "consults": [
         "growth/content-assets/CONTENT_ASSETS.md"
@@ -9975,6 +10007,7 @@
         "reference.experience.ethics-guardrail",
         "reference.growth.launch-narrative-cadence",
         "reference.growth.viral-growth-loops",
+        "reference.research.distribution-offer-signal",
         "reference.words.consumer-copy-benchmarks",
         "reference.words.no-slop-writing"
       ],
@@ -9992,7 +10025,8 @@
         "workflow.growth.viral-growth-loop"
       ],
       "outputPaths": [
-        "growth/LAUNCH_NARRATIVE.md"
+        "growth/LAUNCH_NARRATIVE.md",
+        "growth/content-intelligence.csv"
       ],
       "gateCommands": [],
       "providerIds": [],
@@ -10228,18 +10262,21 @@
         "area.growth-revenue"
       ],
       "trigger": "Before founder-led organic social, creator sourcing/contracts, format-discovery tests",
-      "instructions": "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install/referral/revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
+      "instructions": "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then use strategy/SIGNAL_CORPUS.md and structured content intelligence to select formats. Normalize outliers against each source account's baseline, and extract patterns without copying words, people, assets, or exact compositions. Run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, and 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install, owned-contact, activation, referral, or revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
       "reads": [
         "design/design.md",
         "growth/VIRAL_GROWTH.md",
         "growth/LAUNCH_NARRATIVE.md",
-        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+        "growth/content-intelligence.csv",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "strategy/SIGNAL_CORPUS.md"
       ],
       "consults": [],
       "referenceIds": [
         "reference.growth.influencer-sponsorship-engine",
         "reference.growth.ugc-creator-engine",
         "reference.growth.viral-growth-loops",
+        "reference.research.distribution-offer-signal",
         "reference.words.no-slop-writing"
       ],
       "roleId": "role.marketing-guru",
@@ -10278,6 +10315,7 @@
       "reads": [
         "design/design.md",
         "growth/LAUNCH_NARRATIVE.md",
+        "growth/content-intelligence.csv",
         "ugc/script-bank.md"
       ],
       "consults": [],
@@ -10836,6 +10874,15 @@
         "content_assets"
       ],
       "generated": true
+    },
+    {
+      "id": "artifact.growth-content-intelligence-csv",
+      "path": "growth/content-intelligence.csv",
+      "ownerDomainId": "domain.growth",
+      "laneIds": [
+        "growth"
+      ],
+      "generated": false
     },
     {
       "id": "artifact.growth-demo-video-md",
@@ -11532,8 +11579,28 @@
       "generated": false
     },
     {
+      "id": "artifact.strategy-offer-test-md",
+      "path": "strategy/OFFER_TEST.md",
+      "ownerDomainId": "domain.research",
+      "laneIds": [
+        "research",
+        "product"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.strategy-research-md",
       "path": "strategy/RESEARCH.md",
+      "ownerDomainId": "domain.research",
+      "laneIds": [
+        "research",
+        "product"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.strategy-signal-corpus-md",
+      "path": "strategy/SIGNAL_CORPUS.md",
       "ownerDomainId": "domain.research",
       "laneIds": [
         "research",

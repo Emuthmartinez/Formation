@@ -288,7 +288,16 @@ export function register(h: Harness): void {
     const contract = readFileSync(contractPath, "utf8").replace("## Reference Evidence", "### Reference Evidence");
     writeFileSync(contractPath, contract, "utf8");
   }
-  runFixture("nested Reference Evidence does not become an authored audience row", designRoomNestedEvidence, "check-design-room-contract.ts", 0);
+  runFixture(
+    "nested Reference Evidence does not become an authored audience row",
+    designRoomNestedEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.craft_reasoning_contract_missing",
+    [],
+    undefined,
+    "design_room.audience_research_missing",
+  );
 
   const designRoomAudienceTableGone = makeFixture("design-room-audience-table-gone");
   {
@@ -321,6 +330,120 @@ export function register(h: Harness): void {
     "check-design-room-contract.ts",
     1,
     "design_room.reference_evidence_source_missing",
+  );
+
+  const designRoomCraftContractMissing = makeFixture("design-room-craft-reasoning-contract-missing");
+  {
+    const contractPath = path.join(designRoomCraftContractMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace("| Physical model |", "| Visual treatment |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Reference Evidence without the Formation Craft Lens reasoning contract fails",
+    designRoomCraftContractMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.craft_reasoning_contract_missing",
+  );
+
+  const designRoomSmallCorrectionWithoutCraftRow = makeFixture("design-room-small-correction-without-craft-row");
+  {
+    const statePath = path.join(designRoomSmallCorrectionWithoutCraftRow, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSmallCorrectionWithoutCraftRow, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a small token-preserving correction does not require an authored Craft Lens row",
+    designRoomSmallCorrectionWithoutCraftRow,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.craft_reasoning_incomplete",
+  );
+
+  const designRoomCraftSurfaceMissing = makeFixture("design-room-craft-surface-missing");
+  {
+    const statePath = path.join(designRoomCraftSurfaceMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomCraftSurfaceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary, paywall.upgrade")
+      .replace(
+        "| Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| onboarding.primary | guided setup, progressive disclosure, and staged preview | stacked cards | stateful panel handoff | inline portrait sequence | native walkthrough | one dominant action | interruptible spring | clarity and confidence | removed decorative chrome | preserves context with less noise | idle to active to complete | device and keyboard review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "every scoped substantive surface needs its own complete Craft Lens row",
+    designRoomCraftSurfaceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "Missing: paywall.upgrade.",
+  );
+
+  const designRoomCraftOneConcept = makeFixture("design-room-craft-one-concept");
+  {
+    const statePath = path.join(designRoomCraftOneConcept, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomCraftOneConcept, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replace(
+        "| Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| onboarding.primary | guided setup, guided setup, and guided setup | stacked cards | stateful panel handoff | inline portrait sequence | native walkthrough | one dominant action | interruptible spring | clarity and confidence | removed decorative chrome | preserves context with less noise | idle to active to complete | device and keyboard review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a substantive Craft Lens row must compare three comma-separated concepts",
+    designRoomCraftOneConcept,
+    "check-design-room-contract.ts",
+    1,
+    "Concepts compared must name at least three distinct concepts separated by commas.",
+  );
+
+  const designRoomCraftVacuousReasoning = makeFixture("design-room-craft-vacuous-reasoning");
+  {
+    const statePath = path.join(designRoomCraftVacuousReasoning, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomCraftVacuousReasoning, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replace(
+        "| Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| onboarding.primary | guided setup, progressive disclosure, and staged preview | none | not applicable | N/A | native walkthrough | one dominant action | interruptible spring | clarity and confidence | removed decorative chrome | preserves context with less noise | idle to active to complete | device and keyboard review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a substantive Craft Lens row rejects vacuous mandatory reasoning fields",
+    designRoomCraftVacuousReasoning,
+    "check-design-room-contract.ts",
+    1,
+    "Mandatory reasoning fields cannot use none, not applicable, or N/A.",
   );
 
   const designRoomEvidenceHeadingVariant = makeFixture("design-room-reference-evidence-heading-variant");

@@ -52,6 +52,21 @@ Weekly log — one dated row per session, numbers not adjectives. "unverified" i
 - Reactivation/win-back runs plan-segmented; pause-instead-of-cancel is offered before the cancel completes.
 - Retention findings that change product, copy, pricing, or paywall behavior cascade through `knowledge/process/change-cascade.md`.
 
+## Owned-Relationship Metrics
+
+Record these values by discovery channel when they apply.
+
+| Date | Channel | Discovery exposure | Owned contacts | Activations | Paid conversions | Revenue | External-platform share |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+
+## Manual Loop Proof
+
+Record one successful manual run before you automate a value-producing process.
+Security, compliance, backup, and monitoring controls do not require this proof.
+
+| Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+
 ## Support Operations
 
 - Support inbox: support@ alias routed (Resend inbound or Cloudflare Email Routing) to the founder/operator; tested end to end.

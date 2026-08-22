@@ -728,7 +728,7 @@ async function main(): Promise<number> {
     const verifierSessionId = `${sessionId}.verifier`;
     const scopedRefreshDependencyIds = new Set<RunNodeId>();
     const failedScopedRefreshDependencyIds = new Set<RunNodeId>();
-    const runVerificationSweep = async (): Promise<number> => {
+    const runVerificationSweep = async (allowCooperativeYield = false): Promise<number> => {
       if (!verifier) return 0;
       const pending = listPendingFreshContext(plan, run).filter((nodeId) => {
         const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
@@ -747,7 +747,7 @@ async function main(): Promise<number> {
           haltReason = "kill_switch";
           break;
         }
-        if (boundary.halt) {
+        if (boundary.halt && !(allowCooperativeYield && boundary.reason === "cooperative_yield")) {
           haltReason = boundary.reason;
           break;
         }
@@ -1145,6 +1145,13 @@ async function main(): Promise<number> {
           writeRunState(paths.runState, run);
         }
       }
+    }
+
+    // A final batch can produce fresh-context work after the loop's last empty-frontier
+    // sweep. Judge that work before the session closes. A cooperative yield still permits
+    // verification of completed work; a timeout or kill switch remains final.
+    if (verifier && !timedOut && haltReason !== "kill_switch") {
+      await runVerificationSweep(true);
     }
 
     if (!verifier) {

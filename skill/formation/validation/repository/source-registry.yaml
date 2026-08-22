@@ -248,6 +248,16 @@ sources:
     locations:
       - skill/formation/workspace/business/trust/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
+  - id: eptwts-signal-knowledgebase
+    name: EP's Signal Knowledgebase
+    source_type: founder_corpus_case_study
+    url: https://www.eptwts.com/
+    refresh_cadence_days: 30
+    owner: research
+    locations:
+      - skill/formation/catalog/knowledge/research/research-distribution-offer-signal.yaml
+      - skill/formation/knowledge/research/distribution-offer-signal.md
+    notes: Primary corpus-compression and portable-publishing example. Treat business claims as personal hypotheses. Reject deceptive, unsafe, copied, or platform-circumvention tactics.
   - id: formation-platform-repository
     name: Formation-Platform repository
     source_type: official_docs

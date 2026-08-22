@@ -367,6 +367,88 @@ if (hasDesignState) {
           }
         }
       }
+
+      const craftHeaders = [
+        "Surface",
+        "Concepts compared",
+        "Physical model",
+        "Structural motion",
+        "Mobile recomposition",
+        "Native medium",
+        "Restraint",
+        "Microinteraction",
+        "Quality facets",
+        "Reductions",
+        "Convergence reason",
+        "State paths",
+        "Validation",
+      ];
+      const craftTable = tables.find((table) => tableHasHeaders(table, craftHeaders));
+      if (!craftTable) {
+        issues.push(
+          issue(
+            "error",
+            "design_room.craft_reasoning_contract_missing",
+            "design/design.md's Reference Evidence section must include the Formation Craft Lens reasoning table.",
+            rel(args.root, contractPath),
+          ),
+        );
+      } else if (reviewReady && externalEvidenceRequired) {
+        const surfaceIndex = craftTable.headers.indexOf("surface");
+        const conceptsIndex = craftTable.headers.indexOf("concepts compared");
+        const reasoningIndexes = craftHeaders.slice(1).map((header) => craftTable.headers.indexOf(header.toLowerCase()));
+        const declaredCraftRows = craftTable.rows.filter((row) => isAuthoredEvidenceCell(normalizedCell(row[surfaceIndex])));
+        const validCraftRows = declaredCraftRows.filter(
+          (row) =>
+            reasoningIndexes.every((index) => isSubstantiveCraftCell(normalizedCell(row[index]))) &&
+            parseNamedCraftConcepts(normalizedCell(row[conceptsIndex])).length >= 3,
+        );
+        const invalidCraftSurfaces = declaredCraftRows
+          .filter((row) => !validCraftRows.includes(row))
+          .map((row) => normalizedCell(row[surfaceIndex]).toLowerCase());
+        const validCraftSurfaces = new Set(validCraftRows.map((row) => normalizedCell(row[surfaceIndex]).toLowerCase()));
+        const missingCraftSurfaces = scopedSurfaceKeys.filter((surface) => !validCraftSurfaces.has(surface));
+        if (invalidCraftSurfaces.length > 0 || missingCraftSurfaces.length > 0) {
+          const details = [
+            invalidCraftSurfaces.length > 0 ? `Invalid Craft rows: ${[...new Set(invalidCraftSurfaces)].join(", ")}.` : "",
+            missingCraftSurfaces.length > 0 ? `Missing: ${missingCraftSurfaces.join(", ")}.` : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          issues.push(
+            issue(
+              "error",
+              "design_room.craft_reasoning_incomplete",
+              `A review-ready substantive change needs one complete Formation Craft Lens row for every scoped surface. Concepts compared must name at least three distinct concepts separated by commas. Mandatory reasoning fields cannot use none, not applicable, or N/A. ${details}`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+      }
+      const requiredCraftTerms = [
+        "three distinct concepts",
+        "physical presence",
+        "motion explains structure",
+        "mobile is recomposed",
+        "medium feels native",
+        "quiet space",
+        "microinteractions are precise and responsive",
+        "quality facets",
+        "reductions",
+        "reason for convergence",
+      ];
+      for (const term of requiredCraftTerms) {
+        if (!evidenceBody.toLowerCase().includes(term)) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.craft_reasoning_contract_missing",
+              `design/design.md's Reference Evidence section must preserve the Formation Craft Lens requirement: ${term}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+      }
     }
 
     if (reviewReady && containsTemplatePlaceholder(contract)) {
@@ -664,6 +746,23 @@ function normalizedCell(value: string | undefined): string {
 
 function isAuthoredEvidenceCell(value: string): boolean {
   return value.length > 0 && !containsTemplatePlaceholder(value) && !/^not reviewed$/i.test(value);
+}
+
+function isSubstantiveCraftCell(value: string): boolean {
+  return isAuthoredEvidenceCell(value) && !/^(?:none|not[ -]?applicable|n[/. -]?a)(?:\b|[.!:;,—-])/i.test(value);
+}
+
+// Commas are the authored contract for concept boundaries. This accepts the
+// natural Oxford-comma form used by the workspace example while keeping the
+// distinct-concept count deterministic for validation.
+function parseNamedCraftConcepts(value: string): string[] {
+  const concepts = value.split(",").map((concept) =>
+    normalizedCell(concept)
+      .replace(/^(?:and|or)\s+/i, "")
+      .toLowerCase(),
+  );
+  if (concepts.some((concept) => !isSubstantiveCraftCell(concept))) return [];
+  return [...new Set(concepts)];
 }
 
 function isValidEvidenceDate(value: string): boolean {

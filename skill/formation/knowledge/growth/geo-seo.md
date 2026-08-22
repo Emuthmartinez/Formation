@@ -51,6 +51,19 @@ Write content for both humans and AI answer engines:
 - avoid thin marketing pages that have no extractable factual answers
 - before drafting title tags, meta descriptions, or answer-style sections, load `knowledge/words/no-slop-writing.md`; weasel attribution and importance puffery here are also a copy-compliance risk (see §4 below), not just style noise
 
+When a business publishes a substantial knowledge corpus, keep one canonical authored source.
+Generate the human pages, question-shaped routes, Markdown export, sitemap, and `llms.txt` from that source.
+Do not create multiple writable copies of the same claim.
+
+The generated set must provide:
+
+- chapter or topic navigation
+- answer-shaped page titles and routes
+- a complete portable Markdown export
+- a sitemap that lists each public route
+- an `llms.txt` file that points to the canonical export and topic routes
+- inline dates and source pointers for time-sensitive claims
+
 ## 3a. Landing Craft: Motion And UI Generation
 
 Landing pages and funnels are web surfaces, so framer-motion / the `motion` library and the `ui-ux-pro-max` skill apply directly here (unlike the shipped mobile binary). **Load [`landing-motion-craft.md`](../design/landing-motion-craft.md) before building or animating any landing section** — it carries the two-lane (Remotion-baked vs motion/react-live) model, the `business/growth/landing/` section library, the landing motion-token scale (`--motion-duration-reveal`/`--motion-duration-cinematic`/`--motion-easing-emphasis`/`--motion-easing-spring`/`--motion-stagger`), and the progressive-enhancement contract that `check:landing-funnel` enforces. Use them to lift conversion without hurting GEO or performance:

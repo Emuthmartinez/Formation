@@ -16,6 +16,8 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
+const projectOwner = state ? (asString(getPath(state, "project.owner")) ?? "").trim() : "";
+const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|autopilot|ai)\b/i;
 
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
@@ -36,6 +38,9 @@ const downstreamActive = DOWNSTREAM_OF_VERDICT.some((lane) => {
 });
 const verdictRequired = done || buildPhase || downstreamActive;
 const text = readText(args.root, "strategy/RESEARCH.md");
+const signalText = readText(args.root, "strategy/SIGNAL_CORPUS.md");
+const offerText = readText(args.root, "strategy/OFFER_TEST.md");
+const signalEvidence = verdictRequired ? validateSignalCorpus(signalText, issues, done) : emptySignalCorpusIndex();
 
 // A deferred/not_needed research lane suppresses the missing-file error only
 // before the build phases: from phase_2 onward the verdict is mandatory, so
@@ -63,6 +68,7 @@ if (text) {
     "Decision Log",
     "Rejected Claims",
     "Category Revenue Reality",
+    "Distribution Proof",
     "Go, Pivot, Or Kill",
   ]) {
     if (!text.toLowerCase().includes(phrase.toLowerCase())) {
@@ -190,6 +196,66 @@ if (text) {
       }
     }
 
+    const distributionSection = markdownSection(text, "Distribution Proof");
+    const distributionColumns: RegExp[] = [
+      /audience segment/i,
+      /exact discovery location/i,
+      /native format/i,
+      /owned relationship/i,
+      /measured signal/i,
+      /evidence ids?/i,
+    ];
+    const distributionColumnIndexes = distributionColumns.map((pattern) => tableColumnIndex(distributionSection, pattern));
+    if (!distributionSection || distributionColumnIndexes.some((column) => column < 1)) {
+      issues.push(
+        issue(
+          "error",
+          "research.distribution_proof_columns_missing",
+          "Distribution Proof needs audience, exact discovery location, native format, owned relationship, measured signal, and evidence ID columns.",
+          "strategy/RESEARCH.md",
+        ),
+      );
+    } else {
+      const rows = tableDataRows(distributionSection);
+      const sourceLedgerIds = eligibleSourceLedgerIds(text);
+      const genericLocation = /^(social media|online|internet|web|app store|community|creator audience)$/i;
+      const rowsValid =
+        rows.length > 0 &&
+        rows.every((row) => {
+          const cells = distributionColumnIndexes.map((column) => (row[column] ?? "").trim());
+          const audience = cells[0] ?? "";
+          const location = cells[1] ?? "";
+          const format = cells[2] ?? "";
+          const ownedRoute = cells[3] ?? "";
+          const measuredSignal = cells[4] ?? "";
+          const evidenceIds = cells[5] ?? "";
+          const parsedEvidenceIds = parseStableIdList(evidenceIds);
+          const evidenceResolved =
+            parsedEvidenceIds.validSyntax &&
+            parsedEvidenceIds.ids.length > 0 &&
+            parsedEvidenceIds.ids.every((evidenceId) => sourceLedgerIds.has(evidenceId) || signalEvidence.eligibleSignalIds.has(evidenceId));
+          return (
+            [audience, location, format, ownedRoute, measuredSignal, evidenceIds].every(
+              (cell) => cell.length > 0 && !PLACEHOLDER_TEXT.test(cell) && !/\breplace with\b/i.test(cell),
+            ) &&
+            !genericLocation.test(location) &&
+            /\d/.test(measuredSignal) &&
+            evidenceResolved
+          );
+        });
+      if (!rowsValid) {
+        issues.push(
+          issue(
+            "error",
+            "research.distribution_proof_row_invalid",
+            "Every Distribution Proof row needs a specific audience, discovery location, native format, owned route, and numeric measured signal. " +
+              "Each Evidence ID must resolve through a complete Source Ledger row's URL/source-ID or Artifact/trace cell, or through a current/dated Signal Record.",
+            "strategy/RESEARCH.md",
+          ),
+        );
+      }
+    }
+
     const verdictSection = markdownSection(text, "Go, Pivot, Or Kill");
     if (!verdictSection) {
       issues.push(
@@ -205,7 +271,7 @@ if (text) {
       // The three named evidence columns must exist between Date and Verdict:
       // a table renamed to Notes | Opinion | Summary carries cells, not the
       // required inputs, and a stripped table carries nothing at all.
-      const evidenceColumnPatterns: RegExp[] = [/category revenue|revenue reality/i, /wedge/i, /demand/i];
+      const evidenceColumnPatterns: RegExp[] = [/category revenue|revenue reality/i, /wedge/i, /demand/i, /distribution/i, /offer test/i];
       const evidenceColumnsPresent = evidenceColumnPatterns.every((pattern) => {
         const index = tableColumnIndex(verdictSection, pattern);
         return index > 1 && (verdictColumn === -1 || index < verdictColumn);
@@ -215,7 +281,7 @@ if (text) {
           issue(
             "error",
             "research.go_pivot_kill_evidence_columns_missing",
-            "The Go, Pivot, Or Kill table is missing its named evidence columns. Category revenue reality, wedge, and demand signal must " +
+            "The Go, Pivot, Or Kill table is missing its named evidence columns. Category revenue, wedge, demand, distribution, and offer test must " +
               "each have a column between Date and Verdict — a verdict table with the reasons renamed or removed is a decision without its inputs.",
             "strategy/RESEARCH.md",
           ),
@@ -269,12 +335,7 @@ if (text) {
         // not be able to satisfy the founder-only gate.
         const decidedColumn = tableColumnIndex(verdictSection, /decided by/i);
         const decidedByCell = decidedColumn === -1 ? "" : (latest.cells[decidedColumn] ?? "").trim();
-        const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|autopilot|ai)\b/i;
-        // The founder counts by role or by their recorded name (project.owner).
-        const ownerName = (asString(getPath(state, "project.owner")) ?? "").trim();
-        const namedFounder =
-          /\b(founder|owner)\b/i.test(decidedByCell) || (ownerName.length > 2 && decidedByCell.toLowerCase().includes(ownerName.toLowerCase()));
-        if (decidedByCell.length === 0 || PLACEHOLDER_TEXT.test(decidedByCell) || AUTOMATION_IDENTITY.test(decidedByCell) || !namedFounder) {
+        if (decidedByCell.length === 0 || PLACEHOLDER_TEXT.test(decidedByCell) || !isFounderDecider(decidedByCell)) {
           issues.push(
             issue(
               "error",
@@ -292,7 +353,7 @@ if (text) {
               "error",
               "research.go_pivot_kill_evidence_thin",
               "The latest Go, Pivot, Or Kill row carries empty or placeholder evidence cells. A verdict decided over " +
-                '"unverified" is a mood, not a decision — fill category revenue, wedge, and demand from the ledger above before recording it.',
+                '"unverified" is a mood, not a decision — fill category revenue, wedge, demand, distribution, and offer evidence before recording it.',
               "strategy/RESEARCH.md",
             ),
           );
@@ -339,22 +400,7 @@ if (text) {
 
   if (done) {
     const rows = sourceLedgerRows(text);
-    const completeRows = rows.filter((row) => {
-      if (row.length < 10) return false;
-      const [source, , identity, observedAt, backendQuery, transcriptVisual, observation, inference, confidence, artifactTrace] = row;
-      return Boolean(
-        source?.trim() &&
-        identity?.trim() &&
-        isDateTime(observedAt) &&
-        backendQuery?.trim() &&
-        transcriptVisual?.trim() &&
-        observation?.trim() &&
-        inference?.trim() &&
-        /^(low|medium|high)$/i.test(confidence?.trim() ?? "") &&
-        artifactTrace?.trim() &&
-        !/\b(pending|todo|tbd|n\/a without reason)\b/i.test(row.join(" ")),
-      );
-    });
+    const completeRows = rows.filter(isCompleteSourceLedgerRow);
     if (completeRows.length === 0) {
       issues.push(
         issue(
@@ -368,7 +414,472 @@ if (text) {
   }
 }
 
+if (verdictRequired) {
+  validateOfferTest(offerText, issues);
+}
+
 reportAndExit("Research evidence check", issues);
+
+type SignalLifecycle = "current" | "dated" | "superseded" | "rejected" | "unverified";
+
+interface SignalCorpusIndex {
+  signalLifecycles: Map<string, SignalLifecycle>;
+  eligibleSignalIds: Set<string>;
+}
+
+function emptySignalCorpusIndex(): SignalCorpusIndex {
+  return { signalLifecycles: new Map(), eligibleSignalIds: new Set() };
+}
+
+function validateSignalCorpus(value: string | undefined, target: ReturnType<typeof issue>[], strict: boolean): SignalCorpusIndex {
+  const index = emptySignalCorpusIndex();
+  if (!value) {
+    target.push(
+      issue(
+        "error",
+        "research.signal_corpus_missing",
+        "strategy/SIGNAL_CORPUS.md is required before the Go, Pivot, or Kill decision.",
+        "strategy/SIGNAL_CORPUS.md",
+      ),
+    );
+    return index;
+  }
+
+  const notApplicable = value.match(/^Status:\s*not applicable\b(.*)$/im);
+  if (notApplicable) {
+    const reason = (notApplicable[1] ?? "").replace(/^[\s:—-]+/, "").trim();
+    if (reason.length === 0 || /\b(todo|tbd|placeholder|replace with|unverified|pending|authored reason)\b/i.test(reason) || /<[^>]+>/.test(reason)) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_not_applicable_reason_missing",
+          "A not-applicable signal corpus needs an authored reason. Do not fabricate signal rows when no reusable source material exists.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+    const retainedRows = ["Corpus Inputs", "Signal Records", "Conflicts And Supersession", "Derived Outputs"].flatMap((heading) =>
+      tableDataRows(markdownSection(value, heading)),
+    );
+    if (retainedRows.length > 0) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_not_applicable_rows_present",
+          "A not-applicable signal corpus cannot retain starter or evidence rows. Remove the corpus rows instead of relabeling fabricated data as not applicable.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+    return index;
+  }
+
+  for (const heading of ["Corpus Inputs", "Signal Records", "Conflicts And Supersession", "Derived Outputs"]) {
+    if (!markdownSection(value, heading)) {
+      target.push(
+        issue(
+          strict ? "error" : "warning",
+          `research.signal_corpus_${heading.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_missing`,
+          `strategy/SIGNAL_CORPUS.md needs a ${heading} section.`,
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+  }
+
+  const placeholder = /\b(todo|tbd|placeholder|replace with|pending|unverified|authored reason|yyyy-mm-dd)\b|<[^>]+>/i;
+  const inputs = markdownSection(value, "Corpus Inputs");
+  const inputColumns: RegExp[] = [
+    /input id/i,
+    /source type/i,
+    /owner|creator/i,
+    /^\s*scope\s*$/i,
+    /date range/i,
+    /collection route/i,
+    /permission|public basis/i,
+    /^\s*limits?\s*$/i,
+  ];
+  const inputColumnIndexes = inputColumns.map((pattern) => tableColumnIndex(inputs, pattern));
+  const declaredInputIds = new Set<string>();
+  if (inputColumnIndexes.some((column) => column < 1)) {
+    target.push(
+      issue(
+        "error",
+        "research.signal_corpus_input_columns_missing",
+        "The Corpus Inputs table needs input ID, source type, owner or creator, scope, date range, collection route, permission or public basis, and limits columns.",
+        "strategy/SIGNAL_CORPUS.md",
+      ),
+    );
+  } else {
+    const inputRows = tableDataRows(inputs);
+    let inputRowsValid = inputRows.length > 0;
+    for (const row of inputRows) {
+      const cells = inputColumnIndexes.map((column) => (row[column] ?? "").trim());
+      const inputId = (cells[0] ?? "").toUpperCase();
+      const complete =
+        /^INPUT-[A-Z0-9][A-Z0-9-]*$/.test(inputId) &&
+        cells.slice(1).every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
+        /\b20\d{2}-\d{2}-\d{2}\b/.test(cells[4] ?? "") &&
+        !declaredInputIds.has(inputId);
+      if (!complete) {
+        inputRowsValid = false;
+        continue;
+      }
+      declaredInputIds.add(inputId);
+    }
+    if (!inputRowsValid) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_input_row_invalid",
+          "Every Corpus Inputs row needs a unique stable INPUT ID and an ISO-dated range. " +
+            "It also needs real source, ownership, collection route, permission or public basis, and limits values.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+  }
+
+  const records = markdownSection(value, "Signal Records");
+  const requiredColumns: RegExp[] = [
+    /signal id/i,
+    /^\s*type\s*$/i,
+    /claim|phrase/i,
+    /source ids?/i,
+    /observed at/i,
+    /applies to/i,
+    /confidence/i,
+    /^\s*status\s*$/i,
+    /supersedes/i,
+    /artifact|trace/i,
+  ];
+  if (requiredColumns.some((pattern) => tableColumnIndex(records, pattern) < 1)) {
+    target.push(
+      issue(
+        "error",
+        "research.signal_corpus_columns_missing",
+        "The Signal Records table needs identity, provenance, date, applicability, confidence, lifecycle, supersession, and trace columns.",
+        "strategy/SIGNAL_CORPUS.md",
+      ),
+    );
+  } else {
+    const columns = requiredColumns.map((pattern) => tableColumnIndex(records, pattern));
+    const signalRows = tableDataRows(records);
+    const seenSignalIds = new Set<string>();
+    let rowsComplete = signalRows.length > 0;
+    let unresolvedSource = false;
+    for (const row of signalRows) {
+      const cells = columns.map((column) => (row[column] ?? "").trim());
+      const id = (cells[0] ?? "").toUpperCase();
+      const type = cells[1] ?? "";
+      const claim = cells[2] ?? "";
+      const sources = cells[3] ?? "";
+      const observedAt = cells[4] ?? "";
+      const appliesTo = cells[5] ?? "";
+      const confidence = cells[6] ?? "";
+      const lifecycle = (cells[7] ?? "").toLowerCase() as SignalLifecycle;
+      const supersedes = cells[8] ?? "";
+      const trace = cells[9] ?? "";
+      const sourceIds = parsePrefixedIdList(sources, "INPUT");
+      const sourcesResolve = sourceIds.validSyntax && sourceIds.ids.length > 0 && sourceIds.ids.every((sourceId) => declaredInputIds.has(sourceId));
+      const supersessionValid = lifecycle !== "superseded" || (/^SIG-[A-Z0-9][A-Z0-9-]*$/i.test(supersedes) && !/^none$/i.test(supersedes));
+      const rowComplete =
+        /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id) &&
+        [type, claim, appliesTo, trace].every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
+        /^\d{4}-\d{2}-\d{2}$/.test(observedAt) &&
+        /^(low|medium|high)$/i.test(confidence) &&
+        /^(current|dated|superseded|rejected|unverified)$/.test(lifecycle) &&
+        supersessionValid &&
+        !seenSignalIds.has(id);
+      if (!sourcesResolve) unresolvedSource = true;
+      if (!rowComplete || !sourcesResolve) {
+        rowsComplete = false;
+        continue;
+      }
+      seenSignalIds.add(id);
+      index.signalLifecycles.set(id, lifecycle);
+      if (lifecycle === "current" || lifecycle === "dated") index.eligibleSignalIds.add(id);
+    }
+    if (!rowsComplete) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_row_missing",
+          "Every declared Signal Records row needs a unique stable ID, dated provenance, applicability, confidence, a documented lifecycle, supersession data, and a trace pointer.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+    if (unresolvedSource) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_source_unresolved",
+          "Every Source ID in Signal Records must resolve to a complete row in Corpus Inputs. Use comma-separated INPUT IDs only.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+  }
+
+  const derived = markdownSection(value, "Derived Outputs");
+  const derivedColumns: RegExp[] = [/signal ids?/i, /^\s*output\s*$/i, /decision changed/i, /trace id/i];
+  const derivedColumnIndexes = derivedColumns.map((pattern) => tableColumnIndex(derived, pattern));
+  if (derivedColumnIndexes.some((column) => column < 1)) {
+    target.push(
+      issue(
+        "error",
+        "research.signal_corpus_derived_columns_missing",
+        "The Derived Outputs table needs Signal IDs, Output, Decision changed, and Trace ID columns.",
+        "strategy/SIGNAL_CORPUS.md",
+      ),
+    );
+  } else {
+    const invalidDerivedRow = tableDataRows(derived).some((row) => {
+      const cells = derivedColumnIndexes.map((column) => (row[column] ?? "").trim());
+      const signalIds = parsePrefixedIdList(cells[0] ?? "", "SIG");
+      return !(
+        signalIds.validSyntax &&
+        signalIds.ids.length > 0 &&
+        signalIds.ids.every((signalId) => index.eligibleSignalIds.has(signalId)) &&
+        [cells[1] ?? "", cells[2] ?? ""].every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
+        /\bTRACE-[A-Z0-9][A-Z0-9-]*\b/i.test(cells[3] ?? "") &&
+        !placeholder.test(cells[3] ?? "")
+      );
+    });
+    if (invalidDerivedRow) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_derived_output_invalid",
+          "Every Derived Outputs row must cite only current or dated Signal IDs. It must also name a real output, changed decision, and TRACE ID. " +
+            "Keep unverified, rejected, and superseded signals in the corpus, but do not use them to support an output.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+  }
+
+  return index;
+}
+
+function validateOfferTest(value: string | undefined, target: ReturnType<typeof issue>[]): void {
+  if (!value) {
+    target.push(
+      issue("error", "research.offer_test_missing", "strategy/OFFER_TEST.md is required before the Go, Pivot, or Kill decision.", "strategy/OFFER_TEST.md"),
+    );
+    return;
+  }
+
+  for (const heading of ["Test Contract", "Exposure And Conversion", "Decision"]) {
+    if (!markdownSection(value, heading)) {
+      target.push(
+        issue(
+          "error",
+          `research.offer_test_${heading.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_missing`,
+          `strategy/OFFER_TEST.md needs a ${heading} section.`,
+          "strategy/OFFER_TEST.md",
+        ),
+      );
+    }
+  }
+
+  const contractSection = markdownSection(value, "Test Contract");
+  const contractRows = tableDataRows(contractSection);
+  const contractFields = new Map(contractRows.map((row) => [(row[1] ?? "").trim().toLowerCase(), (row[2] ?? "").trim()]));
+  const requiredContractFields = ["audience", "exact discovery location", "native format", "offer", "owned relationship", "primary response", "stop rule"];
+  const contractIncomplete = requiredContractFields.some((field) => {
+    const value = contractFields.get(field) ?? "";
+    if (value.length === 0 || /\b(todo|tbd|placeholder|replace with|pending|unverified|required)\b|<[^>]+>/i.test(value)) return true;
+    if (isGenericOfferOptionMenu(field, value)) return true;
+    if (field === "exact discovery location" && /^(social media|online|internet|web|app store|community|creator audience)$/i.test(value)) return true;
+    if (field === "stop rule" && !/\d/.test(value)) return true;
+    return false;
+  });
+  if (contractIncomplete) {
+    target.push(
+      issue(
+        "error",
+        "research.offer_test_contract_incomplete",
+        "The offer Test Contract needs an exact audience, discovery location, native format, offer, owned route, primary response, and measurable stop rule.",
+        "strategy/OFFER_TEST.md",
+      ),
+    );
+  }
+
+  const decisionSection = markdownSection(value, "Decision");
+  const statusColumn = tableColumnIndex(decisionSection, /^\s*status\s*$/i);
+  const dateColumn = tableColumnIndex(decisionSection, /^\s*date\s*$/i);
+  const evidenceColumn = tableColumnIndex(decisionSection, /evidence/i);
+  const decisionColumn = tableColumnIndex(decisionSection, /^\s*decision\s*$/i);
+  const deciderColumn = tableColumnIndex(decisionSection, /decided by/i);
+  const decisionRows = tableDataRows(decisionSection);
+  const placeholder = /\b(todo|tbd|placeholder|replace with|pending|unverified)\b/i;
+  const row = [...decisionRows].reverse().find((candidate) => /^(run|waived)$/i.test(candidate[statusColumn] ?? ""));
+  if (!row || [statusColumn, dateColumn, evidenceColumn, decisionColumn, deciderColumn].some((column) => column < 1)) {
+    target.push(
+      issue(
+        "error",
+        "research.offer_test_decision_missing",
+        "The offer test needs a run or waived decision row with date, evidence, decision, and founder identity.",
+        "strategy/OFFER_TEST.md",
+      ),
+    );
+    return;
+  }
+
+  const status = (row[statusColumn] ?? "").trim().toLowerCase();
+  const decider = (row[deciderColumn] ?? "").trim();
+  const decisionComplete =
+    /^\d{4}-\d{2}-\d{2}$/.test((row[dateColumn] ?? "").trim()) &&
+    [row[evidenceColumn] ?? "", row[decisionColumn] ?? "", decider].every((cell) => cell.trim().length > 0 && !placeholder.test(cell)) &&
+    isFounderDecider(decider);
+  if (!decisionComplete) {
+    target.push(
+      issue(
+        "error",
+        "research.offer_test_decision_incomplete",
+        "The offer-test decision needs an ISO date, real evidence, a decision, and the founder or owner as decider.",
+        "strategy/OFFER_TEST.md",
+      ),
+    );
+  }
+
+  if (status === "run") {
+    const exposureSection = markdownSection(value, "Exposure And Conversion");
+    const exposureColumn = tableColumnIndex(exposureSection, /^\s*exposure\s*$/i);
+    const conversionsColumn = tableColumnIndex(exposureSection, /cta conversions/i);
+    const sourceColumn = tableColumnIndex(exposureSection, /evidence source/i);
+    const measured = tableDataRows(exposureSection).some((candidate) => {
+      const exposure = Number((candidate[exposureColumn] ?? "").replace(/,/g, ""));
+      const conversions = Number((candidate[conversionsColumn] ?? "").replace(/,/g, ""));
+      const source = (candidate[sourceColumn] ?? "").trim();
+      return Number.isFinite(exposure) && exposure > 0 && Number.isFinite(conversions) && conversions >= 0 && source.length > 0 && !placeholder.test(source);
+    });
+    if (!measured) {
+      target.push(
+        issue(
+          "error",
+          "research.offer_test_measurement_missing",
+          "A run offer test needs a measured exposure above zero, a CTA conversion count, and a real evidence source.",
+          "strategy/OFFER_TEST.md",
+        ),
+      );
+    }
+  }
+
+  if (status === "waived") {
+    const waiverSection = markdownSection(value, "Founder Waiver");
+    const waiverDateColumn = tableColumnIndex(waiverSection, /^\s*date\s*$/i);
+    const founderColumn = tableColumnIndex(waiverSection, /founder/i);
+    const reasonColumn = tableColumnIndex(waiverSection, /reason/i);
+    const riskColumn = tableColumnIndex(waiverSection, /residual risk/i);
+    const waiverRows = tableDataRows(waiverSection);
+    const validWaiver = waiverRows.some((candidate) => {
+      const founder = candidate[founderColumn] ?? "";
+      return (
+        [waiverDateColumn, founderColumn, reasonColumn, riskColumn].every((column) => column > 0) &&
+        /^\d{4}-\d{2}-\d{2}$/.test(candidate[waiverDateColumn] ?? "") &&
+        isFounderDecider(founder) &&
+        [candidate[reasonColumn] ?? "", candidate[riskColumn] ?? ""].every((cell) => cell.trim().length > 0 && !placeholder.test(cell))
+      );
+    });
+    if (!validWaiver) {
+      target.push(
+        issue(
+          "error",
+          "research.offer_test_waiver_missing",
+          "A waived offer test needs a dated founder, reason, and residual-risk record.",
+          "strategy/OFFER_TEST.md",
+        ),
+      );
+    }
+  }
+}
+
+function isGenericOfferOptionMenu(field: string, value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (/(?:\b(?:choose one|select one|one of|for example)\b|\be\.g\.)/.test(normalized)) return true;
+
+  const starterPhrases: Record<string, RegExp> = {
+    audience: /one evidence-backed segment/,
+    "exact discovery location": /named community,?\s*query,?\s*creator audience,?\s*placement,?\s*partner,?\s*or outreach list/,
+    "native format": /format used at that location/,
+    offer: /one truthful outcome and action/,
+    "owned relationship": /email,?\s*account,?\s*push permission,?\s*direct community,?\s*or not applicable/,
+    "primary response": /sign-?up,?\s*deposit,?\s*purchase,?\s*booked call,?\s*or another named action/,
+    "stop rule": /an? exposure,?\s*cost,?\s*or time limit/,
+  };
+  if (starterPhrases[field]?.test(normalized)) return true;
+
+  const optionTerms: Record<string, RegExp[]> = {
+    "exact discovery location": [/\bcommunity\b/, /\bquery\b/, /\bcreator audience\b/, /\bplacement\b/, /\bpartner\b/, /\boutreach list\b/],
+    "native format": [/\bpost\b/, /\bvideo\b/, /\bthread\b/, /\bemail\b/, /\bad\b/],
+    "owned relationship": [/\bemail\b/, /\baccount\b/, /\bpush permission\b/, /\bdirect community\b/, /\bnot applicable\b/],
+    "primary response": [/\bsign-?up\b/, /\bdeposit\b/, /\bpurchase\b/, /\bbooked call\b/, /\bnamed action\b/],
+    "stop rule": [/\bexposure\b/, /\bcost\b/, /\btime limit\b/],
+  };
+  const terms = optionTerms[field] ?? [];
+  return terms.filter((pattern) => pattern.test(normalized)).length > 1 && /,|\/|\bor\b/.test(normalized);
+}
+
+function isFounderDecider(value: string): boolean {
+  const candidate = value.trim();
+  if (candidate.length === 0 || AUTOMATION_IDENTITY.test(candidate)) return false;
+  return /\b(founder|owner)\b/i.test(candidate) || (projectOwner.length > 2 && candidate.toLowerCase().includes(projectOwner.toLowerCase()));
+}
+
+function eligibleSourceLedgerIds(value: string): Set<string> {
+  const ids = new Set<string>();
+  for (const row of sourceLedgerRows(value).filter(isCompleteSourceLedgerRow)) {
+    for (const sourceId of extractStableIds(row[2] ?? "")) ids.add(sourceId);
+    for (const traceId of extractStableIds(row[9] ?? "")) ids.add(traceId);
+  }
+  return ids;
+}
+
+function isCompleteSourceLedgerRow(row: string[]): boolean {
+  if (row.length < 10) return false;
+  const [source, , identity, observedAt, backendQuery, transcriptVisual, observation, inference, confidence, artifactTrace] = row;
+  return Boolean(
+    source?.trim() &&
+    identity?.trim() &&
+    isDateTime(observedAt) &&
+    backendQuery?.trim() &&
+    transcriptVisual?.trim() &&
+    observation?.trim() &&
+    inference?.trim() &&
+    /^(low|medium|high)$/i.test(confidence?.trim() ?? "") &&
+    artifactTrace?.trim() &&
+    !/\b(pending|todo|tbd|placeholder|replace with|n\/a without reason)\b|<[^>]+>/i.test(row.join(" ")),
+  );
+}
+
+interface ParsedIdList {
+  ids: string[];
+  validSyntax: boolean;
+}
+
+function parsePrefixedIdList(value: string, prefix: string): ParsedIdList {
+  const parsed = parseStableIdList(value);
+  return {
+    ids: parsed.ids,
+    validSyntax: parsed.validSyntax && parsed.ids.every((id) => id.startsWith(`${prefix.toUpperCase()}-`)),
+  };
+}
+
+function parseStableIdList(value: string): ParsedIdList {
+  const ids = extractStableIds(value);
+  const remainder = value
+    .replace(/\b[A-Z][A-Z0-9_-]*-[A-Z0-9][A-Z0-9_-]*\b/gi, " ")
+    .replace(/\b(?:and)\b/gi, " ")
+    .replace(/[\s,;+/&()[\]`]+/g, "");
+  return { ids: [...new Set(ids)], validSyntax: remainder.length === 0 };
+}
+
+function extractStableIds(value: string): string[] {
+  return [...value.matchAll(/\b[A-Z][A-Z0-9_-]*-[A-Z0-9][A-Z0-9_-]*\b/gi)].map((match) => (match[0] ?? "").toUpperCase());
+}
 
 function sourceLedgerRows(value: string): string[][] {
   const lines = value.split(/\r?\n/);
@@ -431,6 +942,6 @@ function tableDataRows(section: string): string[][] {
  * satisfy a column requirement. */
 function tableColumnIndex(section: string, pattern: RegExp): number {
   const header = section.split(/\r?\n/).find((line) => line.trim().startsWith("|"));
-  if (!header || !pattern.test(header)) return -1;
+  if (!header) return -1;
   return header.split("|").findIndex((cell) => pattern.test(cell));
 }

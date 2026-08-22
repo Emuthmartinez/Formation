@@ -75,10 +75,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 107 | 0 | 0 | 1 | 108 |
+| Knowledge content files | 108 | 0 | 0 | 1 | 109 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (69) | 35 | 25 | 0 | 15 | 75 |
-| **Total** | **150** | **25** | **1** | **31** | **207** |
+| **Total** | **151** | **25** | **1** | **31** | **208** |
 
 ---
 
@@ -115,7 +115,7 @@ implementation of R20, and the most consequential single disposition in this led
 
 ## 2. Knowledge content files
 
-107 keep, 1 drop (108 total). Every "keep" row ports into `content/<domain>/` at U11 keyed by the
+108 keep, 1 drop (109 total). Every "keep" row ports into `content/<domain>/` at U11 keyed by the
 matching knowledge manifest, which carries its authored `loadWhen` text
 — the reason column here stays short since the full rationale lives there.
 
@@ -272,7 +272,7 @@ outside the 4 shipped archetypes, so this file generalizes the archetypes' own m
 | knowledge/product/product-moat.md | keep | 11-star / product-moat reference, `check:11-star` |
 | knowledge/product/social-network.md | keep | social-network archetype spec reference |
 
-### domain.research (2 files, all keep)
+### domain.research (3 files, all keep)
 
 2026-08 graph-consolidation audit's thin-domain rebalancing (PR-4a) added the second file:
 the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge file, only
@@ -280,6 +280,7 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 
 | path | disposition | reason |
 |---|---|---|
+| knowledge/research/distribution-offer-signal.md | keep | distribution proof, lifecycle-aware signal corpus, traffic-backed offer validation, owned-relationship metrics, and manual-before-automation guidance |
 | knowledge/research/go-pivot-or-kill.md | keep | Go/Pivot/Kill pre-build verdict judgment layer for the research-backed-spec workflow, restating check-research-evidence.ts's (check:research) enforced criteria |
 | knowledge/research/localization-market-research.md | keep | localization/locale-priority reference, `check:localization-research` |
 
