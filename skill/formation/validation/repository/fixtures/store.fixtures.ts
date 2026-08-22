@@ -9,6 +9,7 @@ import {
   writeCompleteAppleRequirements,
   writeCompleteStoreConsole,
   writeCompleteStoreScreenshots,
+  writeNewerCompetingFixtureArchive,
   writeState,
   skillRoot,
 } from "./_harness.js";
@@ -359,6 +360,28 @@ export function register(h: Harness): void {
     "check-apple-app-store-requirements.ts",
     1,
     "apple_requirements.post_archive_sdk_keys_mismatch",
+  );
+
+  const archiveSdkProviderSubstringOnly = makeFixture("apple-requirements-archive-sdk-provider-substring-only");
+  writeCompleteAppleRequirements(archiveSdkProviderSubstringOnly);
+  rewriteFixtureArchiveInfoPlist(archiveSdkProviderSubstringOnly, (contents) => contents.replace("POSTHOG_API_KEY", "POSTHOG_HOST"));
+  runFixture(
+    "Apple signing rejects a partial provider match when the exact item 7 plist key is absent",
+    archiveSdkProviderSubstringOnly,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_sdk_keys_mismatch",
+  );
+
+  const newerCompetingArchive = makeFixture("apple-requirements-newer-competing-archive");
+  writeCompleteAppleRequirements(newerCompetingArchive);
+  writeNewerCompetingFixtureArchive(newerCompetingArchive);
+  runFixture(
+    "Apple signing rejects recorded evidence when a newer root-confined archive exists",
+    newerCompetingArchive,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_newer_artifact_exists",
   );
 
   const archiveMutatedAfterEvidence = makeFixture("apple-requirements-archive-mutated-after-evidence");

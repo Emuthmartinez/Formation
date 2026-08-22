@@ -90,7 +90,7 @@ export function writeCompleteAppleSigning(root: string): void {
       "6. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.",
       "Post-archive sign-off (recorded before export/upload):",
       `Archive evidence: path=${archivePath}; created_at=${archiveTimestamp}; Info.plist SHA-256=${archiveInfoPlistSha}`,
-      `7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase); archive path=${archivePath}; Info.plist SHA-256=${archiveInfoPlistSha}: pass.`,
+      `7. New compiled archive Info.plist identity and SDK keys [REVENUECAT_API_KEY, POSTHOG_API_KEY, SUPABASE_URL]; archive path=${archivePath}; Info.plist SHA-256=${archiveInfoPlistSha}: pass.`,
     ].join("\n"),
     "utf8",
   );
@@ -111,6 +111,23 @@ export function rewriteFixtureArchiveInfoPlist(root: string, transform: (content
   utimesSync(archiveDirectory, archiveDirectoryTime, archiveDirectoryTime);
   const archiveInfoPlistSha = createHash("sha256").update(readFileSync(archiveInfoPlistPath)).digest("hex");
   writeFileSync(signingPath, signing.replaceAll(/Info\.plist SHA-256=[a-f\d]{64}/gi, `Info.plist SHA-256=${archiveInfoPlistSha}`), "utf8");
+}
+
+export function writeNewerCompetingFixtureArchive(root: string): void {
+  const signing = readFileSync(path.join(root, "store/APPLE_SIGNING.md"), "utf8");
+  const recordedTimestamp = /created_at=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/.exec(signing)?.[1];
+  if (!recordedTimestamp) throw new Error("fixture Apple signing record is missing created_at");
+  const archiveDirectory = path.join(root, "build/NewerFixtureRelease.xcarchive");
+  const infoPlistPath = path.join(archiveDirectory, "Products/Applications/NewerFixture.app/Info.plist");
+  mkdirSync(path.dirname(infoPlistPath), { recursive: true });
+  writeFileSync(
+    infoPlistPath,
+    '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.example.newer</string></dict></plist>',
+    "utf8",
+  );
+  const newerTime = new Date(new Date(recordedTimestamp).getTime() + 10_000);
+  utimesSync(infoPlistPath, newerTime, newerTime);
+  utimesSync(archiveDirectory, newerTime, newerTime);
 }
 
 export function writeCompleteAppleRequirements(root: string): void {

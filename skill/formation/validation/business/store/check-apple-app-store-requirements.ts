@@ -219,13 +219,47 @@ function plistScalarText(value: PlistScalar | undefined): string {
   return value === undefined ? "" : String(value).trim();
 }
 
-function normalizedSdkKey(value: string): string {
-  return value.replace(/[^a-z\d]/gi, "").toUpperCase();
-}
-
 function sdkValueIsResolved(value: PlistScalar): boolean {
   const text = plistScalarText(value);
   return Boolean(text) && !/\$\([^)]+\)|\$\{[^}]+\}|\{\{[^}]+\}\}/.test(text);
+}
+
+function archiveLatestArtifactMtime(archivePath: string): number | undefined {
+  try {
+    const archiveStat = statSync(archivePath);
+    if (!archiveStat.isDirectory() || !archivePath.endsWith(".xcarchive")) return undefined;
+    const applicationsDirectory = path.join(archivePath, "Products", "Applications");
+    const infoPlists = readdirSync(applicationsDirectory, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.endsWith(".app"))
+      .map((entry) => path.join(applicationsDirectory, entry.name, "Info.plist"))
+      .filter((candidate) => existsSync(candidate));
+    if (infoPlists.length !== 1) return undefined;
+    const infoPlistStat = statSync(infoPlists[0] ?? "");
+    return infoPlistStat.isFile() ? Math.max(archiveStat.mtimeMs, infoPlistStat.mtimeMs) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function discoverArchiveDirectories(businessRoot: string): string[] {
+  const archives: string[] = [];
+  const pending = [businessRoot];
+  while (pending.length > 0) {
+    const current = pending.pop()!;
+    let entries;
+    try {
+      entries = readdirSync(current, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() || entry.isSymbolicLink() || entry.name === ".git" || entry.name === "node_modules") continue;
+      const candidate = path.join(current, entry.name);
+      if (entry.name.endsWith(".xcarchive")) archives.push(candidate);
+      else pending.push(candidate);
+    }
+  }
+  return archives;
 }
 
 function checkResolvedAppleSignOff(markdown: string): void {
@@ -320,6 +354,7 @@ function checkResolvedAppleSignOff(markdown: string): void {
   }
   let archiveArtifactFound = false;
   let archiveArtifactIsFresh = false;
+  let newerArchiveArtifactExists = false;
   let actualArchiveInfoPlistSha: string | undefined;
   let actualArchiveInfoPlist: Record<string, PlistScalar> | undefined;
   if (archivePath && parsedArchiveTimestamp && !Number.isNaN(parsedArchiveTimestamp.getTime())) {
@@ -357,6 +392,12 @@ function checkResolvedAppleSignOff(markdown: string): void {
         latestArtifactTime <= recordedTime + ARCHIVE_EVIDENCE_FUTURE_SKEW_MS && recordedTime - latestArtifactTime <= ARCHIVE_EVIDENCE_MAX_AGE_MS;
       actualArchiveInfoPlistSha = createHash("sha256").update(readFileSync(resolvedInfoPlist)).digest("hex");
       actualArchiveInfoPlist = parseInfoPlist(resolvedInfoPlist);
+      newerArchiveArtifactExists = discoverArchiveDirectories(businessRoot).some((candidate) => {
+        const resolvedCandidate = realpathSync(candidate);
+        if (!isWithinDirectory(businessRoot, resolvedCandidate) || resolvedCandidate === resolvedArchive) return false;
+        const candidateMtime = archiveLatestArtifactMtime(resolvedCandidate);
+        return candidateMtime !== undefined && candidateMtime > latestArtifactTime + ARCHIVE_EVIDENCE_FUTURE_SKEW_MS;
+      });
     } catch {
       archiveArtifactFound = false;
     }
@@ -380,6 +421,16 @@ function checkResolvedAppleSignOff(markdown: string): void {
       ),
     );
   }
+  if (archiveArtifactFound && newerArchiveArtifactExists) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_newer_artifact_exists",
+        "A newer root-confined .xcarchive exists. Regenerate post-archive evidence from the newest release archive before export or upload.",
+        signingRelative,
+      ),
+    );
+  }
   if (archiveArtifactFound && (!archiveInfoPlistSha || actualArchiveInfoPlistSha !== archiveInfoPlistSha)) {
     issues.push(
       issue(
@@ -391,9 +442,9 @@ function checkResolvedAppleSignOff(markdown: string): void {
     );
   }
   const itemSevenLine = itemSevenIndex === -1 ? "" : (lines[itemSevenIndex] ?? "");
-  const itemSevenSdkKeys = /Info\.plist identity and SDK keys\s*\(([^)]+)\)/i
+  const itemSevenSdkKeys = /Info\.plist identity and SDK keys\s*\[([^\]\r\n]+)\]/i
     .exec(itemSevenLine)?.[1]
-    ?.split(/,|\band\b/i)
+    ?.split(",")
     .map((value) => value.trim())
     .filter(Boolean);
   const itemSevenEvidenceMatch = /archive path=([^;\r\n]+\.xcarchive)\s*;\s*Info\.plist SHA-256=([a-f\d]{64})\s*:\s*(?:pass|ready|ok)\.?\s*$/i.exec(
@@ -415,18 +466,18 @@ function checkResolvedAppleSignOff(markdown: string): void {
     archiveArtifactFound &&
     (!actualArchiveInfoPlist ||
       !itemSevenSdkKeys?.length ||
+      new Set(itemSevenSdkKeys).size !== itemSevenSdkKeys.length ||
+      itemSevenSdkKeys.some((requiredKey) => !/^[A-Za-z0-9_.-]+$/.test(requiredKey)) ||
       itemSevenSdkKeys.some((requiredKey) => {
-        const fragment = normalizedSdkKey(requiredKey);
-        return (
-          !fragment || !Object.entries(actualArchiveInfoPlist!).some(([key, value]) => normalizedSdkKey(key).includes(fragment) && sdkValueIsResolved(value))
-        );
+        const value = actualArchiveInfoPlist![requiredKey];
+        return value === undefined || !sdkValueIsResolved(value);
       }))
   ) {
     issues.push(
       issue(
         "error",
         "apple_requirements.post_archive_sdk_keys_mismatch",
-        "Every SDK key named in Apple signing item 7 must exist in the compiled Info.plist with a resolved value.",
+        "Apple signing item 7 must enumerate unique, exact Info.plist SDK key names in square brackets; every named key must exist with a resolved value.",
         signingRelative,
       ),
     );
