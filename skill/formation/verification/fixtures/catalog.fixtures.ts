@@ -486,6 +486,11 @@ export function register(harness: Harness): void {
       "Apple signing and release readiness must fail closed on the strict Apple release validator",
     );
     assert(
+      appleSigning!.dependencies.includes("workflow.store.apple-app-store-requirements-privacy-manifest") &&
+        appleSigning!.reads.includes("store/APPLE_APP_STORE_REQUIREMENTS.md"),
+      "Apple signing must wait for and read the App Store privacy requirements proof",
+    );
+    assert(
       landingBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render") &&
         appBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render"),
       "local landing and app implementation must share the design-lock dependency",
@@ -523,6 +528,11 @@ export function register(harness: Harness): void {
     assert(
       appleSigning!.verification.kind === "deterministic" && appleSigning!.verification.gateIds.includes("check:apple-release-readiness"),
       "Apple signing execution must carry check:apple-release-readiness as a deterministic gate",
+    );
+    assert(
+      appleSigning!.dependencies.includes("run.store.apple-app-store-requirements-privacy-manifest") &&
+        appleSigning!.inputs.includes("artifact.store-apple-app-store-requirements-md"),
+      "compiled Apple signing execution must wait for the privacy workflow artifact",
     );
   });
 

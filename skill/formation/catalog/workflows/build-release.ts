@@ -79,11 +79,11 @@ export const workflows = [
     trigger: "Before Apple Developer enrollment, Team ID, signing, profiles, archive/upload, TestFlight",
     instructions:
       "Classify the Apple account state (membership, Team ID, role, agreements signed) before any TestFlight/App Store distribution claim, and treat a simulator build as engineering proof only, never distribution readiness. Before each release archive, read Apple's live Upcoming Requirements, submission baseline, Xcode compatibility, and upload pages; compare them with the local Xcode/SDK; reconcile the intended Release bundle ID, version, and build with App Store Connect; lint PrivacyInfo.xcprivacy; audit required-reason API coverage; prepare API-key export authentication; and check native screenshot dimensions. Record items 1 through 6 in store/APPLE_SIGNING.md before archiving. After the new archive exists, read its compiled Info.plist and confirm its bundle ID, CFBundleShortVersionString, CFBundleVersion, and injected SDK keys. Record item 7 before export or upload. Do not use an older archive as evidence for a new build. A current exact TestFlight upload standing envelope authorizes archive/upload without another prompt; read back the build state and record proof. Enrollment, certificate creation/rotation, agreements, pricing, final review submission, and production release remain founder decisions unless the opening envelope names that exact action.",
-    reads: ["store/app-store-listing/APP_STORE_LISTING.md", "state/PROJECT_STATE.yaml"],
+    reads: ["store/app-store-listing/APP_STORE_LISTING.md", "store/APPLE_APP_STORE_REQUIREMENTS.md", "state/PROJECT_STATE.yaml"],
     roleId: "role.engineering-leader",
     laneIds: ["apple_signing"],
     phaseIds: ["phase.3"],
-    dependencies: ["workflow.store.app-store-listing-prep-packet"],
+    dependencies: ["workflow.store.app-store-listing-prep-packet", "workflow.store.apple-app-store-requirements-privacy-manifest"],
     outputPaths: ["store/APPLE_SIGNING.md"],
     gates: ["check:apple-release-readiness"],
     providers: ["provider.app-store-connect"],

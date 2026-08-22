@@ -387,6 +387,62 @@ export function register(h: Harness): void {
     "apple_requirements.signing_identity_version_invalid",
   );
 
+  const staleArchiveEvidence = makeFixture("apple-requirements-stale-archive-evidence");
+  writeCompleteAppleRequirements(staleArchiveEvidence);
+  const staleArchiveSigningPath = path.join(staleArchiveEvidence, "store/APPLE_SIGNING.md");
+  const staleArchiveDate = new Date(`${currentDate}T00:00:00Z`);
+  staleArchiveDate.setUTCDate(staleArchiveDate.getUTCDate() - 1);
+  writeFileSync(
+    staleArchiveSigningPath,
+    readFileSync(staleArchiveSigningPath, "utf8").replace(
+      `created_at=${currentDate}T12:00:00Z`,
+      `created_at=${staleArchiveDate.toISOString().slice(0, 10)}T12:00:00Z`,
+    ),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects stale post-archive evidence",
+    staleArchiveEvidence,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_evidence_invalid",
+  );
+
+  const mismatchedArchiveEvidence = makeFixture("apple-requirements-mismatched-archive-evidence");
+  writeCompleteAppleRequirements(mismatchedArchiveEvidence);
+  const mismatchedArchiveSigningPath = path.join(mismatchedArchiveEvidence, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    mismatchedArchiveSigningPath,
+    readFileSync(mismatchedArchiveSigningPath, "utf8").replace("archive path=/tmp/FixtureRelease.xcarchive", "archive path=/tmp/PriorRelease.xcarchive"),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects item 7 evidence from a different archive",
+    mismatchedArchiveEvidence,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_evidence_mismatch",
+  );
+
+  const invalidBuildIdentity = makeFixture("apple-requirements-invalid-build-identity");
+  writeCompleteAppleRequirements(invalidBuildIdentity);
+  const invalidBuildSigningPath = path.join(invalidBuildIdentity, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    invalidBuildSigningPath,
+    readFileSync(invalidBuildSigningPath, "utf8").replace(
+      "| CFBundleVersion | 42 | 42 | 42 | matched |",
+      "| CFBundleVersion | invalid | invalid | invalid | matched |",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects nonnumeric compiled build identifiers",
+    invalidBuildIdentity,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_identity_build_invalid",
+  );
+
   const iosOnlyStore = makeFixture("store-ios-only");
   const iosOnlyStoreState = readState(iosOnlyStore);
   expectRecord(iosOnlyStoreState.project, "project")["platforms"] = ["ios"];

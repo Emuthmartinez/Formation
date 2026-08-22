@@ -25,6 +25,9 @@ export function writeCompleteAttribution(root: string): void {
 
 export function writeCompleteAppleSigning(root: string): void {
   const checkedAt = new Date().toISOString().slice(0, 10);
+  const archivePath = "/tmp/FixtureRelease.xcarchive";
+  const archiveTimestamp = `${checkedAt}T12:00:00Z`;
+  const archiveInfoPlistSha = "a".repeat(64);
   writeFileSync(
     path.join(root, "store/APPLE_SIGNING.md"),
     [
@@ -61,7 +64,8 @@ export function writeCompleteAppleSigning(root: string): void {
       "5. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.",
       "6. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.",
       "Post-archive sign-off (recorded before export/upload):",
-      "7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase): pass.",
+      `Archive evidence: path=${archivePath}; created_at=${archiveTimestamp}; Info.plist SHA-256=${archiveInfoPlistSha}`,
+      `7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase); archive path=${archivePath}; Info.plist SHA-256=${archiveInfoPlistSha}: pass.`,
     ].join("\n"),
     "utf8",
   );

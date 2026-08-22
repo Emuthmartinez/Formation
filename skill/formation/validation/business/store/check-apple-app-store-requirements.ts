@@ -223,6 +223,47 @@ function checkResolvedAppleSignOff(markdown: string): void {
       ),
     );
   }
+  const itemSevenIndex = lines.findIndex((line) => /^\s*7\.\s+/.test(line));
+  const postArchiveEvidenceIndex = lines.findIndex((line) => /^\s*Archive evidence\s*:/i.test(line));
+  const postArchiveEvidenceLine = postArchiveEvidenceIndex === -1 ? "" : (lines[postArchiveEvidenceIndex] ?? "");
+  const postArchiveEvidenceMatch =
+    /Archive evidence\s*:\s*path=([^;\r\n]+\.xcarchive)\s*;\s*created_at=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)\s*;\s*Info\.plist SHA-256=([a-f\d]{64})\s*$/i.exec(
+      postArchiveEvidenceLine,
+    );
+  const archivePath = postArchiveEvidenceMatch?.[1]?.trim();
+  const archiveTimestamp = postArchiveEvidenceMatch?.[2];
+  const archiveInfoPlistSha = postArchiveEvidenceMatch?.[3]?.toLowerCase();
+  const parsedArchiveTimestamp = archiveTimestamp ? new Date(archiveTimestamp) : undefined;
+  const archiveEvidenceIsCurrent =
+    Boolean(parsedArchiveTimestamp && !Number.isNaN(parsedArchiveTimestamp.getTime())) && archiveTimestamp?.slice(0, 10) === currentIsoDate();
+  const archiveEvidenceIsPositioned =
+    postArchiveHeadingIndex !== -1 && postArchiveEvidenceIndex > postArchiveHeadingIndex && itemSevenIndex > postArchiveEvidenceIndex;
+  if (!archivePath || !archiveInfoPlistSha || !archiveEvidenceIsCurrent || !archiveEvidenceIsPositioned) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_evidence_invalid",
+        "Post-archive sign-off needs a same-day ISO timestamp, an .xcarchive path, and a 64-hex Info.plist SHA-256 before item 7.",
+        signingRelative,
+      ),
+    );
+  }
+  const itemSevenLine = itemSevenIndex === -1 ? "" : (lines[itemSevenIndex] ?? "");
+  const itemSevenEvidenceMatch = /archive path=([^;\r\n]+\.xcarchive)\s*;\s*Info\.plist SHA-256=([a-f\d]{64})\s*:\s*(?:pass|ready|ok)\.?\s*$/i.exec(
+    itemSevenLine,
+  );
+  const itemSevenArchivePath = itemSevenEvidenceMatch?.[1]?.trim();
+  const itemSevenInfoPlistSha = itemSevenEvidenceMatch?.[2]?.toLowerCase();
+  if (!archivePath || !archiveInfoPlistSha || itemSevenArchivePath !== archivePath || itemSevenInfoPlistSha !== archiveInfoPlistSha) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_evidence_mismatch",
+        "Apple signing item 7 must repeat the exact archive path and Info.plist SHA-256 from the post-archive evidence record.",
+        signingRelative,
+      ),
+    );
+  }
   const signingStatus = lines.find((line) => /^\s*Status\s*:/i.test(line));
   if (!signingStatus || hasUnresolvedEvidence(signingStatus) || !/\b(?:done|complete|completed|ready|verified|approved)\b/i.test(signingStatus)) {
     issues.push(
@@ -277,7 +318,7 @@ function checkResolvedAppleSignOff(markdown: string): void {
       code: "version",
       validateFormat: (value: string) => /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/.test(value),
     },
-    { key: "CFBundleVersion", code: "build", validateFormat: (_value: string) => true },
+    { key: "CFBundleVersion", code: "build", validateFormat: (value: string) => /^\d+(?:\.\d+){0,2}$/.test(value) },
   ];
 
   identitySpecs.forEach(({ key, code, validateFormat }) => {

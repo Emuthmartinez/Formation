@@ -65,7 +65,7 @@ A weekly source-freshness result only proves that these pages are reachable. Thi
 | `CFBundleShortVersionString` | {{MARKETING_VERSION}} | {{ARCHIVE_MARKETING_VERSION}} | {{ASC_VERSION}} | {{VERSION_MATCH_RESULT}} |
 | `CFBundleVersion` | {{CURRENT_PROJECT_VERSION}} | {{ARCHIVE_BUILD_VERSION}} | {{ASC_BUILD_VERSION}} | {{BUILD_UNIQUENESS_RESULT}} |
 
-Use three period-separated integer segments for `CFBundleShortVersionString`. Do not use leading zeroes. Confirm that the compiled archive contains no unresolved build variables and that Apple has not already received the same version/build combination. The [2016 Apple Developer Forums thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence only; current Apple documentation is authoritative.
+Use three period-separated integer segments for `CFBundleShortVersionString`. Do not use leading zeroes. Use one to three period-separated integers for `CFBundleVersion`; use numeric characters and periods only. Confirm that the compiled archive contains no unresolved build variables and that Apple has not already received the same version/build combination. The [2016 Apple Developer Forums thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence only; current Apple documentation is authoritative.
 
 ## Archive, Export, And Upload Preflight Sign-Off
 
@@ -80,9 +80,18 @@ Pre-archive sign-off (recorded on the archive date):
 5. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
 6. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.
 
+Post-archive evidence:
+- Archive path: {{RELEASE_ARCHIVE_PATH_XCARCHIVE}}
+- Archive created at: {{RELEASE_ARCHIVE_CREATED_AT_ISO_8601_UTC}}
+- Info.plist SHA-256: {{RELEASE_ARCHIVE_INFO_PLIST_SHA256_64_HEX}}
+
 Post-archive sign-off (recorded before export/upload):
+7. Archive path: {{RELEASE_ARCHIVE_PATH_XCARCHIVE}}
+7. Info.plist SHA-256: {{RELEASE_ARCHIVE_INFO_PLIST_SHA256_64_HEX}}
 7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase): pass.
 ```
+
+The archive path must end in `.xcarchive`. The timestamp must use ISO 8601 UTC. The SHA-256 must contain 64 hexadecimal characters. Item 7 must repeat the same archive path and SHA-256 as the post-archive evidence record. Regenerate the complete current-release evidence record after every re-archive; never reuse evidence from an older archive.
 
 See the "Archive, Export, And Upload Preflight Checklist" section in `apple-signing-release.md` for commands and acceptance criteria for each item.
 

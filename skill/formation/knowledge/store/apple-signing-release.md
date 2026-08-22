@@ -83,7 +83,7 @@ Treat a stale or missing check as a release blocker. A weekly healthy-link resul
 Before each archive, reconcile the version record in App Store Connect with the intended Release build settings:
 
 - `CFBundleShortVersionString` is the user-visible version. Use three period-separated integer segments. Do not use leading zeroes in a segment.
-- `CFBundleVersion` is the build identifier. Use only the format that the current Apple documentation accepts and ensure that the version/build combination is unique for the target platform.
+- `CFBundleVersion` is the build identifier. Use one to three period-separated integers. Use numeric characters and periods only. Ensure that the version/build combination is unique for the target platform.
 - `PRODUCT_BUNDLE_IDENTIFIER`, `MARKETING_VERSION`, and `CURRENT_PROJECT_VERSION` are intended values before the archive exists. The compiled archive `Info.plist` is the release evidence after the archive exists.
 - The App Store Connect version must match the intended version before archive and the compiled version after archive. Increment the build before another upload for the same version.
 
@@ -420,6 +420,19 @@ Record result:
 Screenshot dimension preflight: pass (<device> native: <WxH>) | BLOCKED — <device> capture at <WxH>, below minimum
 ```
 
+### Post-Archive Evidence Contract
+
+After the archive succeeds, record the exact artifact before item 7. The archive path must end in `.xcarchive`. Use an ISO 8601 UTC timestamp for the archive creation time. Hash the compiled app's `Info.plist` with SHA-256 and record all 64 hexadecimal characters.
+
+```text
+Post-archive evidence:
+- Archive path: build/MyApp.xcarchive
+- Archive created at: YYYY-MM-DDTHH:MM:SSZ
+- Info.plist SHA-256: <64 lowercase hexadecimal characters>
+```
+
+Regenerate this current-release evidence after every re-archive. Do not carry the path, creation time, hash, or item 7 result forward from an earlier archive.
+
 ### 7. Inspect The New Compiled Archive
 
 After `xcodebuild archive` succeeds, inspect the new archive. Do not inspect an older archive. Confirm that its bundle ID, version, and build match the intended Release settings and App Store Connect. Then verify that all provider runtime keys are present in the archive's `Info.plist`. Keys that come from build variables must be expanded.
@@ -437,10 +450,12 @@ If any expected key is absent or shows the raw `$(VAR_NAME)` placeholder, the ar
 Record result:
 
 ```text
-Compiled archive identity and SDK keys: pass | BLOCKED — <mismatch, missing key, or unexpanded value>
+7. Archive path: build/MyApp.xcarchive
+7. Info.plist SHA-256: <same 64-character SHA-256 recorded in post-archive evidence>
+7. Compiled archive identity and SDK keys: pass | BLOCKED — <mismatch, missing key, or unexpanded value>
 ```
 
-Do not export or upload until item 7 passes. If item 7 fails, fix the build input and create a new archive.
+The item 7 path and SHA-256 must match the post-archive evidence record. This correlation binds the validation to the release artifact. Do not export or upload until item 7 passes. If item 7 fails, fix the build input, create a new archive, and regenerate the complete post-archive evidence record.
 
 ## Archive, Export, And Upload
 
