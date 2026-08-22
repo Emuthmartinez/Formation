@@ -61,11 +61,11 @@ Record these values by discovery channel when they apply.
 
 ## Manual Loop Proof
 
-Record one successful manual run before you automate a value-producing process.
+Record one successful manual run before you automate each value-producing process.
 Security, compliance, backup, and monitoring controls do not require this proof.
 
-Applicability: TODO — Record applicable, or not applicable with a specific reason.
-Use `passed` or `failed` in Result. Do not hide the run outcome inside narrative text.
+Applicability: TODO — Record exactly one declaration: applicable, or not applicable with a specific reason.
+Use `passed` or `failed` in Result. Do not hide the run outcome inside narrative text. Automation decision must begin with `automate` or `keep manual`; an `automate` row must itself be `passed`.
 
 | Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |
 | --- | --- | --- | --- | --- | --- | --- | --- |

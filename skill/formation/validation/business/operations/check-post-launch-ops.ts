@@ -178,6 +178,16 @@ function parseLiveDate(raw: string): Date | undefined {
 // either prove one successful manual cycle or state why no such automation applies. This check is
 // separate from the weekly clock because the proof must exist before the first automated run.
 const manualLoopHeaders = ["Date", "Process", "Input", "Output", "Result", "Cost", "Failure mode", "Automation decision"] as const;
+
+/** Authoritative prefixes keep the safety decision machine-readable while
+ * leaving the rest of the cell available for an authored rationale. */
+function automationDisposition(decision: string): "automate" | "keep_manual" | undefined {
+  const value = decision.trim();
+  if (/^automate\b/i.test(value)) return "automate";
+  if (/^keep manual\b/i.test(value)) return "keep_manual";
+  return undefined;
+}
+
 const manualProofResult = parseRequiredTableSection(runbook, "Manual Loop Proof", manualLoopHeaders);
 if (!manualProofResult.ok) {
   const sectionMissing = manualProofResult.errors.some((error) => error.kind === "section-missing");
@@ -193,7 +203,11 @@ if (!manualProofResult.ok) {
   );
 } else {
   const manualProofSection = manualProofResult.section.renderedBody;
-  const applicability = manualProofSection.match(/^Applicability:\s*(.+)$/im)?.[1]?.trim() ?? "";
+  const applicabilityDeclarations = manualProofSection
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^Applicability\b/i.test(line));
+  const applicability = applicabilityDeclarations.length === 1 ? (applicabilityDeclarations[0]?.match(/^Applicability:\s*(.+)$/i)?.[1]?.trim() ?? "") : "";
   const notApplicable = applicability.match(/^not applicable\s*(?:—|-|:)\s*(.+)$/i);
   const notApplicableReason = notApplicable?.[1]?.trim() ?? "";
   const substantiveNotApplicableReason =
@@ -209,10 +223,13 @@ if (!manualProofResult.ok) {
       if (row.rawCellCount !== manualProofResult.section.width) return false;
       const [date, processName, input, output, result, cost, failureMode, automationDecision] = row.cells;
       const evidenceCells = [processName, input, output, result, cost, failureMode, automationDecision];
+      const disposition = automationDisposition(automationDecision ?? "");
       return (
         Boolean(parseLiveDate(date ?? "")) &&
         evidenceCells.every((cell) => Boolean(cell) && !PLACEHOLDER_TEXT.test(cell ?? "")) &&
-        /^(passed|failed)$/i.test(result ?? "")
+        /^(passed|failed)$/i.test(result ?? "") &&
+        Boolean(disposition) &&
+        (disposition !== "automate" || /^passed$/i.test(result ?? ""))
       );
     });
   const hasPassedRun = manualProofResult.section.rows.some((row) => /^passed$/i.test(row.cells[4] ?? ""));
@@ -222,8 +239,9 @@ if (!manualProofResult.ok) {
       issue(
         numbersSeverity,
         "post_launch_ops.manual_loop_applicability_missing",
-        `${runbookPath}'s Manual Loop Proof must record "Applicability: applicable" or "Applicability: not applicable — <authored reason>". ` +
-          "A placeholder or option menu does not decide whether a value-producing process will be automated.",
+        `${runbookPath}'s Manual Loop Proof must record exactly one rendered "Applicability: applicable" or ` +
+          '"Applicability: not applicable — <authored reason>" declaration. Duplicate, contradictory, placeholder, or option-menu declarations ' +
+          "do not decide whether a value-producing process will be automated.",
         runbookPath,
       ),
     );
@@ -237,7 +255,8 @@ if (!manualProofResult.ok) {
         numbersSeverity,
         "post_launch_ops.manual_loop_proof_missing",
         `Every declared Manual Loop Proof row in ${runbookPath} must use the canonical width, a real past date, complete evidence, and a Result of "passed" or "failed". ` +
-          'When applicable, at least one complete row must record "passed" before automating the process.',
+          'Automation decision must begin with "automate" or "keep manual". When applicable, at least one complete row must record "passed"; ' +
+          'any row beginning with "automate" must itself be passed.',
         runbookPath,
       ),
     );

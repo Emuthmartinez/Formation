@@ -37,7 +37,7 @@ export function register(h: Harness): void {
   const setManualLoopApplicability = (root: string, value: string): void => {
     const runbookPath = path.join(root, "operations/POST_LAUNCH_OPS.md");
     const runbook = readFileSync(runbookPath, "utf8").replace(
-      "Applicability: TODO — Record applicable, or not applicable with a specific reason.",
+      "Applicability: TODO — Record exactly one declaration: applicable, or not applicable with a specific reason.",
       `Applicability: ${value}`,
     );
     writeFileSync(runbookPath, runbook, "utf8");
@@ -258,6 +258,153 @@ export function register(h: Harness): void {
     1,
     "post_launch_ops.manual_loop_proof_missing",
   );
+
+  const postLaunchManualLoopContradictoryApplicability = makeCompletedPostLaunchFixture("post-launch-manual-loop-contradictory-applicability");
+  {
+    setManualLoopApplicability(postLaunchManualLoopContradictoryApplicability, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopContradictoryApplicability, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "Applicability: not applicable — No value-producing process is scheduled for automation.",
+      "Applicability: not applicable — No value-producing process is scheduled for automation.\nApplicability: applicable",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "contradictory rendered Manual Loop applicability declarations fail closed",
+    postLaunchManualLoopContradictoryApplicability,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_applicability_missing",
+  );
+
+  const postLaunchManualLoopDuplicateApplicability = makeCompletedPostLaunchFixture("post-launch-manual-loop-duplicate-applicability");
+  {
+    setManualLoopApplicability(postLaunchManualLoopDuplicateApplicability, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopDuplicateApplicability, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "Applicability: not applicable — No value-producing process is scheduled for automation.",
+      "Applicability: not applicable — No value-producing process is scheduled for automation.\n" +
+        "Applicability: not applicable — The same process was declared twice by mistake.",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "duplicate rendered Manual Loop applicability declarations fail even when they agree",
+    postLaunchManualLoopDuplicateApplicability,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_applicability_missing",
+  );
+
+  const postLaunchManualLoopMalformedDuplicateApplicability = makeCompletedPostLaunchFixture("post-launch-manual-loop-malformed-duplicate-applicability");
+  {
+    setManualLoopApplicability(postLaunchManualLoopMalformedDuplicateApplicability, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopMalformedDuplicateApplicability, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "Applicability: not applicable — No value-producing process is scheduled for automation.",
+      "Applicability: not applicable — No value-producing process is scheduled for automation.\n  Applicability should be applicable",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a malformed indented applicability candidate cannot hide behind an earlier valid declaration",
+    postLaunchManualLoopMalformedDuplicateApplicability,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_applicability_missing",
+  );
+
+  const postLaunchManualLoopFencedApplicabilityExample = makeCompletedPostLaunchFixture("post-launch-manual-loop-fenced-applicability-example");
+  {
+    setManualLoopApplicability(postLaunchManualLoopFencedApplicabilityExample, "not applicable — No value-producing process is scheduled for automation.");
+    const runbookPath = path.join(postLaunchManualLoopFencedApplicabilityExample, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "Applicability: not applicable — No value-producing process is scheduled for automation.",
+      "Applicability: not applicable — No value-producing process is scheduled for automation.\n\n```markdown\nApplicability: applicable\n```",
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "a fenced Manual Loop applicability example does not duplicate the rendered declaration",
+    postLaunchManualLoopFencedApplicabilityExample,
+    "check-post-launch-ops.ts",
+    0,
+  );
+
+  const postLaunchManualLoopFailedAutomation = makeCompletedPostLaunchFixture("post-launch-manual-loop-failed-automation");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopFailedAutomation);
+    const runbookPath = path.join(postLaunchManualLoopFailedAutomation, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "| keep manual until three clean weekly runs |",
+      "| keep manual until three clean weekly runs |\n" +
+        `| ${isoDaysAgo(1)} | renewal export | 25 renewals | 19 exported | failed | $0 | six records rejected | automate renewal export now |`,
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "an unrelated passed run cannot authorize automation for a failed process",
+    postLaunchManualLoopFailedAutomation,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopFailedKeptManual = makeCompletedPostLaunchFixture("post-launch-manual-loop-failed-kept-manual");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopFailedKeptManual);
+    const runbookPath = path.join(postLaunchManualLoopFailedKeptManual, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "| keep manual until three clean weekly runs |",
+      "| automate the renewal reminder send |\n" +
+        `| ${isoDaysAgo(1)} | renewal export | 25 renewals | 19 exported | failed | $0 | six records rejected | keep manual until a retry passes |`,
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture("a passed process may automate while a failed process stays manual", postLaunchManualLoopFailedKeptManual, "check-post-launch-ops.ts", 0);
+
+  const postLaunchManualLoopAmbiguousDecision = makeCompletedPostLaunchFixture("post-launch-manual-loop-ambiguous-decision");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopAmbiguousDecision);
+    const runbookPath = path.join(postLaunchManualLoopAmbiguousDecision, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace("keep manual until three clean weekly runs", "do not automate until three clean weekly runs");
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "an ambiguous free-form Automation decision fails closed",
+    postLaunchManualLoopAmbiguousDecision,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopLaterFailedAutomation = makeCompletedPostLaunchFixture("post-launch-manual-loop-later-failed-automation");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopLaterFailedAutomation);
+    const runbookPath = path.join(postLaunchManualLoopLaterFailedAutomation, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "| keep manual until three clean weekly runs |",
+      "| keep manual until three clean weekly runs |\n" +
+        `| ${isoDaysAgo(1)} | renewal reminder send | 12 opted-in reminders | 8 delivered | failed | $0 | four addresses rejected | automate the next reminder send |`,
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture(
+    "an earlier passed run cannot excuse a later failed automation decision for the same process",
+    postLaunchManualLoopLaterFailedAutomation,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopPassedAutomation = makeCompletedPostLaunchFixture("post-launch-manual-loop-passed-automation");
+  {
+    recordSuccessfulManualLoop(postLaunchManualLoopPassedAutomation);
+    const runbookPath = path.join(postLaunchManualLoopPassedAutomation, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace("keep manual until three clean weekly runs", "automate the renewal reminder send");
+    writeFileSync(runbookPath, runbook, "utf8");
+  }
+  runFixture("a passed process may carry an explicit automation decision", postLaunchManualLoopPassedAutomation, "check-post-launch-ops.ts", 0);
 
   const postLaunchManualLoopNestedFence = makeCompletedPostLaunchFixture("post-launch-manual-loop-nested-fence");
   {

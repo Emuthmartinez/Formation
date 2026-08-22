@@ -139,12 +139,12 @@ Do not copy another creator's words, identity, assets, or exact composition.
 
 ## 8. Manual Proof Before Automation
 
-Run a value-producing process manually before you automate it.
+Run each value-producing process manually before you automate it.
 Record the manual input, output, result, cost, and failure mode.
 
 This rule does not apply to necessary security, compliance, backup, or monitoring controls.
 
-Automate the process only when the manual evidence shows that repetition has value.
+Begin each automation decision with `automate` or `keep manual`. Use `automate` only when that process's row passed and its manual evidence shows that repetition has value.
 
 ## 9. Optional Persona-Balanced Test Planning
 
