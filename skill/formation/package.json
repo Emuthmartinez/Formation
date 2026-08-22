@@ -1,6 +1,6 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.159.0",
+  "version": "0.160.0",
   "private": true,
   "bin": {
     "formation": "bin/formation.mjs",
@@ -39,6 +39,7 @@
     "migrate:founder-gates": "tsx tooling/migrate-founder-gates.ts",
     "check:asc-command-contract": "tsx validation/business/store/check-asc-command-contract.ts",
     "check:motion-contract": "tsx validation/business/design/check-motion-contract.ts",
+    "check:scrollytelling": "tsx validation/business/design/check-scrollytelling-contract.ts",
     "check:mobai-proof": "tsx validation/business/engineering/check-mobai-proof.ts",
     "check:secrets": "tsx validation/business/trust/check-secret-routing.ts",
     "check:security": "tsx validation/business/trust/check-security-release.ts",

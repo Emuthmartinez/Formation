@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.159.0",
+  "version": "0.160.0",
   "description": "Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into autonomous operation, with deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -47,6 +47,7 @@
     "migrate:founder-gates": "tsx skill/formation/tooling/migrate-founder-gates.ts",
     "check:asc-command-contract": "tsx skill/formation/validation/business/store/check-asc-command-contract.ts",
     "check:motion-contract": "tsx skill/formation/validation/business/design/check-motion-contract.ts",
+    "check:scrollytelling": "tsx skill/formation/validation/business/design/check-scrollytelling-contract.ts",
     "check:mobai-proof": "tsx skill/formation/validation/business/engineering/check-mobai-proof.ts",
     "check:secrets": "tsx skill/formation/validation/business/trust/check-secret-routing.ts",
     "check:security": "tsx skill/formation/validation/business/trust/check-security-release.ts",

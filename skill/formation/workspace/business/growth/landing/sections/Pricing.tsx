@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Pricing — glass cards + live billing toggle that re-prices in place.
+ * Offer comparison with a live billing toggle that re-prices in place.
  * Prices are real text server-side (monthly by default). The toggle is a
  * button pair, keyboard-accessible, and the re-price transition respects
  * reduced motion.

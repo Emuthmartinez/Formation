@@ -1,9 +1,10 @@
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, expectRecord, getLane, readState, writeState } from "./_harness.js";
 
 export function register(h: Harness): void {
-  const { makeFixture, runFixture } = h;
+  const { makeFixture, makeEmptyFixture, runFixture } = h;
 
   const emotionalDesignMissing = makeFixture("emotional-design-missing");
   rmSync(path.join(emotionalDesignMissing, "product", "experience", "emotional-design"), { recursive: true, force: true });
@@ -945,4 +946,1096 @@ experience_card:
     "utf8",
   );
   runFixture("warning-tier tell reports without failing", vibecodeWarningTier, "check-vibecoded-tells.ts", 0, "vibecode.glassmorphism");
+
+  // --- check-scrollytelling-contract ------------------------------------------------------
+
+  const validScrollySource = `
+import { useReducedMotion } from "motion/react";
+export function Story() {
+  const reduced = useReducedMotion();
+  const anchor = document.querySelector("[data-scrolly-step]")?.getBoundingClientRect();
+  const style = { "--scene-p": 0.5, "--beat-t": 0.25, "--beat-index": 1 };
+  return <section style={style} data-scene-id="response" data-state-id="response-ready">
+    <ol><li data-scrolly-step="response">The complete static story remains visible.</li></ol>
+    <span>{String(reduced)} {String(anchor)}</span>
+  </section>;
+}
+`;
+
+  const localizedTextDigest = (text: string): string => createHash("sha256").update(text, "utf8").digest("hex");
+
+  function validScrollyContract(): Record<string, unknown> {
+    const scene = (id: string, guide: number): Record<string, unknown> => ({
+      id,
+      narrative_roles: ["need", "mechanism", "proof"],
+      states: [`${id}-need`, `${id}-mechanism`, `${id}-proof`],
+      visual_job: `Show the evidence-bearing ${id} state and its relationship to the next beat.`,
+      source_kind: "html",
+      evidence_id: `evidence-${id}`,
+      localizations: ["en-US", "es-US"].map((locale) => {
+        const captionText = locale === "en-US" ? `Caption for ${id}.` : `Leyenda para ${id}.`;
+        const descriptionText = locale === "en-US" ? `Description of the ${id} evidence and change.` : `Descripción de la evidencia y el cambio de ${id}.`;
+        return {
+          locale,
+          beats: [`${id}-need`, `${id}-mechanism`, `${id}-proof`].map((stateId) => {
+            const text = locale === "en-US" ? `Copy for ${id}, state ${stateId}.` : `Texto para ${id}, estado ${stateId}.`;
+            return {
+              state_id: stateId,
+              text,
+              copy_key: `landing.story.${id}.${stateId}.${locale}`,
+              copy_sha256: localizedTextDigest(text),
+            };
+          }),
+          caption: {
+            text: captionText,
+            copy_key: `landing.story.${id}.caption.${locale}`,
+            copy_sha256: localizedTextDigest(captionText),
+          },
+          accessible_description: {
+            text: descriptionText,
+            copy_key: `landing.story.${id}.accessible_description.${locale}`,
+            copy_sha256: localizedTextDigest(descriptionText),
+          },
+        };
+      }),
+      activation_guides: { desktop: guide, mobile: guide + 0.2, short_mobile: guide + 0.35 },
+      modes: { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "code-native" },
+      forward_reverse: true,
+    });
+    const scenes = [scene("need", 0.15), scene("response", 0.5)];
+    const qa: Array<Record<string, unknown>> = [];
+    for (const row of scenes) {
+      const id = String(row.id);
+      const states = row.states as string[];
+      for (const locale of ["en-US", "es-US"]) {
+        for (const [stateIndex, state] of states.entries()) {
+          for (const direction of ["forward", "reverse"]) {
+            const browser = direction === "reverse" ? "Chrome" : (["Chrome", "Safari", "Firefox"][stateIndex] ?? "Chrome");
+            const platform = browser === "Firefox" ? "Windows 11" : "macOS 15";
+            const viewport = browser === "Safari" ? "desktop 1024x768" : browser === "Firefox" ? "desktop 1366x768" : "desktop 1440x900";
+            qa.push({
+              viewport,
+              browser,
+              platform,
+              mode: "default",
+              locale,
+              direction,
+              scene_id: id,
+              expected_state: state,
+              result: "pass",
+              evidence: `growth/landing/evidence/browser-matrix.md#${id}-${locale}-${state}-${direction}`,
+            });
+          }
+        }
+        qa.push({
+          viewport: "mobile 390x844",
+          browser: "Chrome",
+          platform: "Android 16",
+          mode: "default",
+          locale,
+          direction: "jump",
+          scene_id: id,
+          expected_state: states[1],
+          result: "pass",
+          evidence: `growth/landing/evidence/browser-matrix.md#${id}-${locale}-jump`,
+        });
+        for (const [mode, viewport, browser, platform] of [
+          ["short_mobile", "short-mobile 667x375", "Safari", "iOS 19"],
+          ["reduced_motion", "mobile 390x844", "Chrome", "Android 16"],
+          ["no_js", "desktop 1440x900", "Firefox", "Linux"],
+          ["save_data", "mobile 390x844", "Chrome", "Android 16"],
+        ] as const) {
+          qa.push({
+            viewport,
+            browser,
+            platform,
+            mode,
+            locale,
+            direction: "jump",
+            scene_id: id,
+            expected_state: states.at(-1),
+            result: "pass",
+            evidence: `growth/landing/evidence/browser-matrix.md#${id}-${locale}-${mode}`,
+          });
+        }
+      }
+    }
+    const matrixScene = String(scenes[0]!.id);
+    const matrixState = (scenes[0]!.states as string[]).at(-1);
+    for (const [browser, platform] of [
+      ["Chrome", "macOS 15"],
+      ["Safari", "macOS 15"],
+      ["Firefox", "Windows 11"],
+    ] as const) {
+      for (const viewport of ["desktop 1280x720", "desktop 1440x1000"]) {
+        qa.push({
+          viewport,
+          browser,
+          platform,
+          mode: "default",
+          locale: "en-US",
+          direction: "jump",
+          scene_id: matrixScene,
+          expected_state: matrixState,
+          result: "pass",
+          evidence: `growth/landing/evidence/browser-matrix.md#${browser.toLowerCase()}-${viewport.replaceAll(" ", "-")}`,
+        });
+      }
+    }
+    for (const [browser, platform] of [
+      ["Safari", "iOS 19"],
+      ["Chrome", "Android 16"],
+    ] as const) {
+      for (const [mode, viewport] of [
+        ["short_mobile", "mobile 390x568"],
+        ["default", "mobile 390x844"],
+      ] as const) {
+        qa.push({
+          viewport,
+          browser,
+          platform,
+          mode,
+          locale: "en-US",
+          direction: "jump",
+          scene_id: matrixScene,
+          expected_state: matrixState,
+          result: "pass",
+          evidence: `growth/landing/evidence/browser-matrix.md#${platform.toLowerCase().replaceAll(" ", "-")}-${mode}`,
+        });
+      }
+    }
+    return {
+      locales: [
+        { locale: "en-US", evidence: "growth/landing/evidence/en-US/" },
+        { locale: "es-US", evidence: "growth/landing/evidence/es-US/" },
+      ],
+      scrollytelling: {
+        applicable: true,
+        evidence: "growth/landing/evidence/scrollytelling-contract.md#decision",
+        locales: ["en-US", "es-US"],
+        scenes,
+        qa,
+      },
+    };
+  }
+
+  function writeScrollyFixture(name: string, mutate?: (contract: Record<string, unknown>) => void, source = validScrollySource): string {
+    const root = makeEmptyFixture(name);
+    const appDir = path.join(root, "growth/landing/app");
+    mkdirSync(appDir, { recursive: true });
+    writeFileSync(path.join(appDir, "ScrollyStory.tsx"), source, "utf8");
+    const evidenceDir = path.join(root, "growth/landing/evidence");
+    mkdirSync(evidenceDir, { recursive: true });
+    const contract = validScrollyContract();
+    const baselineScrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+    const baselineFragments = new Set(
+      (baselineScrolly.qa as Array<Record<string, unknown>>)
+        .map((row) => String(row.evidence).split("#")[1])
+        .filter((fragment): fragment is string => Boolean(fragment)),
+    );
+    writeFileSync(
+      path.join(evidenceDir, "scrollytelling-contract.md"),
+      "# Scrollytelling contract\n\n## Decision\n\nThe evidence supports a sequence.\n",
+      "utf8",
+    );
+    writeFileSync(
+      path.join(evidenceDir, "browser-matrix.md"),
+      `# Browser matrix\n\n${[...baselineFragments].map((fragment) => `<a id="${fragment}"></a>`).join("\n")}\n`,
+      "utf8",
+    );
+    mutate?.(contract);
+    writeFileSync(path.join(root, "growth/landing/surface-contract.json"), `${JSON.stringify(contract, null, 2)}\n`, "utf8");
+    return root;
+  }
+
+  interface ScrollyContentAssetSpec {
+    assetId: string;
+    kind: "image" | "video";
+    status?: string;
+    writeOutput?: boolean;
+    overrides?: Record<string, unknown>;
+  }
+
+  function writeScrollyContentAssetManifest(root: string, specs: ScrollyContentAssetSpec[]): void {
+    const manifestDir = path.join(root, "growth/content-assets");
+    const outputDir = path.join(manifestDir, "out");
+    mkdirSync(outputDir, { recursive: true });
+    const input = "growth/landing/surface-contract.json";
+    const inputDigest = createHash("sha256")
+      .update(readFileSync(path.join(root, input)))
+      .digest("hex");
+    const assets = specs.map((spec) => {
+      const extension = spec.kind === "video" ? "mp4" : "webp";
+      const output = `growth/content-assets/out/${spec.assetId}.${extension}`;
+      if (spec.writeOutput !== false) {
+        writeFileSync(path.join(root, output), `fixture ${spec.kind} output for ${spec.assetId}\n`, "utf8");
+      }
+      return {
+        asset_id: spec.assetId,
+        surface: "landing_scrollytelling",
+        route: spec.kind === "video" ? "founder_owned_recording" : "authored_still",
+        status: spec.status ?? "approved",
+        composition_id: `Scrolly${spec.kind === "video" ? "Video" : "Still"}`,
+        dimensions: spec.kind === "video" ? "1920x1080" : "1280x720",
+        ...(spec.kind === "video" ? { duration_seconds: 12, asset_kind: "demo" } : {}),
+        inputs: [input],
+        input_digests: { [input]: inputDigest },
+        outputs: [output],
+        truth_constraints: ["The approved output supports only the scene narrative recorded in the landing contract."],
+        approvals: ["Founder approved this fixture asset for landing use."],
+        render_proof: `Authored fixture output: ${output}`,
+        license_status: "Rights cleared for approved fixture use.",
+        ...spec.overrides,
+      };
+    });
+    writeFileSync(path.join(manifestDir, "manifest.json"), `${JSON.stringify({ schema_version: "1", assets }, null, 2)}\n`, "utf8");
+  }
+
+  function writeScrollyMediaFixture(name: string, mutate: (contract: Record<string, unknown>) => void, assets: ScrollyContentAssetSpec[]): string {
+    const root = writeScrollyFixture(name, mutate);
+    writeScrollyContentAssetManifest(root, assets);
+    return root;
+  }
+
+  runFixture("complete scrollytelling contract and source hooks pass", writeScrollyFixture("scrolly-complete"), "check-scrollytelling-contract.ts", 0);
+
+  runFixture(
+    "a bare shipped section library does not require an active surface contract",
+    makeFixture("scrolly-inactive-library"),
+    "check-scrollytelling-contract.ts",
+    0,
+  );
+
+  const scrollyMissingContract = makeEmptyFixture("scrolly-surface-contract-missing");
+  mkdirSync(path.join(scrollyMissingContract, "growth/landing/app"), { recursive: true });
+  writeFileSync(path.join(scrollyMissingContract, "growth/landing/app/ScrollyStory.tsx"), validScrollySource, "utf8");
+  runFixture(
+    "active scrollytelling source without a surface contract fails",
+    scrollyMissingContract,
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.business.surface_contract_missing",
+  );
+
+  const scrollyDeclarationMissing = makeEmptyFixture("scrolly-declaration-missing");
+  mkdirSync(path.join(scrollyDeclarationMissing, "growth/landing"), { recursive: true });
+  writeFileSync(path.join(scrollyDeclarationMissing, "growth/landing/index.html"), "<main><h1>Active landing</h1></main>\n", "utf8");
+  writeFileSync(path.join(scrollyDeclarationMissing, "growth/landing/surface-contract.json"), '{"locales":[]}\n', "utf8");
+  runFixture(
+    "every active landing surface contract declares scrollytelling applicability",
+    scrollyDeclarationMissing,
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.business.declaration_missing",
+  );
+
+  runFixture(
+    "duplicate scene IDs fail while state IDs may recur across scenes",
+    writeScrollyFixture("scrolly-duplicate-ids", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[1]!.id = scenes[0]!.id;
+      scenes[1]!.states = scenes[0]!.states;
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.scene_id.duplicate",
+  );
+
+  runFixture(
+    "contract slugs reject digit-leading IDs before SSR does",
+    writeScrollyFixture("scrolly-digit-leading-scene-id", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.id = "1-need";
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.scene_id.invalid",
+  );
+
+  runFixture(
+    "stable state IDs may recur in different scenes",
+    writeScrollyFixture("scrolly-state-ids-recur", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[1]!.states = scenes[0]!.states;
+      for (const localization of scenes[1]!.localizations as Array<Record<string, unknown>>) {
+        for (const beat of localization.beats as Array<Record<string, unknown>>) {
+          beat.state_id = String(beat.state_id).replace(/^response-/u, "need-");
+        }
+      }
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (row.scene_id === "response") row.expected_state = String(row.expected_state).replace(/^response-/u, "need-");
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    0,
+  );
+
+  runFixture(
+    "out-of-order narrative roles fail",
+    writeScrollyFixture("scrolly-role-order", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.narrative_roles = ["proof", "mechanism", "need"];
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.narrative_sequence.out_of_order",
+  );
+
+  runFixture(
+    "narrative roles and visual states must map one to one",
+    writeScrollyFixture("scrolly-role-state-count", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.narrative_roles = ["need", "mechanism", "outcome", "proof"];
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.role_state_count_mismatch",
+  );
+
+  runFixture(
+    "responsive activation guides cannot all reuse the desktop value",
+    writeScrollyFixture("scrolly-activation-guides-uniform", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.activation_guides = { desktop: 0.5, mobile: 0.5, short_mobile: 0.5 };
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.activation_guides.responsive_authorship_missing",
+  );
+
+  runFixture(
+    "short-mobile activation is independently authored",
+    writeScrollyFixture("scrolly-short-mobile-guide-reused", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.activation_guides = { desktop: 0.5, mobile: 0.7, short_mobile: 0.7 };
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.activation_guides.short_mobile_not_distinct",
+  );
+
+  runFixture(
+    "an active contract cannot claim bidirectional completion with a false proof flag",
+    writeScrollyFixture("scrolly-forward-reverse-unverified", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.forward_reverse = false;
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.forward_reverse.missing",
+  );
+
+  runFixture(
+    "every scene carries exactly one localization row per locale",
+    writeScrollyFixture("scrolly-localization-coverage", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      (scenes[0]!.localizations as Array<Record<string, unknown>>).pop();
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.localization.locale_coverage",
+  );
+
+  runFixture(
+    "localized beats must preserve scene state order",
+    writeScrollyFixture("scrolly-localization-beat-order", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      const localizations = scenes[0]!.localizations as Array<Record<string, unknown>>;
+      (localizations[0]!.beats as Array<Record<string, unknown>>).reverse();
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.localization.beat_state_order_mismatch",
+  );
+
+  runFixture(
+    "active localized copy cannot keep a zero digest",
+    writeScrollyFixture("scrolly-localization-placeholder-digest", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      const localizations = scenes[0]!.localizations as Array<Record<string, unknown>>;
+      const beats = localizations[0]!.beats as Array<Record<string, unknown>>;
+      beats[0]!.copy_sha256 = "0".repeat(64);
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.scene.0.localization.0.beat.0.copy_sha256.placeholder",
+  );
+
+  runFixture(
+    "every localized beat carries the exact rendered text",
+    writeScrollyFixture("scrolly-localization-beat-text-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      const localizations = scenes[0]!.localizations as Array<Record<string, unknown>>;
+      const beats = localizations[0]!.beats as Array<Record<string, unknown>>;
+      delete beats[0]!.text;
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.scene.0.localization.0.beat.0.text.missing",
+  );
+
+  runFixture(
+    "localized beat digests hash their exact rendered text",
+    writeScrollyFixture("scrolly-localization-beat-digest-mismatch", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      const localizations = scenes[0]!.localizations as Array<Record<string, unknown>>;
+      const beats = localizations[0]!.beats as Array<Record<string, unknown>>;
+      beats[0]!.text = `${String(beats[0]!.text)} Changed after hashing.`;
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.localization.copy_digest_mismatch",
+  );
+
+  runFixture(
+    "localized caption and description digests hash their exact text",
+    writeScrollyFixture("scrolly-localization-text-digest-mismatch", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      const localizations = scenes[0]!.localizations as Array<Record<string, unknown>>;
+      const caption = expectRecord(localizations[0]!.caption, "caption");
+      caption.text = `${String(caption.text)} Changed after hashing.`;
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.localization.copy_digest_mismatch",
+  );
+
+  runFixture(
+    "heavy narrative media resolves approved primary and poster records",
+    writeScrollyMediaFixture(
+      "scrolly-media-poster-complete",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "response-sequence-video";
+        scenes[0]!.poster_asset_id = "response-sequence-poster";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "poster" };
+      },
+      [
+        { assetId: "response-sequence-video", kind: "video" },
+        { assetId: "response-sequence-poster", kind: "image" },
+      ],
+    ),
+    "check-scrollytelling-contract.ts",
+    0,
+  );
+
+  runFixture(
+    "heavy narrative media may be explicitly omitted under Save-Data after its primary asset resolves",
+    writeScrollyMediaFixture(
+      "scrolly-media-save-data-omit",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "response-sequence-video";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "response-sequence-video", kind: "video" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    0,
+  );
+
+  runFixture(
+    "a poster mode without an authored poster identifier fails",
+    writeScrollyMediaFixture(
+      "scrolly-media-poster-missing",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "image";
+        scenes[0]!.asset_id = "response-sequence-image";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "poster" };
+      },
+      [{ assetId: "response-sequence-image", kind: "image" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.poster_asset_id.missing",
+  );
+
+  runFixture(
+    "an omitted heavy-media fallback cannot retain a stale poster claim",
+    writeScrollyMediaFixture(
+      "scrolly-media-omit-stale-poster",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "image";
+        scenes[0]!.asset_id = "response-sequence-image";
+        scenes[0]!.poster_asset_id = "unused-poster";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "response-sequence-image", kind: "image" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.poster_asset_id.unexpected",
+  );
+
+  runFixture(
+    "active heavy media fails when the canonical content-asset manifest is missing",
+    writeScrollyFixture("scrolly-media-manifest-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+      scenes[0]!.source_kind = "video";
+      scenes[0]!.asset_id = "response-sequence-video";
+      scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.content_asset_manifest.missing",
+  );
+
+  runFixture(
+    "an active image or video scene cannot omit its primary asset ID",
+    writeScrollyMediaFixture(
+      "scrolly-media-primary-id-missing",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        delete scenes[0]!.asset_id;
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "approved-video", kind: "video" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.asset_id.missing",
+  );
+
+  runFixture(
+    "an arbitrary primary asset ID that is absent from the manifest fails",
+    writeScrollyMediaFixture(
+      "scrolly-media-primary-unknown",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "invented-video";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "approved-video", kind: "video" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.asset_id.unknown",
+  );
+
+  runFixture(
+    "a draft primary content asset is not approved scrollytelling evidence",
+    writeScrollyMediaFixture(
+      "scrolly-media-primary-unapproved",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "draft-video";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "draft-video", kind: "video", status: "draft" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.asset_id.unapproved",
+  );
+
+  runFixture(
+    "an unknown status cannot masquerade as content-asset approval",
+    writeScrollyMediaFixture(
+      "scrolly-media-primary-status-unknown",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "image";
+        scenes[0]!.asset_id = "self-described-verified-image";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "self-described-verified-image", kind: "image", status: "verified" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.asset_id.unapproved",
+  );
+
+  runFixture(
+    "an arbitrary Save-Data poster ID that is absent from the manifest fails",
+    writeScrollyMediaFixture(
+      "scrolly-media-poster-unknown",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "approved-video";
+        scenes[0]!.poster_asset_id = "invented-poster";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "poster" };
+      },
+      [{ assetId: "approved-video", kind: "video" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.poster_asset_id.unknown",
+  );
+
+  runFixture(
+    "a draft poster is not approved Save-Data evidence",
+    writeScrollyMediaFixture(
+      "scrolly-media-poster-unapproved",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "approved-video";
+        scenes[0]!.poster_asset_id = "draft-poster";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "poster" };
+      },
+      [
+        { assetId: "approved-video", kind: "video" },
+        { assetId: "draft-poster", kind: "image", status: "draft" },
+      ],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.poster_asset_id.unapproved",
+  );
+
+  runFixture(
+    "a heavy primary record cannot also serve as its own poster",
+    writeScrollyMediaFixture(
+      "scrolly-media-poster-same-as-primary",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "approved-video";
+        scenes[0]!.poster_asset_id = "approved-video";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "poster" };
+      },
+      [{ assetId: "approved-video", kind: "video" }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.poster_asset_id.same_as_primary",
+  );
+
+  runFixture(
+    "a distinct video record is still too heavy to serve as a Save-Data poster",
+    writeScrollyMediaFixture(
+      "scrolly-media-poster-heavy",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "video";
+        scenes[0]!.asset_id = "approved-video";
+        scenes[0]!.poster_asset_id = "other-video";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "poster" };
+      },
+      [
+        { assetId: "approved-video", kind: "video" },
+        { assetId: "other-video", kind: "video" },
+      ],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.poster_asset_id.not_lightweight",
+  );
+
+  runFixture(
+    "a done-tier manifest row with a missing local output is not usable evidence",
+    writeScrollyMediaFixture(
+      "scrolly-media-output-missing",
+      (contract) => {
+        const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+        const scenes = scrolly.scenes as Array<Record<string, unknown>>;
+        scenes[0]!.source_kind = "image";
+        scenes[0]!.asset_id = "missing-output-image";
+        scenes[0]!.modes = { mobile: "recomposed", reduced_motion: "final", no_js: "final", save_data: "omit" };
+      },
+      [{ assetId: "missing-output-image", kind: "image", writeOutput: false }],
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.asset_id.output_missing",
+  );
+
+  runFixture(
+    "missing short-height QA evidence fails",
+    writeScrollyFixture("scrolly-short-height-qa", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter((row) => row.mode !== "short_mobile");
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.short_mobile.missing",
+  );
+
+  runFixture(
+    "each state needs forward and reverse default QA",
+    writeScrollyFixture("scrolly-direction-state-qa", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter(
+        (row) => !(row.mode === "default" && row.direction === "reverse" && row.scene_id === "need" && row.expected_state === "need-mechanism"),
+      );
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.state_direction.missing",
+  );
+
+  runFixture(
+    "every Tier 1 locale covers every state in both directions",
+    writeScrollyFixture("scrolly-locale-state-direction-qa", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter(
+        (row) =>
+          !(
+            row.locale === "es-US" &&
+            row.mode === "default" &&
+            row.direction === "reverse" &&
+            row.scene_id === "need" &&
+            row.expected_state === "need-mechanism"
+          ),
+      );
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.locale_state_direction.missing",
+  );
+
+  runFixture(
+    "each scene needs default-mode restored-position QA",
+    writeScrollyFixture("scrolly-default-jump-qa", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter(
+        (row) => !(row.mode === "default" && row.direction === "jump" && row.scene_id === "need"),
+      );
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.jump.missing",
+  );
+
+  runFixture(
+    "every Tier 1 locale covers restored-position QA",
+    writeScrollyFixture("scrolly-locale-default-jump-qa", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter(
+        (row) => !(row.locale === "es-US" && row.mode === "default" && row.direction === "jump" && row.scene_id === "need"),
+      );
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.locale_jump.missing",
+  );
+
+  runFixture(
+    "every Tier 1 locale covers each degraded mode",
+    writeScrollyFixture("scrolly-locale-degraded-mode-qa", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter(
+        (row) => !(row.locale === "es-US" && row.mode === "save_data" && row.scene_id === "need"),
+      );
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.locale_mode.missing",
+  );
+
+  runFixture(
+    "every QA row names its browser and platform",
+    writeScrollyFixture("scrolly-qa-browser-platform-fields", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const qa = scrolly.qa as Array<Record<string, unknown>>;
+      delete qa[0]!.browser;
+      delete qa[1]!.platform;
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.0.browser.missing",
+  );
+
+  runFixture(
+    "desktop browser-family coverage includes Firefox",
+    writeScrollyFixture("scrolly-qa-firefox-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (row.browser === "Firefox") row.browser = "Chrome";
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.browser.firefox.missing",
+  );
+
+  runFixture(
+    "mobile coverage includes iOS Safari",
+    writeScrollyFixture("scrolly-qa-ios-safari-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (String(row.platform).includes("iOS")) row.platform = "macOS 15";
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.ios_safari.missing",
+  );
+
+  runFixture(
+    "mobile coverage includes Android Chrome",
+    writeScrollyFixture("scrolly-qa-android-chrome-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (String(row.platform).includes("Android")) row.platform = "macOS 15";
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.android_chrome.missing",
+  );
+
+  runFixture(
+    "desktop QA uses at least two distinct viewport heights",
+    writeScrollyFixture("scrolly-qa-desktop-viewports", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (/macOS|Windows|Linux/u.test(String(row.platform))) {
+          row.viewport = row.browser === "Safari" ? "desktop 1024x900" : row.browser === "Firefox" ? "desktop 1366x900" : "desktop 1440x900";
+        }
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.desktop_viewports.insufficient",
+  );
+
+  runFixture(
+    "each desktop browser carries its own short and tall height evidence",
+    writeScrollyFixture("scrolly-qa-desktop-browser-height-cross-product", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (row.browser === "Safari" && String(row.platform).includes("macOS")) row.viewport = "desktop 1280x900";
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.browser.safari.heights_insufficient",
+  );
+
+  runFixture(
+    "short-mobile QA is shorter than the normal mobile viewport",
+    writeScrollyFixture("scrolly-qa-mobile-height-diversity", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (row.mode === "short_mobile") row.viewport = "short-mobile 390x844";
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.mobile_heights.insufficient",
+  );
+
+  runFixture(
+    "iOS Safari carries its own genuinely shorter short-mobile evidence",
+    writeScrollyFixture("scrolly-qa-ios-height-cross-product", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      for (const row of scrolly.qa as Array<Record<string, unknown>>) {
+        if (String(row.platform).includes("iOS") && row.mode === "short_mobile") row.viewport = "mobile 390x844";
+      }
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.ios_safari.heights_insufficient",
+  );
+
+  runFixture(
+    "Android Chrome carries its own short-mobile evidence",
+    writeScrollyFixture("scrolly-qa-android-height-cross-product", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.qa = (scrolly.qa as Array<Record<string, unknown>>).filter((row) => !(String(row.platform).includes("Android") && row.mode === "short_mobile"));
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.qa.android_chrome.heights_insufficient",
+  );
+
+  runFixture(
+    "active evidence paths must exist inside the workspace",
+    writeScrollyFixture("scrolly-evidence-path-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      scrolly.evidence = "growth/landing/evidence/does-not-exist.md#decision";
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.evidence_path.missing",
+  );
+
+  runFixture(
+    "every active QA evidence path must exist inside the workspace",
+    writeScrollyFixture("scrolly-qa-evidence-path-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const qa = scrolly.qa as Array<Record<string, unknown>>;
+      qa[0]!.evidence = "growth/landing/evidence/missing-browser-run.md#need-forward";
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.evidence_path.missing",
+  );
+
+  runFixture(
+    "active evidence fragments resolve to authored anchors",
+    writeScrollyFixture("scrolly-qa-evidence-fragment-missing", (contract) => {
+      const scrolly = expectRecord(contract.scrollytelling, "scrollytelling");
+      const qa = scrolly.qa as Array<Record<string, unknown>>;
+      qa[0]!.evidence = "growth/landing/evidence/browser-matrix.md#not-an-authored-run";
+    }),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.evidence_fragment.missing",
+  );
+
+  const scrollyNotApplicable = makeEmptyFixture("scrolly-not-applicable-reason");
+  mkdirSync(path.join(scrollyNotApplicable, "growth/landing"), { recursive: true });
+  writeFileSync(path.join(scrollyNotApplicable, "growth/landing/index.html"), "<main><h1>Static landing</h1></main>\n", "utf8");
+  writeFileSync(
+    path.join(scrollyNotApplicable, "growth/landing/surface-contract.json"),
+    `${JSON.stringify(
+      {
+        scrollytelling: {
+          applicable: false,
+          evidence: "The short landing has no sequential evidence that needs a scroll-linked treatment.",
+          locales: [],
+          scenes: [],
+          qa: [],
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  runFixture("a not-applicable declaration keeps a plain non-path rationale", scrollyNotApplicable, "check-scrollytelling-contract.ts", 0);
+
+  const scrollyNotApplicableWithoutReason = makeEmptyFixture("scrolly-not-applicable-reason-missing");
+  mkdirSync(path.join(scrollyNotApplicableWithoutReason, "growth/landing"), { recursive: true });
+  writeFileSync(path.join(scrollyNotApplicableWithoutReason, "growth/landing/index.html"), "<main><h1>Static landing</h1></main>\n", "utf8");
+  writeFileSync(
+    path.join(scrollyNotApplicableWithoutReason, "growth/landing/surface-contract.json"),
+    `${JSON.stringify({ scrollytelling: { applicable: false, evidence: "", locales: [], scenes: [], qa: [] } }, null, 2)}\n`,
+    "utf8",
+  );
+  runFixture(
+    "a not-applicable declaration still needs a plain rationale",
+    scrollyNotApplicableWithoutReason,
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.evidence.missing",
+  );
+
+  const scrollyNotApplicableWrongShape = makeEmptyFixture("scrolly-not-applicable-shape-invalid");
+  mkdirSync(path.join(scrollyNotApplicableWrongShape, "growth/landing"), { recursive: true });
+  writeFileSync(path.join(scrollyNotApplicableWrongShape, "growth/landing/index.html"), "<main><h1>Static landing</h1></main>\n", "utf8");
+  writeFileSync(
+    path.join(scrollyNotApplicableWrongShape, "growth/landing/surface-contract.json"),
+    `${JSON.stringify(
+      {
+        scrollytelling: {
+          applicable: false,
+          evidence: "The landing has no sequential evidence.",
+          locales: "none",
+          scenes: {},
+          qa: null,
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  runFixture(
+    "a not-applicable declaration still uses the exact array shape",
+    scrollyNotApplicableWrongShape,
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.locales.invalid",
+  );
+
+  const scrollyNotApplicableWithRows = makeEmptyFixture("scrolly-not-applicable-rows-present");
+  mkdirSync(path.join(scrollyNotApplicableWithRows, "growth/landing"), { recursive: true });
+  writeFileSync(path.join(scrollyNotApplicableWithRows, "growth/landing/index.html"), "<main><h1>Static landing</h1></main>\n", "utf8");
+  writeFileSync(
+    path.join(scrollyNotApplicableWithRows, "growth/landing/surface-contract.json"),
+    `${JSON.stringify(
+      {
+        scrollytelling: {
+          applicable: false,
+          evidence: "The landing has no sequential evidence.",
+          locales: ["en-US"],
+          scenes: [{ id: "should-not-exist" }],
+          qa: [{ result: "pending" }],
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  runFixture(
+    "a not-applicable declaration cannot retain scene or QA rows",
+    scrollyNotApplicableWithRows,
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.contract.not_applicable.locales_not_empty",
+  );
+
+  const scrollyReducedMotionCss = writeScrollyFixture(
+    "scrolly-reduced-motion-shared-css",
+    undefined,
+    validScrollySource
+      .replace('import { useReducedMotion } from "motion/react";\n', "")
+      .replace("  const reduced = useReducedMotion();\n", "")
+      .replace("{String(reduced)} ", ""),
+  );
+  writeFileSync(
+    path.join(scrollyReducedMotionCss, "growth/landing/motion.css"),
+    "@media (prefers-reduced-motion: reduce) { .lm-scrolly { scroll-behavior: auto; } }\n",
+    "utf8",
+  );
+  runFixture("shared landing CSS can own the reduced-motion fallback", scrollyReducedMotionCss, "check-scrollytelling-contract.ts", 0);
+
+  runFixture(
+    "equal-bucket source quantization fails",
+    writeScrollyFixture("scrolly-equal-buckets", undefined, `${validScrollySource}\nconst active = Math.floor(scrollYProgress * steps.length);\n`),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.business.equal_bucket_quantization",
+  );
+
+  runFixture(
+    "Save-Data cannot freeze code-native progress",
+    writeScrollyFixture(
+      "scrolly-save-data-freeze",
+      undefined,
+      `${validScrollySource}\nfunction sceneProgress(saveData: boolean) { if (saveData) return 0; return 1; }\n`,
+    ),
+    "check-scrollytelling-contract.ts",
+    1,
+    "scrollytelling.business.save_data_code_native_freeze",
+  );
 }

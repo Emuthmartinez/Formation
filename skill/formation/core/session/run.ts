@@ -190,7 +190,12 @@ function runDeterministicGates(gateIds: readonly string[], workspaceDir: string)
     });
     const passed = result.status === 0;
     evidence.push(`gate:${gate}=${passed ? "passed" : `exit ${result.status ?? "spawn-error"}`}`);
-    if (!passed) return { allPassed: false, evidence };
+    if (!passed) {
+      const diagnostic = `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim();
+      const tail = diagnostic.length > 1_600 ? diagnostic.slice(-1_600) : diagnostic;
+      console.error(`session.deterministic_gate_failed ${gate}: exit ${result.status ?? "spawn-error"}${tail ? `\n${tail}` : ""}`);
+      return { allPassed: false, evidence };
+    }
   }
   return { allPassed: true, evidence };
 }

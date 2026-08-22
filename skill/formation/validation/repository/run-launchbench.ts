@@ -24,6 +24,7 @@ const knownValidators = new Set([
   "check-source-checkpoint",
   "check-mobai-proof",
   "check-motion-contract",
+  "check-scrollytelling-contract",
   "check-agent-operations",
   "check-founder-operator-bootstrap",
   "check-asc-command-contract",
