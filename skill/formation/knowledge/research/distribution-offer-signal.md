@@ -146,18 +146,19 @@ This rule does not apply to necessary security, compliance, backup, or monitorin
 
 Automate the process only when the manual evidence shows that repetition has value.
 
-## 9. Persona-Balanced Test Group
+## 9. Optional Persona-Balanced Test Planning
 
-Use a mixed test group when a beta test is in scope.
-Cover these perspectives:
+When a beta test is in scope, a mixed group can help plan complementary perspectives:
 
 - a target novice
 - a target experienced user
 - a user who represents a device or accessibility risk
 - a domain, product, or usability reviewer
 
-Record the tester perspective with each issue.
-Do not use one tester group as a fixed quota for every product.
+Use the worksheet only when it helps the project plan recruitment or interpret feedback.
+It is optional planning guidance, not app-quality completion evidence.
+It does not replace measured quality results or change fresh-context acceptance of the whole app-quality artifact.
+Do not use one tester group as a fixed quota for every product, and do not treat a filled worksheet as proof that the app passed quality review.
 
 ## 10. Prohibited Transfers
 

@@ -191,6 +191,204 @@ export function register(h: Harness): void {
       "--require-workflow-outputs",
     ]);
   }
+
+  for (const [name, fence] of [
+    ["backtick", "```md"],
+    ["tilde", "~~~md"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-workflow-fenced-signal-corpus-${name}`);
+    const signalPath = path.join(root, "strategy/SIGNAL_CORPUS.md");
+    const original = readFileSync(signalPath, "utf8").split(/\r?\n/).slice(1).join("\n");
+    writeFileSync(signalPath, ["# Signal Corpus", "Status: partial", fence, original, fence.slice(0, 3), ""].join("\n"), "utf8");
+    runFixture(
+      `claimed research workflow rejects Signal Corpus tables hidden inside a ${name} fence`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.signal_corpus_corpus_inputs_missing",
+      ["--require-workflow-outputs"],
+    );
+  }
+
+  const researchSignalDuplicateHeading = makeCompletedResearch("research-workflow-duplicate-signal-heading");
+  {
+    const signalPath = path.join(researchSignalDuplicateHeading, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace(
+      "## Signal Records",
+      [
+        "## Corpus Inputs",
+        "| Input ID | Source type | Owner or creator | Scope | Date range | Collection route | Permission or public basis | Limits |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| INPUT-002 | founder interview | founder | churn language | 2026-07-20 | direct interview | founder-provided | one interview |",
+        "## Signal Records",
+      ].join("\n"),
+    );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "claimed research workflow rejects duplicate rendered Signal Corpus headings",
+    researchSignalDuplicateHeading,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_corpus_inputs_missing",
+    ["--require-workflow-outputs"],
+  );
+
+  const researchSignalFencedDuplicateHeading = makeCompletedResearch("research-workflow-fenced-duplicate-signal-heading");
+  {
+    const signalPath = path.join(researchSignalFencedDuplicateHeading, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace(
+      "## Signal Records",
+      [
+        "```md",
+        "## Corpus Inputs",
+        "| Input ID | Source type | Owner or creator | Scope | Date range | Collection route | Permission or public basis | Limits |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| INPUT-EXAMPLE | example | example | example | 2026-07-20 | example | example | example |",
+        "```",
+        "## Signal Records",
+      ].join("\n"),
+    );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "a fenced example heading does not duplicate a rendered Signal Corpus section",
+    researchSignalFencedDuplicateHeading,
+    "check-research-evidence.ts",
+    0,
+    undefined,
+    ["--require-workflow-outputs"],
+  );
+
+  const researchSignalConflictShortRow = makeCompletedResearch("research-signal-conflict-short-row");
+  {
+    const signalPath = path.join(researchSignalConflictShortRow, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace(
+      "| none | none | no material conflict | SIG-001 is current | review sample supports it |",
+      "| none | none | no material conflict | SIG-001 is current |",
+    );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "a short Conflicts And Supersession row fails instead of disappearing",
+    researchSignalConflictShortRow,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_conflict_row_invalid",
+  );
+
+  const researchSignalConflictSameId = makeCompletedResearch("research-signal-conflict-same-id");
+  {
+    const signalPath = path.join(researchSignalConflictSameId, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace(
+      "| none | none | no material conflict | SIG-001 is current | review sample supports it |",
+      "| SIG-001 | SIG-001 | customer language conflicts | SIG-001 is current | latest review sample controls |",
+    );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "a conflict cannot point one signal at itself",
+    researchSignalConflictSameId,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_conflict_row_invalid",
+  );
+
+  const researchSignalConflictUnknownId = makeCompletedResearch("research-signal-conflict-unknown-id");
+  {
+    const signalPath = path.join(researchSignalConflictUnknownId, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace(
+      "| none | none | no material conflict | SIG-001 is current | review sample supports it |",
+      "| SIG-001 | SIG-999 | customer language conflicts | SIG-001 is current | latest review sample controls |",
+    );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "a conflict cannot reference an undeclared signal",
+    researchSignalConflictUnknownId,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_conflict_row_invalid",
+  );
+
+  const researchSignalConflictEmpty = makeCompletedResearch("research-signal-conflict-empty");
+  {
+    const signalPath = path.join(researchSignalConflictEmpty, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace(
+      "| none | none | no material conflict | SIG-001 is current | review sample supports it |\n## Derived Outputs",
+      "## Derived Outputs",
+    );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "Conflicts And Supersession requires a declared conflict disposition",
+    researchSignalConflictEmpty,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_conflict_row_invalid",
+  );
+
+  const researchSignalConflictMixedSentinel = makeCompletedResearch("research-signal-conflict-mixed-sentinel");
+  {
+    const signalPath = path.join(researchSignalConflictMixedSentinel, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8")
+      .replace(
+        "## Conflicts And Supersession",
+        [
+          "| SIG-002 | customer language | I return when recovery is available | INPUT-001 | 2026-07-20 | product promise and retention | high | current | none | strategy/RESEARCH.md / TRACE-004 |",
+          "## Conflicts And Supersession",
+        ].join("\n"),
+      )
+      .replace(
+        "| none | none | no material conflict | SIG-001 is current | review sample supports it |",
+        [
+          "| none | none | no material conflict | SIG-001 is current | review sample supports it |",
+          "| SIG-001 | SIG-002 | return behavior differs | SIG-002 is current | recovery evidence is newer |",
+        ].join("\n"),
+      );
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "a no-conflict sentinel cannot coexist with declared conflict rows",
+    researchSignalConflictMixedSentinel,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_conflict_row_invalid",
+  );
+
+  const researchSignalReorderedColumns = makeCompletedResearch("research-signal-reordered-extended-columns");
+  writeFileSync(
+    path.join(researchSignalReorderedColumns, "strategy/SIGNAL_CORPUS.md"),
+    [
+      "# Signal Corpus",
+      "Status: current",
+      "## Corpus Inputs",
+      "| Notes | Limits | Input ID | Date range | Source type | Scope | Owner or creator | Permission or public basis | Collection route |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| retained sample | 120 reviews | INPUT-001 | 2026-07-01 to 2026-07-20 | public reviews | habit adherence | App Store users | public evidence | AppKittie review export |",
+      "## Signal Records",
+      "| Notes | Status | Signal ID | Source IDs | Type | Claim or phrase | Observed at | Applies to | Confidence | Supersedes | Artifact or trace |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+      "| retained evidence | current | SIG-001 | INPUT-001 | customer language | I lose the streak and stop opening the app | 2026-07-20 | product promise and retention | high | none | strategy/RESEARCH.md / TRACE-002 |",
+      "## Conflicts And Supersession",
+      "| Notes | Reason | Current position | Conflict | Later signal | Earlier signal |",
+      "| --- | --- | --- | --- | --- | --- |",
+      "| reviewed | review sample supports it | SIG-001 is current | no material conflict | none | none |",
+      "## Derived Outputs",
+      "| Notes | Trace ID | Decision changed | Output | Signal IDs |",
+      "| --- | --- | --- | --- | --- |",
+      "| applied | TRACE-002 | add streak recovery | product/SPEC.md | SIG-001 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "Signal Corpus tables resolve reordered named columns and allow project-specific extensions",
+    researchSignalReorderedColumns,
+    "check-research-evidence.ts",
+    0,
+  );
+
   const useSourceLedgerDistribution = (root: string): void => {
     const researchPath = path.join(root, "strategy/RESEARCH.md");
     const research = readFileSync(researchPath, "utf8")

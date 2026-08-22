@@ -480,7 +480,10 @@ export function register(harness: Harness): void {
     const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");
     const appBuild = catalog.workflows.find((wf) => wf.id === "workflow.engineering.engineering-orchestration-ce-production-readiness");
     const appleSigning = catalog.workflows.find((wf) => wf.id === "workflow.store.apple-signing-and-release-readiness");
-    assert(Boolean(landingBuild && landingPublish && appBuild && appleSigning), "expected local landing, landing publish, app build, and Apple signing workflows");
+    assert(
+      Boolean(landingBuild && landingPublish && appBuild && appleSigning),
+      "expected local landing, landing publish, app build, and Apple signing workflows",
+    );
     assert(
       appleSigning!.gateCommands.includes("check:apple-release-readiness"),
       "Apple signing and release readiness must fail closed on the strict Apple release validator",
@@ -524,7 +527,9 @@ export function register(harness: Harness): void {
     const plan = compilePlan(input, "2026-08-05T00:00:00.000Z");
     assert(plan.nodes.length === input.workflows.length, "compiled plan should have one node per bridged workflow");
     const appleSigning = plan.nodes.find((node) => node.workflowId === "workflow.store.apple-signing-and-release-readiness");
+    const appQuality = plan.nodes.find((node) => node.workflowId === "workflow.engineering.app-quality-and-vitals");
     assert(Boolean(appleSigning), "compiled plan should include Apple signing and release readiness");
+    assert(Boolean(appQuality), "compiled plan should include app quality and vitals");
     assert(
       appleSigning!.verification.kind === "deterministic" && appleSigning!.verification.gateIds.includes("check:apple-release-readiness"),
       "Apple signing execution must carry check:apple-release-readiness as a deterministic gate",
@@ -534,6 +539,20 @@ export function register(harness: Harness): void {
         appleSigning!.inputs.includes("artifact.store-apple-app-store-requirements-md"),
       "compiled Apple signing execution must wait for the privacy workflow artifact",
     );
+    assert(
+      appQuality!.verification.kind === "fresh_context" && appQuality!.verification.gateIds.length === 0,
+      "app quality must retain whole-artifact fresh-context acceptance rather than narrowing to an incomplete beta-only deterministic gate",
+    );
+    assert(
+      /optional planning guidance/i.test(appQuality!.instructions ?? "") && /does not satisfy app-quality completion/i.test(appQuality!.instructions ?? ""),
+      "the app-quality workflow must describe persona-balanced beta planning as optional non-proof",
+    );
+    const appQualityTemplate = readFileSync(path.join(skillRoot, "workspace/business/engineering/APP_QUALITY.md"), "utf8");
+    assert(
+      /optional planning guidance/i.test(appQualityTemplate) && /does not satisfy app-quality completion/i.test(appQualityTemplate),
+      "the app-quality starter must state that the optional beta worksheet is not completion proof",
+    );
+    assert(!/^\|\s*BETA-\d+/im.test(appQualityTemplate), "the optional beta worksheet must not ship prefilled tester rows that look like declared evidence");
   });
 
   harness.check("bridge: a business workflow retains its executable process dependency", () => {

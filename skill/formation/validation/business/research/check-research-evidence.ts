@@ -27,6 +27,32 @@ const OFFER_TEST_HEADERS = {
   exposure: ["Date", "Channel", "Evidence source", "Exposure type", "Exposure", "CTA conversions", "Conversion rate", "Cost", "Result"],
   waiver: ["Date", "Founder", "Reason", "Residual risk accepted"],
 } as const;
+const SIGNAL_CORPUS_HEADERS = {
+  inputs: [
+    ["Input ID"],
+    ["Source type"],
+    ["Owner or creator", "Owner", "Creator"],
+    ["Scope"],
+    ["Date range"],
+    ["Collection route"],
+    ["Permission or public basis", "Permission", "Public basis"],
+    ["Limits", "Limit"],
+  ],
+  records: [
+    ["Signal ID"],
+    ["Type"],
+    ["Claim or phrase", "Claim", "Phrase"],
+    ["Source IDs", "Source ID"],
+    ["Observed at"],
+    ["Applies to"],
+    ["Confidence"],
+    ["Status"],
+    ["Supersedes"],
+    ["Artifact or trace", "Artifact", "Trace"],
+  ],
+  conflicts: [["Earlier signal"], ["Later signal"], ["Conflict"], ["Current position"], ["Reason"]],
+  derived: [["Signal IDs", "Signal ID"], ["Output"], ["Decision changed"], ["Trace ID"]],
+} as const;
 
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
@@ -453,6 +479,19 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
     return index;
   }
 
+  const sections = {
+    inputs: parseRequiredTableSection(value, "Corpus Inputs"),
+    records: parseRequiredTableSection(value, "Signal Records"),
+    conflicts: parseRequiredTableSection(value, "Conflicts And Supersession"),
+    derived: parseRequiredTableSection(value, "Derived Outputs"),
+  };
+  const sectionEntries = [
+    ["Corpus Inputs", sections.inputs],
+    ["Signal Records", sections.records],
+    ["Conflicts And Supersession", sections.conflicts],
+    ["Derived Outputs", sections.derived],
+  ] as const;
+
   const renderedStatus = parseRenderedTopLevelStatus(value);
   const notApplicable = renderedStatus.ok ? renderedStatus.status.value.match(/^not applicable\b(.*)$/i) : null;
   if (notApplicable) {
@@ -467,10 +506,10 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
         ),
       );
     }
-    const retainedRows = ["Corpus Inputs", "Signal Records", "Conflicts And Supersession", "Derived Outputs"].flatMap((heading) =>
-      tableDataRows(markdownSection(value, heading)),
+    const retainedOrAmbiguousSections = sectionEntries.filter(([, result]) =>
+      result.ok ? result.section.rows.length > 0 : result.errors.some((error) => error.kind !== "section-missing"),
     );
-    if (retainedRows.length > 0) {
+    if (retainedOrAmbiguousSections.length > 0) {
       target.push(
         issue(
           "error",
@@ -483,8 +522,8 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
     return index;
   }
 
-  for (const heading of ["Corpus Inputs", "Signal Records", "Conflicts And Supersession", "Derived Outputs"]) {
-    if (!markdownSection(value, heading)) {
+  for (const [heading, result] of sectionEntries) {
+    if (!result.ok) {
       target.push(
         issue(
           strict ? "error" : "warning",
@@ -497,20 +536,10 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
   }
 
   const placeholder = /\b(todo|tbd|placeholder|replace with|pending|unverified|authored reason|yyyy-mm-dd)\b|<[^>]+>/i;
-  const inputs = markdownSection(value, "Corpus Inputs");
-  const inputColumns: RegExp[] = [
-    /input id/i,
-    /source type/i,
-    /owner|creator/i,
-    /^\s*scope\s*$/i,
-    /date range/i,
-    /collection route/i,
-    /permission|public basis/i,
-    /^\s*limits?\s*$/i,
-  ];
-  const inputColumnIndexes = inputColumns.map((pattern) => tableColumnIndex(inputs, pattern));
+  const inputs = sections.inputs.ok ? sections.inputs.section : undefined;
+  const inputColumnIndexes = inputs ? SIGNAL_CORPUS_HEADERS.inputs.map((headers) => tableColumnAny(inputs, headers)) : [];
   const declaredInputIds = new Set<string>();
-  if (inputColumnIndexes.some((column) => column < 1)) {
+  if (!inputs || inputColumnIndexes.some((column) => column < 0)) {
     target.push(
       issue(
         "error",
@@ -520,10 +549,10 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
       ),
     );
   } else {
-    const inputRows = tableDataRows(inputs);
-    let inputRowsValid = inputRows.length > 0;
+    const inputRows = inputs.rows;
+    let inputRowsValid = inputRows.length > 0 && rowsMatchTableWidth(inputs);
     for (const row of inputRows) {
-      const cells = inputColumnIndexes.map((column) => (row[column] ?? "").trim());
+      const cells = inputColumnIndexes.map((column) => (row.cells[column] ?? "").trim());
       const inputId = (cells[0] ?? "").toUpperCase();
       const complete =
         /^INPUT-[A-Z0-9][A-Z0-9-]*$/.test(inputId) &&
@@ -549,20 +578,9 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
     }
   }
 
-  const records = markdownSection(value, "Signal Records");
-  const requiredColumns: RegExp[] = [
-    /signal id/i,
-    /^\s*type\s*$/i,
-    /claim|phrase/i,
-    /source ids?/i,
-    /observed at/i,
-    /applies to/i,
-    /confidence/i,
-    /^\s*status\s*$/i,
-    /supersedes/i,
-    /artifact|trace/i,
-  ];
-  if (requiredColumns.some((pattern) => tableColumnIndex(records, pattern) < 1)) {
+  const records = sections.records.ok ? sections.records.section : undefined;
+  const recordColumns = records ? SIGNAL_CORPUS_HEADERS.records.map((headers) => tableColumnAny(records, headers)) : [];
+  if (!records || recordColumns.some((column) => column < 0)) {
     target.push(
       issue(
         "error",
@@ -572,20 +590,19 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
       ),
     );
   } else {
-    const columns = requiredColumns.map((pattern) => tableColumnIndex(records, pattern));
-    const signalRows = tableDataRows(records);
+    const signalRows = records.rows;
     const supersessionRecords = signalRows.flatMap((row): SignalSupersessionRecord[] => {
-      const id = (row[columns[0]!] ?? "").trim().toUpperCase();
-      const lifecycle = (row[columns[7]!] ?? "").trim().toLowerCase();
+      const id = (row.cells[recordColumns[0]!] ?? "").trim().toUpperCase();
+      const lifecycle = (row.cells[recordColumns[7]!] ?? "").trim().toLowerCase();
       if (!/^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id) || !/^(current|dated|superseded|rejected|unverified)$/.test(lifecycle)) return [];
-      return [{ id, lifecycle: lifecycle as SignalLifecycle, replacementId: (row[columns[8]!] ?? "").trim().toUpperCase() }];
+      return [{ id, lifecycle: lifecycle as SignalLifecycle, replacementId: (row.cells[recordColumns[8]!] ?? "").trim().toUpperCase() }];
     });
     const invalidSupersessionIds = new Set(validateSignalSupersessionGraph(supersessionRecords).invalidSignalIds);
     const seenSignalIds = new Set<string>();
-    let rowsComplete = signalRows.length > 0;
+    let rowsComplete = signalRows.length > 0 && rowsMatchTableWidth(records);
     let unresolvedSource = false;
     for (const row of signalRows) {
-      const cells = columns.map((column) => (row[column] ?? "").trim());
+      const cells = recordColumns.map((column) => (row.cells[column] ?? "").trim());
       const id = (cells[0] ?? "").toUpperCase();
       const type = cells[1] ?? "";
       const claim = cells[2] ?? "";
@@ -638,10 +655,60 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
     }
   }
 
-  const derived = markdownSection(value, "Derived Outputs");
-  const derivedColumns: RegExp[] = [/signal ids?/i, /^\s*output\s*$/i, /decision changed/i, /trace id/i];
-  const derivedColumnIndexes = derivedColumns.map((pattern) => tableColumnIndex(derived, pattern));
-  if (derivedColumnIndexes.some((column) => column < 1)) {
+  const conflicts = sections.conflicts.ok ? sections.conflicts.section : undefined;
+  const conflictColumnIndexes = conflicts ? SIGNAL_CORPUS_HEADERS.conflicts.map((headers) => tableColumnAny(conflicts, headers)) : [];
+  if (conflicts && conflictColumnIndexes.some((column) => column < 0)) {
+    target.push(
+      issue(
+        "error",
+        "research.signal_corpus_conflicts_and_supersession_missing",
+        "The Conflicts And Supersession table needs Earlier signal, Later signal, Conflict, Current position, and Reason columns.",
+        "strategy/SIGNAL_CORPUS.md",
+      ),
+    );
+  } else if (conflicts) {
+    const conflictRows = conflicts.rows.map((row) => {
+      const cells = conflictColumnIndexes.map((column) => (row.cells[column] ?? "").trim());
+      const [earlier, later, conflict] = cells;
+      return {
+        cells,
+        noConflict: /^none$/i.test(earlier ?? "") && /^none$/i.test(later ?? "") && /^no(?: material)? conflict\b/i.test(conflict ?? ""),
+      };
+    });
+    const invalidConflictRow =
+      conflictRows.length === 0 ||
+      !rowsMatchTableWidth(conflicts) ||
+      conflictRows.some(({ cells, noConflict }) => {
+        const [earlier, later] = cells;
+        const complete = cells.every((cell) => cell.length > 0 && !placeholder.test(cell));
+        if (!complete) return true;
+        if (noConflict) return false;
+        const earlierId = (earlier ?? "").toUpperCase();
+        const laterId = (later ?? "").toUpperCase();
+        return !(
+          /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(earlierId) &&
+          /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(laterId) &&
+          earlierId !== laterId &&
+          index.signalLifecycles.has(earlierId) &&
+          index.signalLifecycles.has(laterId)
+        );
+      }) ||
+      (conflictRows.some((row) => row.noConflict) && (conflictRows.length !== 1 || !conflictRows[0]?.noConflict));
+    if (invalidConflictRow) {
+      target.push(
+        issue(
+          "error",
+          "research.signal_corpus_conflict_row_invalid",
+          "Every authored Conflicts And Supersession row must be width-complete and substantive. Signal IDs must resolve to distinct declared records; use a complete none/none no-conflict row only when no material conflict exists.",
+          "strategy/SIGNAL_CORPUS.md",
+        ),
+      );
+    }
+  }
+
+  const derived = sections.derived.ok ? sections.derived.section : undefined;
+  const derivedColumnIndexes = derived ? SIGNAL_CORPUS_HEADERS.derived.map((headers) => tableColumnAny(derived, headers)) : [];
+  if (!derived || derivedColumnIndexes.some((column) => column < 0)) {
     target.push(
       issue(
         "error",
@@ -651,18 +718,20 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
       ),
     );
   } else {
-    const invalidDerivedRow = tableDataRows(derived).some((row) => {
-      const cells = derivedColumnIndexes.map((column) => (row[column] ?? "").trim());
-      const signalIds = parsePrefixedIdList(cells[0] ?? "", "SIG");
-      return !(
-        signalIds.validSyntax &&
-        signalIds.ids.length > 0 &&
-        signalIds.ids.every((signalId) => index.eligibleSignalIds.has(signalId)) &&
-        [cells[1] ?? "", cells[2] ?? ""].every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
-        /\bTRACE-[A-Z0-9][A-Z0-9-]*\b/i.test(cells[3] ?? "") &&
-        !placeholder.test(cells[3] ?? "")
-      );
-    });
+    const invalidDerivedRow =
+      !rowsMatchTableWidth(derived) ||
+      derived.rows.some((row) => {
+        const cells = derivedColumnIndexes.map((column) => (row.cells[column] ?? "").trim());
+        const signalIds = parsePrefixedIdList(cells[0] ?? "", "SIG");
+        return !(
+          signalIds.validSyntax &&
+          signalIds.ids.length > 0 &&
+          signalIds.ids.every((signalId) => index.eligibleSignalIds.has(signalId)) &&
+          [cells[1] ?? "", cells[2] ?? ""].every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
+          /\bTRACE-[A-Z0-9][A-Z0-9-]*\b/i.test(cells[3] ?? "") &&
+          !placeholder.test(cells[3] ?? "")
+        );
+      });
     if (invalidDerivedRow) {
       target.push(
         issue(
@@ -685,6 +754,14 @@ function normalizedTableLabel(value: string): string {
 
 function tableColumn(section: RequiredTableSection, header: string): number {
   return section.headerIndexes.get(normalizedTableLabel(header)) ?? -1;
+}
+
+function tableColumnAny(section: RequiredTableSection, headers: readonly string[]): number {
+  for (const header of headers) {
+    const column = tableColumn(section, header);
+    if (column >= 0) return column;
+  }
+  return -1;
 }
 
 function rowsMatchTableWidth(section: RequiredTableSection): boolean {
