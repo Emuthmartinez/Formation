@@ -219,7 +219,7 @@ if (manualProofSection) {
         return (
           Boolean(parseLiveDate(date ?? "")) &&
           evidenceCells.every((cell) => Boolean(cell) && !PLACEHOLDER_TEXT.test(cell ?? "")) &&
-          /\b(pass(?:ed)?|success(?:ful(?:ly)?)?|completed)\b/i.test(result ?? "")
+          /^passed$/i.test(result ?? "")
         );
       });
     if (!validManualRun) {
@@ -228,7 +228,7 @@ if (manualProofSection) {
           numbersSeverity,
           "post_launch_ops.manual_loop_proof_missing",
           `${runbookPath} marks Manual Loop Proof applicable but has no complete successful manual-run row. Record the date, process, real input and output, ` +
-            "successful result, cost, observed failure mode, and automation decision before automating the process.",
+            'a Result of "passed", cost, observed failure mode, and automation decision before automating the process.',
           runbookPath,
         ),
       );

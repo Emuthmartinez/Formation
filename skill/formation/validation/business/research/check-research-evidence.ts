@@ -519,7 +519,7 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
       const complete =
         /^INPUT-[A-Z0-9][A-Z0-9-]*$/.test(inputId) &&
         cells.slice(1).every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
-        /\b20\d{2}-\d{2}-\d{2}\b/.test(cells[4] ?? "") &&
+        isValidPastIsoDateRange(cells[4] ?? "") &&
         !declaredInputIds.has(inputId);
       if (!complete) {
         inputRowsValid = false;
@@ -565,6 +565,9 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
   } else {
     const columns = requiredColumns.map((pattern) => tableColumnIndex(records, pattern));
     const signalRows = tableDataRows(records);
+    const declaredSignalIds = new Set(
+      signalRows.map((row) => (row[columns[0]!] ?? "").trim().toUpperCase()).filter((id) => /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id)),
+    );
     const seenSignalIds = new Set<string>();
     let rowsComplete = signalRows.length > 0;
     let unresolvedSource = false;
@@ -582,11 +585,12 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
       const trace = cells[9] ?? "";
       const sourceIds = parsePrefixedIdList(sources, "INPUT");
       const sourcesResolve = sourceIds.validSyntax && sourceIds.ids.length > 0 && sourceIds.ids.every((sourceId) => declaredInputIds.has(sourceId));
-      const supersessionValid = lifecycle !== "superseded" || (/^SIG-[A-Z0-9][A-Z0-9-]*$/i.test(supersedes) && !/^none$/i.test(supersedes));
+      const replacementId = supersedes.toUpperCase();
+      const supersessionValid = lifecycle !== "superseded" || (declaredSignalIds.has(replacementId) && replacementId !== id);
       const rowComplete =
         /^SIG-[A-Z0-9][A-Z0-9-]*$/.test(id) &&
         [type, claim, appliesTo, trace].every((cell) => cell.length > 0 && !placeholder.test(cell)) &&
-        /^\d{4}-\d{2}-\d{2}$/.test(observedAt) &&
+        isValidPastIsoDate(observedAt) &&
         /^(low|medium|high)$/i.test(confidence) &&
         /^(current|dated|superseded|rejected|unverified)$/.test(lifecycle) &&
         supersessionValid &&
@@ -731,7 +735,7 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
   const status = (row[statusColumn] ?? "").trim().toLowerCase();
   const decider = (row[deciderColumn] ?? "").trim();
   const decisionComplete =
-    /^\d{4}-\d{2}-\d{2}$/.test((row[dateColumn] ?? "").trim()) &&
+    isValidPastIsoDate((row[dateColumn] ?? "").trim()) &&
     [row[evidenceColumn] ?? "", row[decisionColumn] ?? "", decider].every((cell) => cell.trim().length > 0 && !placeholder.test(cell)) &&
     isFounderDecider(decider);
   if (!decisionComplete) {
@@ -783,7 +787,7 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
       const founder = candidate[founderColumn] ?? "";
       return (
         [waiverDateColumn, founderColumn, reasonColumn, riskColumn].every((column) => column > 0) &&
-        /^\d{4}-\d{2}-\d{2}$/.test(candidate[waiverDateColumn] ?? "") &&
+        isValidPastIsoDate((candidate[waiverDateColumn] ?? "").trim()) &&
         isFounderDecider(founder) &&
         [candidate[reasonColumn] ?? "", candidate[riskColumn] ?? ""].every((cell) => cell.trim().length > 0 && !placeholder.test(cell))
       );
@@ -905,6 +909,18 @@ function sourceLedgerRows(value: string): string[][] {
 
 function isDateTime(value: string | undefined): boolean {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && !Number.isNaN(new Date(value).getTime()));
+}
+
+function isValidPastIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value && date.getTime() <= Date.now();
+}
+
+function isValidPastIsoDateRange(value: string): boolean {
+  const dates = value.match(/\b\d{4}-\d{2}-\d{2}\b/g) ?? [];
+  if (dates.length < 1 || dates.length > 2 || !dates.every(isValidPastIsoDate)) return false;
+  return dates.length === 1 || dates[0]! <= dates[1]!;
 }
 
 /** The block from a `## <heading>` line to the next `## ` heading (or EOF). */

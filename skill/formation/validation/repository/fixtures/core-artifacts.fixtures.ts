@@ -176,6 +176,20 @@ export function register(h: Harness): void {
   }
   runFixture("signal corpus with an unknown lifecycle fails", researchSignalLifecycle, "check-research-evidence.ts", 1, "research.signal_corpus_row_missing");
 
+  const researchSignalImpossibleDate = makeCompletedResearch("research-signal-impossible-date");
+  {
+    const signalPath = path.join(researchSignalImpossibleDate, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace("| INPUT-001 | 2026-07-20 |", "| INPUT-001 | 2026-99-99 |");
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "signal corpus rejects an impossible observed-at calendar date",
+    researchSignalImpossibleDate,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_row_missing",
+  );
+
   const researchSignalMixedValidity = makeCompletedResearch("research-signal-mixed-validity");
   {
     const signalPath = path.join(researchSignalMixedValidity, "strategy/SIGNAL_CORPUS.md");
@@ -218,6 +232,34 @@ export function register(h: Harness): void {
   runFixture(
     "corpus input without a real dated range fails",
     researchSignalInputInvalid,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_input_row_invalid",
+  );
+
+  const researchSignalInputImpossibleDate = makeCompletedResearch("research-signal-input-impossible-date");
+  {
+    const signalPath = path.join(researchSignalInputImpossibleDate, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace("| 2026-07-01 to 2026-07-20 |", "| 2026-99-99 to 2026-07-20 |");
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "corpus input rejects an impossible calendar date in its range",
+    researchSignalInputImpossibleDate,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_input_row_invalid",
+  );
+
+  const researchSignalInputReversedRange = makeCompletedResearch("research-signal-input-reversed-range");
+  {
+    const signalPath = path.join(researchSignalInputReversedRange, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8").replace("| 2026-07-01 to 2026-07-20 |", "| 2026-07-20 to 2026-07-01 |");
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "corpus input rejects a reversed date range",
+    researchSignalInputReversedRange,
     "check-research-evidence.ts",
     1,
     "research.signal_corpus_input_row_invalid",
@@ -271,6 +313,38 @@ export function register(h: Harness): void {
     "check-research-evidence.ts",
     1,
     "research.signal_corpus_derived_output_invalid",
+  );
+
+  const researchSupersededSignalMissingReplacement = makeCompletedResearch("research-superseded-signal-missing-replacement");
+  {
+    const signalPath = path.join(researchSupersededSignalMissingReplacement, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8")
+      .replace("| high | current | none |", "| high | superseded | SIG-999 |")
+      .replace("| SIG-001 | product/SPEC.md | add streak recovery | TRACE-002 |", "");
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "superseded signal must resolve to a declared replacement",
+    researchSupersededSignalMissingReplacement,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_row_missing",
+  );
+
+  const researchSupersededSignalSelfReference = makeCompletedResearch("research-superseded-signal-self-reference");
+  {
+    const signalPath = path.join(researchSupersededSignalSelfReference, "strategy/SIGNAL_CORPUS.md");
+    const signal = readFileSync(signalPath, "utf8")
+      .replace("| high | current | none |", "| high | superseded | SIG-001 |")
+      .replace("| SIG-001 | product/SPEC.md | add streak recovery | TRACE-002 |", "");
+    writeFileSync(signalPath, signal, "utf8");
+  }
+  runFixture(
+    "superseded signal cannot point to itself as the replacement",
+    researchSupersededSignalSelfReference,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_row_missing",
   );
 
   const researchDistributionSourceLedger = makeCompletedResearch("research-distribution-source-ledger");
@@ -415,6 +489,40 @@ export function register(h: Harness): void {
     "research.offer_test_measurement_missing",
   );
 
+  const researchOfferImpossibleDecisionDate = makeCompletedResearch("research-offer-test-impossible-decision-date");
+  {
+    const offerPath = path.join(researchOfferImpossibleDecisionDate, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+      "| run | 2026-99-99 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "offer-test decision rejects an impossible calendar date",
+    researchOfferImpossibleDecisionDate,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_decision_incomplete",
+  );
+
+  const researchOfferFutureDecisionDate = makeCompletedResearch("research-offer-test-future-decision-date");
+  {
+    const offerPath = path.join(researchOfferFutureDecisionDate, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+      "| run | 2999-01-01 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "offer-test decision rejects a future calendar date",
+    researchOfferFutureDecisionDate,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_decision_incomplete",
+  );
+
   const researchOfferStarterContract = makeCompletedResearch("research-offer-test-starter-contract");
   {
     const offerPath = path.join(researchOfferStarterContract, "strategy/OFFER_TEST.md");
@@ -463,6 +571,28 @@ export function register(h: Harness): void {
     writeFileSync(offerPath, offer, "utf8");
   }
   runFixture("dated founder offer-test waiver passes", researchOfferWaived, "check-research-evidence.ts", 0);
+
+  const researchOfferWaiverImpossibleDate = makeCompletedResearch("research-offer-test-waiver-impossible-date");
+  {
+    const offerPath = path.join(researchOfferWaiverImpossibleDate, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8")
+      .replace(
+        "| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |",
+        "| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | founder |",
+      )
+      .replace(
+        "## Founder Waiver\n| Date | Founder | Reason | Residual risk accepted |\n| --- | --- | --- | --- |",
+        "## Founder Waiver\n| Date | Founder | Reason | Residual risk accepted |\n| --- | --- | --- | --- |\n| 2026-99-99 | founder | no public account access before decision date | audience and message remain untested |",
+      );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "founder offer-test waiver rejects an impossible calendar date",
+    researchOfferWaiverImpossibleDate,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_waiver_missing",
+  );
 
   const researchOfferRecordedOwner = makeCompletedResearch("research-offer-test-recorded-owner");
   {

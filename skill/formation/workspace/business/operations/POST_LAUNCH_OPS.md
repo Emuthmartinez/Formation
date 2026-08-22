@@ -65,6 +65,7 @@ Record one successful manual run before you automate a value-producing process.
 Security, compliance, backup, and monitoring controls do not require this proof.
 
 Applicability: TODO — Record applicable, or not applicable with a specific reason.
+Use `passed` or `failed` in Result. Do not hide the run outcome inside narrative text.
 
 | Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |
 | --- | --- | --- | --- | --- | --- | --- | --- |

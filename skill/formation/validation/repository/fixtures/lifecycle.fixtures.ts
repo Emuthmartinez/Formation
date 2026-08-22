@@ -47,7 +47,7 @@ export function register(h: Harness): void {
     const runbookPath = path.join(root, "operations/POST_LAUNCH_OPS.md");
     const header =
       "| Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |\n| --- | --- | --- | --- | --- | --- | --- | --- |";
-    const row = `| ${isoDaysAgo(2)} | renewal reminder send | 18 opted-in renewal reminders | 18 delivered reminders | completed successfully | $0 | two stale email addresses observed | keep manual until three clean weekly runs |`;
+    const row = `| ${isoDaysAgo(2)} | renewal reminder send | 18 opted-in renewal reminders | 18 delivered reminders | passed | $0 | two stale email addresses observed | keep manual until three clean weekly runs |`;
     writeFileSync(runbookPath, readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
     setManualLoopApplicability(root, "applicable");
   };
@@ -123,6 +123,27 @@ export function register(h: Harness): void {
   runFixture(
     "post-launch applicable automation without a successful manual-loop row fails",
     postLaunchManualLoopEmpty,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopNegated = makeFixture("post-launch-manual-loop-negated-success");
+  {
+    const state = readState(postLaunchManualLoopNegated);
+    expectRecord(state.project, "project")["phase"] = "phase_6b";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
+    writeState(postLaunchManualLoopNegated, state);
+    setPostLaunchLive(postLaunchManualLoopNegated, 10);
+    recordSuccessfulManualLoop(postLaunchManualLoopNegated);
+    const runbookPath = path.join(postLaunchManualLoopNegated, "operations/POST_LAUNCH_OPS.md");
+    writeFileSync(runbookPath, readFileSync(runbookPath, "utf8").replace("| passed | $0 |", "| not completed because the export failed | $0 |"), "utf8");
+  }
+  runFixture(
+    "manual-loop result text cannot negate a success keyword and still pass",
+    postLaunchManualLoopNegated,
     "check-post-launch-ops.ts",
     1,
     "post_launch_ops.manual_loop_proof_missing",
