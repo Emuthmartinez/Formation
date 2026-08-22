@@ -60,6 +60,10 @@ export interface RequiredTableSection {
 export type RequiredTableSectionResult =
   { readonly ok: true; readonly section: RequiredTableSection } | { readonly ok: false; readonly errors: readonly RequiredTableSectionError[] };
 
+export type RenderedTopLevelStatusResult =
+  | { readonly ok: true; readonly status: { readonly value: string; readonly sourceLine: number } }
+  | { readonly ok: false; readonly kind: "missing" | "duplicate" | "malformed"; readonly sourceLines: readonly number[] };
+
 interface ScannedLine {
   readonly raw: string;
   readonly sourceLine: number;
@@ -86,6 +90,31 @@ interface UnsupportedMarkdownSyntax {
 interface MarkdownScan {
   readonly lines: readonly ScannedLine[];
   readonly unsupported: readonly UnsupportedMarkdownSyntax[];
+}
+
+/**
+ * Read one rendered, unindented `Status: value` line without assigning any
+ * business meaning to its value. Fenced and commented examples stay hidden;
+ * duplicate or malformed top-level declarations fail closed.
+ */
+export function parseRenderedTopLevelStatus(markdown: string): RenderedTopLevelStatusResult {
+  const lines = scanRenderedLines(markdown).lines;
+  const h1Index = lines.findIndex((line) => line.rendered && atxHeadingLevel(line.raw) === 1);
+  if (h1Index < 0) return { ok: false, kind: "missing", sourceLines: [] };
+  const nextHeadingOffset = lines.slice(h1Index + 1).findIndex((line) => line.rendered && atxHeadingLevel(line.raw) !== undefined);
+  const preambleEnd = nextHeadingOffset < 0 ? lines.length : h1Index + 1 + nextHeadingOffset;
+  const preambleLines = lines.slice(h1Index + 1, preambleEnd).filter((line) => line.rendered && line.raw.trim().length > 0);
+  const candidates = preambleLines.filter((line) => /^Status\b/i.test(line.raw));
+  if (candidates.length === 0) return { ok: false, kind: "missing", sourceLines: [] };
+  if (candidates.length > 1) {
+    return { ok: false, kind: "duplicate", sourceLines: candidates.map((candidate) => candidate.sourceLine) };
+  }
+
+  const candidate = candidates[0]!;
+  if (preambleLines[0] !== candidate) return { ok: false, kind: "malformed", sourceLines: [candidate.sourceLine] };
+  const match = candidate.raw.match(/^Status:\s*(\S(?:.*\S)?)\s*$/i);
+  if (!match) return { ok: false, kind: "malformed", sourceLines: [candidate.sourceLine] };
+  return { ok: true, status: { value: match[1]!, sourceLine: candidate.sourceLine } };
 }
 
 /**
@@ -258,6 +287,11 @@ function h2Title(line: string): string | undefined {
   const match = line.match(/^ {0,3}##(?:[\t ]+|$)(.*)$/u);
   if (!match) return undefined;
   return (match[1] ?? "").replace(/[\t ]+#+[\t ]*$/u, "").trim();
+}
+
+function atxHeadingLevel(line: string): number | undefined {
+  const match = line.match(/^ {0,3}(#{1,6})(?:[\t ]+|$)/u);
+  return match?.[1]?.length;
 }
 
 function scanRenderedLines(markdown: string): MarkdownScan {

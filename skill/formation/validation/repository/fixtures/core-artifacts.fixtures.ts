@@ -1040,6 +1040,76 @@ export function register(h: Harness): void {
   );
   runFixture("signal corpus marked not applicable with an authored reason passes", researchSignalNotApplicableWithReason, "check-research-evidence.ts", 0);
 
+  for (const [name, fence] of [
+    ["backtick", "```"],
+    ["tilde", "~~~"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-signal-corpus-not-applicable-${name}-fence`);
+    useSourceLedgerDistribution(root);
+    writeFileSync(
+      path.join(root, "strategy/SIGNAL_CORPUS.md"),
+      ["# Signal Corpus", fence, "Status: not applicable — No reusable customer-language source material exists for this project.", fence, ""].join("\n"),
+      "utf8",
+    );
+    runFixture(
+      `a not-applicable status inside a ${name} fence cannot exempt Signal Corpus`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.signal_corpus_corpus_inputs_missing",
+    );
+  }
+
+  const researchSignalDuplicateStatus = makeCompletedResearch("research-signal-corpus-duplicate-status");
+  useSourceLedgerDistribution(researchSignalDuplicateStatus);
+  writeFileSync(
+    path.join(researchSignalDuplicateStatus, "strategy/SIGNAL_CORPUS.md"),
+    ["# Signal Corpus", "Status: not applicable — No reusable customer-language source material exists for this project.", "Status: current", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "duplicate rendered Signal Corpus statuses cannot preserve a not-applicable exemption",
+    researchSignalDuplicateStatus,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_corpus_inputs_missing",
+  );
+
+  const researchSignalMalformedSiblingStatus = makeCompletedResearch("research-signal-corpus-malformed-sibling-status");
+  useSourceLedgerDistribution(researchSignalMalformedSiblingStatus);
+  writeFileSync(
+    path.join(researchSignalMalformedSiblingStatus, "strategy/SIGNAL_CORPUS.md"),
+    [
+      "# Signal Corpus",
+      "Status: not applicable — No reusable customer-language source material exists for this project.",
+      "Status not applicable — copied prose is not a status declaration.",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a malformed rendered Signal Corpus status invalidates a sibling not-applicable exemption",
+    researchSignalMalformedSiblingStatus,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_corpus_inputs_missing",
+  );
+
+  const researchSignalSectionLocalStatus = makeCompletedResearch("research-signal-corpus-section-local-status");
+  useSourceLedgerDistribution(researchSignalSectionLocalStatus);
+  writeFileSync(
+    path.join(researchSignalSectionLocalStatus, "strategy/SIGNAL_CORPUS.md"),
+    ["# Signal Corpus", "## Notes", "Status: not applicable — No reusable customer-language source material exists for this project.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a section-local Signal Corpus status cannot act as the top-level exemption",
+    researchSignalSectionLocalStatus,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_corpus_inputs_missing",
+  );
+
   const researchSignalNotApplicableWithRows = makeCompletedResearch("research-signal-corpus-not-applicable-with-rows");
   useSourceLedgerDistribution(researchSignalNotApplicableWithRows);
   {

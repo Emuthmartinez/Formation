@@ -11,7 +11,7 @@
  * Usage: tsx validation/business/research/check-research-evidence.ts --root <app-repo-root>
  */
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../../tooling/lib/launch-state.js";
-import { parseRequiredTableSection, type RequiredTableSection } from "../process/required-table-section.js";
+import { parseRenderedTopLevelStatus, parseRequiredTableSection, type RequiredTableSection } from "../process/required-table-section.js";
 import { parseOfferMeasurement, validateSignalSupersessionGraph, type SignalLifecycle, type SignalSupersessionRecord } from "./research-evidence-helpers.js";
 
 const args = parseCliArgs(process.argv.slice(2));
@@ -453,7 +453,8 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
     return index;
   }
 
-  const notApplicable = value.match(/^Status:\s*not applicable\b(.*)$/im);
+  const renderedStatus = parseRenderedTopLevelStatus(value);
+  const notApplicable = renderedStatus.ok ? renderedStatus.status.value.match(/^not applicable\b(.*)$/i) : null;
   if (notApplicable) {
     const reason = (notApplicable[1] ?? "").replace(/^[\s:—-]+/, "").trim();
     if (reason.length === 0 || /\b(todo|tbd|placeholder|replace with|unverified|pending|authored reason)\b/i.test(reason) || /<[^>]+>/.test(reason)) {

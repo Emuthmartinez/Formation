@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { assert, skillRoot, type Harness } from "./_harness.js";
-import { laneKeys, type BusinessStateV2 } from "../../core/schema/types.js";
+import { laneKeys, type BusinessStateV2, type RunStateDocument } from "../../core/schema/types.js";
 import { acquireLock, releaseLock } from "../../core/reducer/lock.js";
 import { compilePlan, type CatalogInput } from "../../core/engine/compile.js";
 import { seedRunState, writeRunState } from "../../core/engine/runstate.js";
@@ -262,6 +262,17 @@ function readDigest(handle: WorkspaceHandle, sessionId: string): string {
   const filePath = handle.digestPath(sessionId);
   assert(existsSync(filePath), `expected a digest file at ${filePath} — a session must never exit silently`);
   return readFileSync(filePath, "utf8");
+}
+
+function readRunState(handle: WorkspaceHandle): RunStateDocument {
+  return JSON.parse(readFileSync(path.join(handle.dir, "run", "run-state.json"), "utf8")) as RunStateDocument;
+}
+
+function readAuditEntries(handle: WorkspaceHandle): Array<Record<string, unknown>> {
+  return readFileSync(handle.auditPath, "utf8")
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .map((line) => JSON.parse(line) as Record<string, unknown>);
 }
 
 // --- fixture catalogs -----------------------------------------------------------------------
@@ -529,6 +540,146 @@ function slowSilentFreshContextCatalog(): CatalogInput {
       },
     ],
   };
+}
+
+/** Two independent judgment nodes let a resumed session carry older pending work while producing one exact new verification candidate. */
+function resumedFreshContextCatalog(): CatalogInput {
+  return {
+    version: "catalog.session-fixture.resumed-fresh-context",
+    artifacts: [
+      { id: "artifact.research-scan", path: "research/scan.md" },
+      { id: "artifact.engineering-change", path: "engineering/change.md" },
+    ],
+    workflows: [
+      {
+        id: "workflow.research-scan",
+        title: "Research what people need",
+        domainId: "domain.research",
+        actionClass: "draft",
+        dependencies: [],
+        outputPaths: ["research/scan.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+      {
+        id: "workflow.engineering-change",
+        title: "Apply the researched change",
+        domainId: "domain.engineering",
+        actionClass: "mutate",
+        dependencies: [],
+        outputPaths: ["engineering/change.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+    ],
+  };
+}
+
+function driveCooperativeYield(
+  harness: Harness,
+  handle: WorkspaceHandle,
+  options: {
+    readonly sessionId: string;
+    readonly trigger: "lock-acquired" | "attempt-running";
+    readonly runningNodeId?: string;
+    readonly executor: "fixture" | "slow-silent";
+    readonly slowDelayMs?: number;
+  },
+): CliResult {
+  const lockPath = path.join(handle.dir, "control", "session.lock");
+  const runStatePath = path.join(handle.dir, "run", "run-state.json");
+  const lockModuleUrl = pathToFileURL(path.join(skillRoot, "core/reducer/lock.ts")).href;
+  const watchdogMs = (options.slowDelayMs ?? 0) + 12_000;
+  const driverPath = path.join(harness.makeTempDir(`session-yield-driver-${options.sessionId}`), "drive-yield.mts");
+  const driverSource = `
+import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { requestInteractive } from ${JSON.stringify(lockModuleUrl)};
+
+const child = spawn(${JSON.stringify(tsxBin)}, [
+  ${JSON.stringify(runCliPath)},
+  "--workspace", ${JSON.stringify(handle.dir)},
+  "--brief", ${JSON.stringify(handle.briefPath)},
+  "--session", ${JSON.stringify(options.sessionId)},
+  "--executor", ${JSON.stringify(options.executor)},
+  ${options.slowDelayMs === undefined ? "" : `"--slow-delay-ms", ${JSON.stringify(String(options.slowDelayMs))},`}
+  "--verifier", "fixture",
+  "--lock-retries", "0",
+], { cwd: ${JSON.stringify(skillRoot)}, env: (() => { const env = { ...process.env }; delete env.RESEND_API_KEY; return env; })() });
+
+let stdout = "";
+let stderr = "";
+child.stdout.setEncoding("utf8");
+child.stderr.setEncoding("utf8");
+child.stdout.on("data", (chunk) => { stdout += chunk; });
+child.stderr.on("data", (chunk) => { stderr += chunk; });
+
+const exitPromise = new Promise((resolve, reject) => {
+  const watchdog = setTimeout(() => {
+    child.kill("SIGKILL");
+    reject(new Error("cooperative-yield driver timed out"));
+  }, ${watchdogMs});
+  watchdog.unref();
+  child.on("exit", (code, signal) => { clearTimeout(watchdog); resolve({ code, signal }); });
+  child.on("error", (error) => { clearTimeout(watchdog); reject(error); });
+});
+
+function lockIsOwned() {
+  if (!existsSync(${JSON.stringify(lockPath)})) return false;
+  try {
+    return JSON.parse(readFileSync(${JSON.stringify(lockPath)}, "utf8")).ownerSessionId === ${JSON.stringify(options.sessionId)};
+  } catch {
+    return false;
+  }
+}
+
+function targetAttemptIsRunning() {
+  if (!existsSync(${JSON.stringify(runStatePath)})) return false;
+  try {
+    const run = JSON.parse(readFileSync(${JSON.stringify(runStatePath)}, "utf8"));
+    const state = run.nodes?.[${JSON.stringify(options.runningNodeId ?? "")}];
+    const attempts = Array.isArray(state?.attempts) ? state.attempts : [];
+    const latest = attempts[attempts.length - 1];
+    return latest?.ownerSessionId === ${JSON.stringify(options.sessionId)} && latest?.status === "running";
+  } catch {
+    return false;
+  }
+}
+
+async function main() {
+  const deadline = Date.now() + 8_000;
+  while (!(${options.trigger === "lock-acquired" ? "lockIsOwned()" : "targetAttemptIsRunning()"})) {
+    if (child.exitCode !== null) throw new Error("session exited before the requested yield seam\\n" + stdout + "\\n" + stderr);
+    if (Date.now() >= deadline) {
+      child.kill("SIGKILL");
+      throw new Error("timed out waiting for the requested yield seam\\n" + stdout + "\\n" + stderr);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2));
+  }
+
+  if (${JSON.stringify(options.trigger)} === "lock-acquired") {
+    child.kill("SIGSTOP");
+    if (!lockIsOwned()) throw new Error("session lock disappeared before the pre-batch request");
+  }
+  requestInteractive(${JSON.stringify(lockPath)});
+  if (${JSON.stringify(options.trigger)} === "lock-acquired") child.kill("SIGCONT");
+
+  const exit = await exitPromise;
+  if (exit.code !== 0) throw new Error("session exited " + String(exit.code) + " signal " + String(exit.signal) + "\\n" + stdout + "\\n" + stderr);
+  console.log("COOPERATIVE_YIELD_DRIVER_OK");
+}
+
+main().catch((error) => { console.error(String(error?.stack ?? error)); process.exit(1); });
+`;
+  writeFileSync(driverPath, driverSource, "utf8");
+  const result = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8", timeout: watchdogMs + 10_000 });
+  return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
 export function register(harness: Harness): void {
@@ -973,6 +1124,122 @@ main().catch((error) => { console.error(String((error && error.stack) || error))
     assert(result.code === 0, `expected exit 0 with an unavailable verifier, got ${result.code}: ${result.output}`);
     const unavailableCalls = result.output.match(/session\.verifier_unavailable/g)?.length ?? 0;
     assert(unavailableCalls === 1, `ordinary completion must run the unavailable verifier once, got ${unavailableCalls}:\n${result.output}`);
+  });
+
+  harness.check("session: a cooperative yield before any dispatch batch never verifies older pending work", () => {
+    const handle = bootstrapWorkspace(harness, "yield-before-batch", resumedFreshContextCatalog(), {
+      grants: {
+        "domain.research": grant("domain.research", "run-with-guardrails"),
+        "domain.engineering": grant("domain.engineering", "run-with-guardrails"),
+      },
+      scopeHints: ["domain.research"],
+    });
+    const seeded = runSession([
+      "--workspace",
+      handle.dir,
+      "--brief",
+      handle.briefPath,
+      "--session",
+      "sess-yield-before-batch-seed",
+      "--executor",
+      "fixture",
+      "--verifier",
+      "off",
+    ]);
+    assert(seeded.code === 0, `expected seed exit 0, got ${seeded.code}: ${seeded.output}`);
+
+    const before = readRunState(handle);
+    const oldNodeBefore = JSON.stringify(before.nodes["run.research-scan"]);
+    const oldBindingBefore = JSON.stringify(before.artifactBindings.find((binding) => binding.artifactId === "artifact.research-scan"));
+    assert(
+      before.nodes["run.research-scan"]?.status === "blocked" && before.nodes["run.research-scan"]?.blocker === "Verification required",
+      `seed session must leave the research output pending verification, got ${oldNodeBefore}`,
+    );
+
+    const brief = JSON.parse(readFileSync(handle.briefPath, "utf8")) as { scopeHints?: string[] };
+    brief.scopeHints = ["domain.research", "domain.engineering"];
+    writeFileSync(handle.briefPath, `${JSON.stringify(brief, null, 2)}\n`, "utf8");
+    const sessionId = "sess-yield-before-batch-2";
+    const driven = driveCooperativeYield(harness, handle, { sessionId, trigger: "lock-acquired", executor: "fixture" });
+    assert(driven.code === 0 && driven.output.includes("COOPERATIVE_YIELD_DRIVER_OK"), `pre-batch cooperative-yield driver failed:\n${driven.output}`);
+
+    const after = readRunState(handle);
+    assert(
+      !Object.values(after.nodes).some((state) => state.attempts.some((attempt) => attempt.ownerSessionId === sessionId)),
+      `the pre-batch yield must occur before this session owns an attempt: ${JSON.stringify(after.nodes)}`,
+    );
+    assert(JSON.stringify(after.nodes["run.research-scan"]) === oldNodeBefore, "pre-batch yield must leave the older pending node byte-for-byte unchanged");
+    assert(
+      JSON.stringify(after.artifactBindings.find((binding) => binding.artifactId === "artifact.research-scan")) === oldBindingBefore,
+      "pre-batch yield must leave the older pending artifact binding byte-for-byte unchanged",
+    );
+    const verifierEntries = readAuditEntries(handle).filter((entry) => entry.sessionId === `${sessionId}.verifier`);
+    assert(verifierEntries.length === 0, `pre-batch yield must not invoke or attest a verifier, got ${JSON.stringify(verifierEntries)}`);
+  });
+
+  harness.check("session: cooperative-yield verification is limited to fresh-context output from the completed new batch", () => {
+    const handle = bootstrapWorkspace(harness, "yield-new-candidates-only", resumedFreshContextCatalog(), {
+      grants: {
+        "domain.research": grant("domain.research", "run-with-guardrails"),
+        "domain.engineering": grant("domain.engineering", "run-with-guardrails"),
+      },
+      scopeHints: ["domain.research"],
+    });
+    const seeded = runSession([
+      "--workspace",
+      handle.dir,
+      "--brief",
+      handle.briefPath,
+      "--session",
+      "sess-yield-new-candidates-seed",
+      "--executor",
+      "fixture",
+      "--verifier",
+      "off",
+    ]);
+    assert(seeded.code === 0, `expected seed exit 0, got ${seeded.code}: ${seeded.output}`);
+    const before = readRunState(handle);
+    const oldNodeBefore = JSON.stringify(before.nodes["run.research-scan"]);
+    const oldBindingBefore = JSON.stringify(before.artifactBindings.find((binding) => binding.artifactId === "artifact.research-scan"));
+
+    const brief = JSON.parse(readFileSync(handle.briefPath, "utf8")) as { scopeHints?: string[] };
+    brief.scopeHints = ["domain.research", "domain.engineering"];
+    writeFileSync(handle.briefPath, `${JSON.stringify(brief, null, 2)}\n`, "utf8");
+    const sessionId = "sess-yield-new-candidates-2";
+    const driven = driveCooperativeYield(harness, handle, {
+      sessionId,
+      trigger: "attempt-running",
+      runningNodeId: "run.engineering-change",
+      executor: "slow-silent",
+      slowDelayMs: 700,
+    });
+    assert(driven.code === 0 && driven.output.includes("COOPERATIVE_YIELD_DRIVER_OK"), `mid-batch cooperative-yield driver failed:\n${driven.output}`);
+
+    const after = readRunState(handle);
+    assert(JSON.stringify(after.nodes["run.research-scan"]) === oldNodeBefore, "the older pending node must remain durable and unjudged");
+    assert(
+      JSON.stringify(after.artifactBindings.find((binding) => binding.artifactId === "artifact.research-scan")) === oldBindingBefore,
+      "the older pending artifact binding must remain durable and unjudged",
+    );
+    const newNode = after.nodes["run.engineering-change"];
+    assert(
+      newNode?.status === "succeeded" && newNode.verifiedBySessionId === `${sessionId}.verifier`,
+      `the new batch output must be independently verified before the cooperative yield, got ${JSON.stringify(newNode)}`,
+    );
+    const verifierEntries = readAuditEntries(handle).filter((entry) => entry.sessionId === `${sessionId}.verifier` && entry.action === "verification_accepted");
+    assert(
+      verifierEntries.length === 1 && String(verifierEntries[0]?.summary).startsWith("run.engineering-change:"),
+      `only the exact new batch output may be attested by this verifier, got ${JSON.stringify(verifierEntries)}`,
+    );
+
+    const boundary = runBoundary(["--workspace", handle.dir]);
+    assert(boundary.code === 0, `expected exit 0 from the boundary after yielding, got ${boundary.code}: ${boundary.stderr}`);
+    const report = JSON.parse(boundary.stdout);
+    assert(report.results.length === 1, `only the new verified output may cross the boundary, got ${JSON.stringify(report.results)}`);
+    assert(
+      report.results[0]?.producedBySessionId === sessionId && report.results[0]?.verifiedBySessionId === `${sessionId}.verifier`,
+      `new output provenance must remain visible, got ${JSON.stringify(report.results[0])}`,
+    );
   });
 
   harness.check("session: a cooperative yield requested during a fresh-context attempt still verifies the completed batch before yielding", () => {
