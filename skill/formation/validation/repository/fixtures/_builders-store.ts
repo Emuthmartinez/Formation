@@ -43,7 +43,7 @@ export function writeCompleteAppleSigning(root: string): void {
       "<key>CFBundleVersion</key><string>42</string>",
       "<key>REVENUECAT_API_KEY</key><string>appl_fixture</string>",
       "<key>POSTHOG_API_KEY</key><string>phc_fixture</string>",
-      "<key>SUPABASE_URL</key><string>https://fixture.supabase.co</string>",
+      "<key>SUPABASE_URL</key><string>fixture-supabase-endpoint</string>",
       "</dict></plist>",
     ].join("\n"),
     "utf8",
