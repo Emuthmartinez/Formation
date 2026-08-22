@@ -41,7 +41,7 @@ export interface RequiredTableSection {
    * Fenced content remains present and unmodified.
    */
   readonly body: string;
-  /** Non-fenced body lines in source order, joined with LF line endings. */
+  /** Rendered body lines in source order, joined with LF line endings. */
   readonly renderedBody: string;
   /** One-based, half-open source range occupied by `body`. */
   readonly bodyRange: {
@@ -81,6 +81,10 @@ interface FenceCandidate {
   readonly trailing: string;
 }
 
+interface RawHtmlSyntax {
+  readonly description: string;
+}
+
 interface UnsupportedMarkdownSyntax {
   readonly lineIndex: number;
   readonly sourceLine: number;
@@ -94,11 +98,16 @@ interface MarkdownScan {
 
 /**
  * Read one rendered, unindented `Status: value` line without assigning any
- * business meaning to its value. Fenced and commented examples stay hidden;
- * duplicate or malformed top-level declarations fail closed.
+ * business meaning to its value. Approved column-zero fenced examples stay
+ * hidden. Unsupported document syntax and duplicate or malformed top-level
+ * declarations fail closed.
  */
 export function parseRenderedTopLevelStatus(markdown: string): RenderedTopLevelStatusResult {
-  const lines = scanRenderedLines(markdown).lines;
+  const scan = scanRenderedLines(markdown);
+  if (scan.unsupported.length > 0) {
+    return { ok: false, kind: "malformed", sourceLines: scan.unsupported.map((candidate) => candidate.sourceLine) };
+  }
+  const lines = scan.lines;
   const h1Index = lines.findIndex((line) => line.rendered && atxHeadingLevel(line.raw) === 1);
   if (h1Index < 0) return { ok: false, kind: "missing", sourceLines: [] };
   const nextHeadingOffset = lines.slice(h1Index + 1).findIndex((line) => line.rendered && atxHeadingLevel(line.raw) !== undefined);
@@ -121,9 +130,12 @@ export function parseRenderedTopLevelStatus(markdown: string): RenderedTopLevelS
  * Parse the one simple pipe table in an exact H2 section.
  *
  * Section and header names compare after trimming, collapsing whitespace, and
- * case folding. Headings and pipe rows inside backtick or tilde fences do not
- * participate. This intentionally supports only simple pipe tables; it does
- * not interpret escaped pipes or other Markdown table extensions.
+ * case folding. Headings and pipe rows inside approved column-zero backtick or
+ * tilde fences do not participate. The helper rejects raw HTML block syntax,
+ * HTML comment opener tokens, non-column-zero fences, container-relative raw HTML, and
+ * every nonblank source line indented four or more columns anywhere in the
+ * document. This intentionally supports only simple pipe tables; it does not
+ * interpret escaped pipes or other Markdown table extensions.
  */
 export function parseRequiredTableSection(markdown: string, heading: string, requiredHeaders: readonly string[] = []): RequiredTableSectionResult {
   const normalizedHeading = normalizeLabel(heading);
@@ -142,6 +154,16 @@ export function parseRequiredTableSection(markdown: string, heading: string, req
   if (requestErrors.length > 0) return { ok: false, errors: requestErrors };
 
   const scan = scanRenderedLines(markdown);
+  if (scan.unsupported.length > 0) {
+    return {
+      ok: false,
+      errors: scan.unsupported.map((candidate) => ({
+        kind: "unsupported-markdown",
+        message: `Strict evidence Markdown does not allow ${candidate.description}; use top-level prose, headings, simple pipe tables, or fenced examples.`,
+        sourceLine: candidate.sourceLine,
+      })),
+    };
+  }
   const lines = scan.lines;
   const headings = lines.flatMap((line, lineIndex) => {
     if (!line.rendered) return [];
@@ -167,17 +189,6 @@ export function parseRequiredTableSection(markdown: string, heading: string, req
   const match = matches[0]!;
   const nextHeading = headings.find((candidate) => candidate.lineIndex > match.lineIndex);
   const sectionEnd = nextHeading?.lineIndex ?? lines.length;
-  const unsupported = scan.unsupported.filter((candidate) => candidate.lineIndex > match.lineIndex && candidate.lineIndex < sectionEnd);
-  if (unsupported.length > 0) {
-    return {
-      ok: false,
-      errors: unsupported.map((candidate) => ({
-        kind: "unsupported-markdown",
-        message: `The H2 section "${heading.trim()}" contains ${candidate.description}; strict evidence tables cannot be read from hidden or indented Markdown.`,
-        sourceLine: candidate.sourceLine,
-      })),
-    };
-  }
   const bodyStartOffset = lines[match.lineIndex + 1]?.sourceOffset ?? markdown.length;
   const bodyEndOffset = lines[sectionEnd]?.sourceOffset ?? markdown.length;
   const renderedBody = lines
@@ -299,8 +310,6 @@ function scanRenderedLines(markdown: string): MarkdownScan {
   const scanned: ScannedLine[] = [];
   const unsupported: UnsupportedMarkdownSyntax[] = [];
   let fence: Fence | undefined;
-  let unsupportedFence: Fence | undefined;
-  let htmlComment = false;
   let sourceOffset = 0;
 
   for (const [index, raw] of lines.entries()) {
@@ -309,7 +318,7 @@ function scanRenderedLines(markdown: string): MarkdownScan {
     if (markdown.startsWith("\r\n", sourceOffset)) sourceOffset += 2;
     else if (markdown[sourceOffset] === "\n") sourceOffset += 1;
 
-    const markerMatch = raw.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+    const markerMatch = raw.match(/^(`{3,}|~{3,})(.*)$/u);
     const marker = validFenceMarker(markerMatch?.[1], markerMatch?.[2]);
     if (fence) {
       scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
@@ -318,61 +327,193 @@ function scanRenderedLines(markdown: string): MarkdownScan {
       }
       continue;
     }
-    if (unsupportedFence) {
-      const closingCandidate = looseFenceCandidate(raw) ?? unsupportedFenceCandidate(raw);
-      scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
-      if (
-        closingCandidate &&
-        closingCandidate.marker[0] === unsupportedFence.marker &&
-        closingCandidate.marker.length >= unsupportedFence.length &&
-        closingCandidate.trailing.trim().length === 0
-      ) {
-        unsupportedFence = undefined;
-      }
-      continue;
-    }
-    if (htmlComment) {
-      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: "an HTML comment" });
-      scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
-      htmlComment = advanceHtmlCommentState(htmlComment, raw);
-      continue;
-    }
+
     if (marker) {
       fence = { marker: marker[0] as "`" | "~", length: marker.length };
       scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
       continue;
     }
 
-    if (raw.includes("<!--")) {
-      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: "an HTML comment" });
-      scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
-      htmlComment = advanceHtmlCommentState(false, raw);
-      continue;
-    }
-
-    const containerFence = unsupportedFenceCandidate(raw);
-    if (containerFence) {
-      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: "an unsupported container-relative fence" });
-      unsupportedFence = { marker: containerFence.marker[0] as "`" | "~", length: containerFence.marker.length };
+    const nonColumnZeroFence = nonColumnZeroFenceCandidate(raw);
+    if (nonColumnZeroFence) {
+      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: "a non-column-zero fence" });
       scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
       continue;
     }
 
-    const leadingWhitespace = raw.match(/^[ \t]*/u)?.[0] ?? "";
-    const indented = leadingWhitespace.includes("\t") || leadingWhitespace.length > 3;
-    if (indented && looksLikePipeRow(raw)) {
-      unsupported.push({
-        lineIndex: index,
-        sourceLine: index + 1,
-        description: "an indented code table row",
-      });
+    const rawHtml = rawHtmlSyntax(raw) ?? containerRelativeRawHtmlSyntax(raw);
+    if (rawHtml) {
+      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: rawHtml.description });
       scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
       continue;
     }
+
+    if (hasHtmlCommentOpener(raw)) {
+      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: "an HTML comment opener token" });
+      scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
+      continue;
+    }
+
+    if (leadingWhitespaceColumns(raw) >= 4 && raw.trim().length > 0) {
+      unsupported.push({ lineIndex: index, sourceLine: index + 1, description: "a nonblank source line indented four or more columns" });
+      scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: false });
+      continue;
+    }
+
     scanned.push({ raw, sourceLine: index + 1, sourceOffset: lineOffset, rendered: true });
   }
 
   return { lines: scanned, unsupported };
+}
+
+// Keep this finite strict-evidence dialect aligned with the raw-HTML opener
+// families recognized by tooling/lib/launch-state.ts. The helper rejects an
+// opener globally, so it never needs to emulate each block's closing grammar.
+const RAW_HTML_BLOCK_TAGS = new Set([
+  "address",
+  "article",
+  "aside",
+  "base",
+  "basefont",
+  "blockquote",
+  "body",
+  "caption",
+  "center",
+  "col",
+  "colgroup",
+  "dd",
+  "details",
+  "dialog",
+  "dir",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "frame",
+  "frameset",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hr",
+  "html",
+  "iframe",
+  "legend",
+  "li",
+  "link",
+  "main",
+  "menu",
+  "menuitem",
+  "nav",
+  "noframes",
+  "ol",
+  "optgroup",
+  "option",
+  "p",
+  "param",
+  "search",
+  "section",
+  "source",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "title",
+  "track",
+  "tr",
+  "ul",
+]);
+
+function rawHtmlSyntax(line: string): RawHtmlSyntax | undefined {
+  const typeOne = line.match(/^ {0,3}<(script|style|template|pre|textarea)(?=[\t >]|$)/iu);
+  if (typeOne) {
+    const tag = typeOne[1]!.toLocaleLowerCase("en-US");
+    return { description: `raw HTML <${tag}> block syntax` };
+  }
+
+  if (/^ {0,3}<\?/u.test(line)) {
+    return { description: "raw HTML processing-instruction syntax" };
+  }
+  if (/^ {0,3}<!\[CDATA\[/u.test(line)) {
+    return { description: "raw HTML CDATA syntax" };
+  }
+  if (/^ {0,3}<![A-Z]/u.test(line)) {
+    return { description: "raw HTML declaration syntax" };
+  }
+
+  const blockTag = line.match(/^ {0,3}<\/?([A-Za-z][A-Za-z0-9]*)(?=[\t ]|$|\/?>)/u)?.[1]?.toLocaleLowerCase("en-US");
+  if (blockTag && RAW_HTML_BLOCK_TAGS.has(blockTag)) {
+    return { description: "raw HTML block-container syntax" };
+  }
+
+  // The strict dialect accepts the full line as the tag tail instead of
+  // interpreting attribute grammar. That catches quoted angle brackets and
+  // malformed tag-like evidence fail-closed without growing a generic HTML
+  // parser; mid-sentence tag mentions still do not start here.
+  const completeTag = line.match(/^ {0,3}<(\/?)([A-Za-z][A-Za-z0-9-]*)(?:[\t ].*)?\/?>[\t ]*$/u);
+  if (completeTag) {
+    return { description: "raw HTML complete-tag syntax" };
+  }
+  return undefined;
+}
+
+function containerRelativeRawHtmlSyntax(line: string): RawHtmlSyntax | undefined {
+  const content = containerRelativeContent(line);
+  if (content === undefined) return undefined;
+  const syntax = rawHtmlSyntax(content);
+  return syntax ? { description: `container-relative ${syntax.description}` } : undefined;
+}
+
+function containerRelativeContent(line: string): string | undefined {
+  let content = line;
+  let consumedPrefix = false;
+
+  // This is deliberately lexical rather than a container-lifetime parser.
+  // Repeated blockquote/list markers and their content padding are removed so
+  // nested unsupported syntax cannot evade the document-wide strict gate.
+  while (true) {
+    const blockquote = content.match(/^ {0,3}>[\t ]*/u);
+    if (blockquote) {
+      content = content.slice(blockquote[0].length);
+      consumedPrefix = true;
+      continue;
+    }
+
+    const list = content.match(/^ {0,3}(?:[-+*]|\d{1,9}[.)])[\t ]+/u);
+    if (list) {
+      content = content.slice(list[0].length);
+      consumedPrefix = true;
+      continue;
+    }
+    break;
+  }
+
+  return consumedPrefix ? content : undefined;
+}
+
+function hasHtmlCommentOpener(line: string): boolean {
+  return line.includes("<!--");
+}
+
+function leadingWhitespaceColumns(line: string): number {
+  let columns = 0;
+  for (const character of line) {
+    if (character === " ") columns += 1;
+    else if (character === "\t") columns += 4 - (columns % 4);
+    else break;
+  }
+  return columns;
 }
 
 function validFenceMarker(marker: string | undefined, trailing: string | undefined): string | undefined {
@@ -381,31 +522,13 @@ function validFenceMarker(marker: string | undefined, trailing: string | undefin
   return marker;
 }
 
-function looseFenceCandidate(line: string): FenceCandidate | undefined {
-  const match = line.trimStart().match(/^(`{3,}|~{3,})(.*)$/u);
-  const marker = validFenceMarker(match?.[1], match?.[2]);
-  return marker ? { marker, trailing: match?.[2] ?? "" } : undefined;
-}
-
-function unsupportedFenceCandidate(line: string): FenceCandidate | undefined {
-  const indented = line.match(/^(?: {4,}|\t[ \t]*)(`{3,}|~{3,})(.*)$/u);
-  const container = line.match(/^ {0,3}(?:(?:> ?)|(?:(?:[-+*]|\d{1,9}[.)])[ \t]+))+(`{3,}|~{3,})(.*)$/u);
+function nonColumnZeroFenceCandidate(line: string): FenceCandidate | undefined {
+  const indented = line.match(/^(?: +|\t[ \t]*)(`{3,}|~{3,})(.*)$/u);
+  const containerContent = containerRelativeContent(line);
+  const container = containerContent?.match(/^[\t ]*(`{3,}|~{3,})(.*)$/u);
   const match = indented ?? container;
   const marker = validFenceMarker(match?.[1], match?.[2]);
   return marker ? { marker, trailing: match?.[2] ?? "" } : undefined;
-}
-
-function advanceHtmlCommentState(initialState: boolean, line: string): boolean {
-  let inside = initialState;
-  let cursor = 0;
-  while (cursor < line.length) {
-    const delimiter = inside ? "-->" : "<!--";
-    const delimiterIndex = line.indexOf(delimiter, cursor);
-    if (delimiterIndex < 0) return inside;
-    inside = !inside;
-    cursor = delimiterIndex + delimiter.length;
-  }
-  return inside;
 }
 
 function contiguousPipeBlocks(lines: readonly ScannedLine[], start: number, end: number): ScannedLine[][] {

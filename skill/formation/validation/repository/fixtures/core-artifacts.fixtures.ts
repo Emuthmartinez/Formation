@@ -431,6 +431,35 @@ export function register(h: Harness): void {
     "research.category_revenue_bar_unjudged",
   );
 
+  const researchRevenueScriptJudgment = makeCompletedResearch("research-category-revenue-script-judgment");
+  replaceResearchBlock(researchRevenueScriptJudgment, categoryRevenueProofLines, [
+    ...categoryRevenueProofLines.slice(0, 4),
+    '<script type="text/plain">',
+    ...categoryRevenueProofLines.slice(4),
+    "</script>",
+  ]);
+  runFixture(
+    "revenue bar and pass-fail prose inside a raw HTML block cannot satisfy the judgment",
+    researchRevenueScriptJudgment,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_reality.section_missing",
+  );
+
+  const researchRevenueIndentedJudgment = makeCompletedResearch("research-category-revenue-indented-judgment");
+  replaceResearchBlock(researchRevenueIndentedJudgment, categoryRevenueProofLines, [
+    ...categoryRevenueProofLines.slice(0, 4),
+    "",
+    ...categoryRevenueProofLines.slice(4).map((line) => `    ${line}`),
+  ]);
+  runFixture(
+    "revenue bar and pass-fail prose rendered as indented code cannot satisfy the judgment",
+    researchRevenueIndentedJudgment,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_reality.section_missing",
+  );
+
   const researchVerdictFencedLater = makeCompletedResearch("research-verdict-fenced-later-row");
   replaceResearchBlock(researchVerdictFencedLater, verdictProofLines, [
     ...verdictProofLines,
@@ -946,6 +975,17 @@ export function register(h: Harness): void {
       ["--require-workflow-outputs"],
     );
   }
+
+  const researchDistributionScriptBlock = makeCompletedResearch("research-distribution-proof-script-block");
+  replaceDistributionProof(researchDistributionScriptBlock, ['<script type="text/plain">', ...distributionProofLines, "</script>"]);
+  runFixture(
+    "Distribution Proof cannot be satisfied by a section inside a raw HTML block",
+    researchDistributionScriptBlock,
+    "check-research-evidence.ts",
+    1,
+    "research.distribution_proof_columns_missing",
+    ["--require-workflow-outputs"],
+  );
 
   const researchDistributionDuplicateHeading = makeCompletedResearch("research-distribution-proof-duplicate-heading");
   replaceDistributionProof(researchDistributionDuplicateHeading, [...distributionProofLines, ...distributionProofLines]);
@@ -1626,6 +1666,27 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("signal corpus marked not applicable with an authored reason passes", researchSignalNotApplicableWithReason, "check-research-evidence.ts", 0);
+
+  const researchSignalNotApplicableScriptBlock = makeCompletedResearch("research-signal-corpus-not-applicable-script-block");
+  useSourceLedgerDistribution(researchSignalNotApplicableScriptBlock);
+  writeFileSync(
+    path.join(researchSignalNotApplicableScriptBlock, "strategy/SIGNAL_CORPUS.md"),
+    [
+      '<script type="text/plain">',
+      "# Signal Corpus",
+      "Status: not applicable — No reusable customer-language source material exists for this project.",
+      "</script>",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a Signal Corpus heading and not-applicable status inside raw HTML cannot exempt missing rendered evidence",
+    researchSignalNotApplicableScriptBlock,
+    "check-research-evidence.ts",
+    1,
+    "research.signal_corpus_corpus_inputs_missing",
+  );
 
   for (const [name, fence] of [
     ["backtick", "```"],

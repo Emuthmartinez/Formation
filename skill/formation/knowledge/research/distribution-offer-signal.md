@@ -16,6 +16,10 @@ Research must answer five questions before design or build work starts:
 Category revenue proves that money exists in a market.
 It does not prove that this business can reach the market.
 
+### Strict Evidence Markdown
+
+Validator-backed evidence sections use a narrow Markdown dialect. Each section has one exact rendered H2 and one simple pipe table. Validators resolve required columns by name. Approved column-zero backtick and tilde fences may hold hidden examples. Outside those fences, every nonblank line indented four or more columns invalidates the evidence document. HTML comment opener tokens, raw HTML block syntax, non-column-zero fences, and container-relative raw HTML also invalidate it. Write checkable records as top-level Markdown.
+
 ## 2. Distribution Proof
 
 Record distribution proof in `strategy/RESEARCH.md`.
