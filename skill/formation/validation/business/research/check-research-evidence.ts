@@ -53,6 +53,14 @@ const SIGNAL_CORPUS_HEADERS = {
   conflicts: [["Earlier signal"], ["Later signal"], ["Conflict"], ["Current position"], ["Reason"]],
   derived: [["Signal IDs", "Signal ID"], ["Output"], ["Decision changed"], ["Trace ID"]],
 } as const;
+const DISTRIBUTION_PROOF_HEADERS = [
+  ["Audience segment"],
+  ["Exact discovery location"],
+  ["Native format"],
+  ["Owned relationship"],
+  ["Measured signal"],
+  ["Evidence IDs", "Evidence ID"],
+] as const;
 
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
@@ -232,17 +240,10 @@ if (text) {
       }
     }
 
-    const distributionSection = markdownSection(text, "Distribution Proof");
-    const distributionColumns: RegExp[] = [
-      /audience segment/i,
-      /exact discovery location/i,
-      /native format/i,
-      /owned relationship/i,
-      /measured signal/i,
-      /evidence ids?/i,
-    ];
-    const distributionColumnIndexes = distributionColumns.map((pattern) => tableColumnIndex(distributionSection, pattern));
-    if (!distributionSection || distributionColumnIndexes.some((column) => column < 1)) {
+    const distributionResult = parseRequiredTableSection(text, "Distribution Proof");
+    const distributionSection = distributionResult.ok ? distributionResult.section : undefined;
+    const distributionColumnIndexes = distributionSection ? DISTRIBUTION_PROOF_HEADERS.map((headers) => tableColumnAny(distributionSection, headers)) : [];
+    if (!distributionSection || distributionColumnIndexes.some((column) => column < 0)) {
       issues.push(
         issue(
           "error",
@@ -252,13 +253,14 @@ if (text) {
         ),
       );
     } else {
-      const rows = tableDataRows(distributionSection);
+      const rows = distributionSection.rows;
       const sourceLedgerIds = eligibleSourceLedgerIds(text);
       const genericLocation = /^(social media|online|internet|web|app store|community|creator audience)$/i;
       const rowsValid =
         rows.length > 0 &&
+        rowsMatchTableWidth(distributionSection) &&
         rows.every((row) => {
-          const cells = distributionColumnIndexes.map((column) => (row[column] ?? "").trim());
+          const cells = distributionColumnIndexes.map((column) => (row.cells[column] ?? "").trim());
           const audience = cells[0] ?? "";
           const location = cells[1] ?? "";
           const format = cells[2] ?? "";

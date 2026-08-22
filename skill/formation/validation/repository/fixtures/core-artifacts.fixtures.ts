@@ -647,6 +647,125 @@ export function register(h: Harness): void {
     0,
   );
 
+  const distributionProofLines = [
+    "## Distribution Proof",
+    "| Audience segment | Exact discovery location | Native format | Owned relationship | Measured signal | Evidence IDs |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| people who lose habit streaks | r/habits | case-study post | email waitlist | 840 qualified visits and 31 signups | SIG-001 |",
+  ];
+  const replaceDistributionProof = (root: string, replacement: readonly string[]): void => {
+    const researchPath = path.join(root, "strategy/RESEARCH.md");
+    const research = readFileSync(researchPath, "utf8");
+    const current = distributionProofLines.join("\n");
+    if (!research.includes(current)) throw new Error(`Distribution Proof fixture anchor is missing in ${root}`);
+    writeFileSync(researchPath, research.replace(current, replacement.join("\n")), "utf8");
+  };
+
+  for (const [name, openingFence, closingFence] of [
+    ["backtick", "```md", "```"],
+    ["tilde", "~~~md", "~~~"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-distribution-proof-fenced-${name}`);
+    replaceDistributionProof(root, [distributionProofLines[0]!, openingFence, ...distributionProofLines.slice(1), closingFence]);
+    runFixture(
+      `Distribution Proof cannot be satisfied by a table inside a ${name} fence`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.distribution_proof_columns_missing",
+      ["--require-workflow-outputs"],
+    );
+  }
+
+  const researchDistributionDuplicateHeading = makeCompletedResearch("research-distribution-proof-duplicate-heading");
+  replaceDistributionProof(researchDistributionDuplicateHeading, [...distributionProofLines, ...distributionProofLines]);
+  runFixture(
+    "duplicate rendered Distribution Proof headings fail closed",
+    researchDistributionDuplicateHeading,
+    "check-research-evidence.ts",
+    1,
+    "research.distribution_proof_columns_missing",
+    ["--require-workflow-outputs"],
+  );
+
+  const researchDistributionCommentedTable = makeCompletedResearch("research-distribution-proof-commented-table");
+  replaceDistributionProof(researchDistributionCommentedTable, [distributionProofLines[0]!, "<!--", ...distributionProofLines.slice(1), "-->"]);
+  runFixture(
+    "an HTML-commented Distribution Proof table cannot satisfy the contract",
+    researchDistributionCommentedTable,
+    "check-research-evidence.ts",
+    1,
+    "research.distribution_proof_columns_missing",
+    ["--require-workflow-outputs"],
+  );
+
+  const researchDistributionIndentedTable = makeCompletedResearch("research-distribution-proof-indented-table");
+  replaceDistributionProof(researchDistributionIndentedTable, [distributionProofLines[0]!, ...distributionProofLines.slice(1).map((line) => `    ${line}`)]);
+  runFixture(
+    "an indented Distribution Proof example cannot satisfy the contract",
+    researchDistributionIndentedTable,
+    "check-research-evidence.ts",
+    1,
+    "research.distribution_proof_columns_missing",
+    ["--require-workflow-outputs"],
+  );
+
+  const researchDistributionShortRow = makeCompletedResearch("research-distribution-proof-short-row");
+  replaceDistributionProof(researchDistributionShortRow, [
+    distributionProofLines[0]!,
+    "| Audience segment | Exact discovery location | Native format | Owned relationship | Measured signal | Evidence IDs | Notes |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    distributionProofLines[3]!,
+  ]);
+  runFixture(
+    "a Distribution Proof row shorter than its extended header fails",
+    researchDistributionShortRow,
+    "check-research-evidence.ts",
+    1,
+    "research.distribution_proof_row_invalid",
+  );
+
+  const researchDistributionExtraRow = makeCompletedResearch("research-distribution-proof-extra-row");
+  replaceDistributionProof(researchDistributionExtraRow, [
+    ...distributionProofLines.slice(0, 3),
+    "| people who lose habit streaks | r/habits | case-study post | email waitlist | 840 qualified visits and 31 signups | SIG-001 | unexplained extra cell |",
+  ]);
+  runFixture(
+    "a Distribution Proof row wider than its header fails",
+    researchDistributionExtraRow,
+    "check-research-evidence.ts",
+    1,
+    "research.distribution_proof_row_invalid",
+  );
+
+  const researchDistributionReorderedColumns = makeCompletedResearch("research-distribution-proof-reordered-columns");
+  replaceDistributionProof(researchDistributionReorderedColumns, [
+    distributionProofLines[0]!,
+    "| Notes | Evidence IDs | Measured signal | Owned relationship | Native format | Exact discovery location | Audience segment |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| retained evidence | SIG-001 | 840 qualified visits and 31 signups | email waitlist | case-study post | r/habits | people who lose habit streaks |",
+  ]);
+  runFixture(
+    "Distribution Proof resolves reordered named columns and permits extensions",
+    researchDistributionReorderedColumns,
+    "check-research-evidence.ts",
+    0,
+  );
+
+  const researchDistributionSingularEvidenceHeader = makeCompletedResearch("research-distribution-proof-singular-evidence-header");
+  replaceDistributionProof(researchDistributionSingularEvidenceHeader, [
+    distributionProofLines[0]!,
+    distributionProofLines[1]!.replace("Evidence IDs", "Evidence ID"),
+    distributionProofLines[2]!,
+    distributionProofLines[3]!,
+  ]);
+  runFixture(
+    "Distribution Proof preserves the singular Evidence ID header compatibility",
+    researchDistributionSingularEvidenceHeader,
+    "check-research-evidence.ts",
+    0,
+  );
+
   const researchDistributionSourceLedger = makeCompletedResearch("research-distribution-source-ledger");
   {
     const researchPath = path.join(researchDistributionSourceLedger, "strategy/RESEARCH.md");
