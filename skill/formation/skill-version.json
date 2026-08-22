@@ -30,6 +30,7 @@
     "Moved Distribution Proof onto the same exact fence-aware table contract while preserving its source-ledger, signal-resolution, and measured-evidence semantics.",
     "Completed the research-evidence parser migration for Source Ledger, Category Revenue Reality, and Go/Pivot/Kill, sharing one rendered provenance index while preserving activation and verdict semantics.",
     "Required exactly one rendered Manual Loop applicability declaration and bound every automation-authorizing decision to a passed run of that same process.",
-    "Defined strict evidence Markdown with column-zero hidden fences. Raw HTML, comment openers, non-column-zero fences, and four-column indentation now fail closed document-wide."
+    "Defined strict evidence Markdown with column-zero hidden fences. Raw HTML, comment openers, non-column-zero fences, and four-column indentation now fail closed document-wide.",
+    "Bound final waived offer decisions to a matching dated decision-maker waiver, and excluded invalid or future Source Ledger timestamps from evidence completeness and ID eligibility."
   ]
 }

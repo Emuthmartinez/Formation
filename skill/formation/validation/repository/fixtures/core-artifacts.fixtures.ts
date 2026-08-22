@@ -1102,6 +1102,88 @@ export function register(h: Harness): void {
     0,
   );
 
+  const researchSourceFutureOnly = makeCompletedResearch("research-source-ledger-future-only");
+  replaceResearchBlock(researchSourceFutureOnly, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    sourceLedgerProofLines[1]!,
+    sourceLedgerProofLines[2]!,
+    sourceLedgerProofLines[3]!.replace("2026-07-01T12:00:00Z", "2999-07-01T12:00:00Z"),
+  ]);
+  runFixture(
+    "a future-only Source Ledger does not provide dated evidence",
+    researchSourceFutureOnly,
+    "check-research-evidence.ts",
+    1,
+    "research.no_dated_evidence",
+  );
+  runFixture(
+    "a future-only Source Ledger does not provide a complete evidence row",
+    researchSourceFutureOnly,
+    "check-research-evidence.ts",
+    1,
+    "research.source_ledger_row_missing",
+  );
+
+  const futureLedgerRows = [
+    sourceLedgerProofLines[0]!,
+    sourceLedgerProofLines[1]!,
+    sourceLedgerProofLines[2]!,
+    sourceLedgerProofLines[3]!.replace("appkittie category", "SOURCE-PAST").replace("strategy/RESEARCH.md / TRACE-002", "strategy/RESEARCH.md / TRACE-PAST"),
+    sourceLedgerProofLines[3]!
+      .replace("appkittie category", "SOURCE-FUTURE")
+      .replace("2026-07-01T12:00:00Z", "2999-07-01T12:00:00Z")
+      .replace("strategy/RESEARCH.md / TRACE-002", "strategy/RESEARCH.md / TRACE-FUTURE"),
+  ];
+  for (const [name, evidenceId] of [
+    ["source ID", "SOURCE-FUTURE"],
+    ["trace ID", "TRACE-FUTURE"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-source-ledger-future-${name.replace(/\s+/g, "-")}`);
+    replaceResearchBlock(root, sourceLedgerProofLines, futureLedgerRows);
+    replaceDistributionProof(root, [
+      distributionProofLines[0]!,
+      distributionProofLines[1]!,
+      distributionProofLines[2]!,
+      distributionProofLines[3]!.replace("SIG-001", evidenceId),
+    ]);
+    runFixture(
+      `a future Source Ledger row cannot make its ${name} eligible for Distribution Proof`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.distribution_proof_row_invalid",
+    );
+  }
+
+  const researchSourcePastOffset = makeCompletedResearch("research-source-ledger-past-offset");
+  replaceResearchBlock(researchSourcePastOffset, sourceLedgerProofLines, [
+    sourceLedgerProofLines[0]!,
+    sourceLedgerProofLines[1]!,
+    sourceLedgerProofLines[2]!,
+    sourceLedgerProofLines[3]!.replace("appkittie category", "SOURCE-OFFSET").replace("2026-07-01T12:00:00Z", "2026-07-01T08:00:00-04:00"),
+  ]);
+  replaceDistributionProof(researchSourcePastOffset, [
+    distributionProofLines[0]!,
+    distributionProofLines[1]!,
+    distributionProofLines[2]!,
+    distributionProofLines[3]!.replace("SIG-001", "SOURCE-OFFSET"),
+  ]);
+  runFixture("a valid past Source Ledger offset timestamp remains eligible", researchSourcePastOffset, "check-research-evidence.ts", 0);
+
+  for (const [name, timestamp] of [
+    ["impossible calendar date", "2026-02-30T12:00:00Z"],
+    ["24-hour clock rollover", "2026-07-01T24:00:00Z"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-source-ledger-${name.replace(/\s+/g, "-")}`);
+    replaceResearchBlock(root, sourceLedgerProofLines, [
+      sourceLedgerProofLines[0]!,
+      sourceLedgerProofLines[1]!,
+      sourceLedgerProofLines[2]!,
+      sourceLedgerProofLines[3]!.replace("2026-07-01T12:00:00Z", timestamp),
+    ]);
+    runFixture(`a Source Ledger ${name} is not dated evidence`, root, "check-research-evidence.ts", 1, "research.no_dated_evidence");
+  }
+
   const researchDistributionUnresolved = makeCompletedResearch("research-distribution-unresolved-evidence");
   {
     const researchPath = path.join(researchDistributionUnresolved, "strategy/RESEARCH.md");
@@ -1493,6 +1575,96 @@ export function register(h: Harness): void {
     writeFileSync(offerPath, offer, "utf8");
   }
   runFixture("dated founder offer-test waiver passes", researchOfferWaived, "check-research-evidence.ts", 0);
+
+  const makeWaivedOfferFixture = (name: string, decisionRows: readonly string[], waiverRows: readonly string[]): string => {
+    const root = makeCompletedResearch(name);
+    const offerPath = path.join(root, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8")
+      .replace("| run | 2026-07-21 | 840 visits and 31 signups in TRACE-003 | use the recovery offer | founder |", decisionRows.join("\n"))
+      .replace(
+        "## Founder Waiver\n| Date | Founder | Reason | Residual risk accepted |\n| --- | --- | --- | --- |",
+        ["## Founder Waiver", "| Date | Founder | Reason | Residual risk accepted |", "| --- | --- | --- | --- |", ...waiverRows].join("\n"),
+      );
+    writeFileSync(offerPath, offer, "utf8");
+    return root;
+  };
+
+  const researchOfferWaiverStaleDifferentActor = makeWaivedOfferFixture(
+    "research-offer-test-waiver-stale-different-actor",
+    ["| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | Daisy Rivera owner |"],
+    ["| 2026-07-20 | founder | earlier acquisition constraint | earlier audience risk |"],
+  );
+  runFixture(
+    "a stale waiver by a different founder cannot authorize the final waived decision",
+    researchOfferWaiverStaleDifferentActor,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_waiver_missing",
+  );
+
+  const researchOfferWaiverWrongActor = makeWaivedOfferFixture(
+    "research-offer-test-waiver-wrong-actor",
+    ["| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | Daisy Rivera owner |"],
+    ["| 2026-07-21 | founder | no public account access before decision date | audience and message remain untested |"],
+  );
+  runFixture(
+    "a waiver on the final decision date must name the final decision-maker",
+    researchOfferWaiverWrongActor,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_waiver_missing",
+  );
+
+  const researchOfferWaiverWrongDate = makeWaivedOfferFixture(
+    "research-offer-test-waiver-wrong-date",
+    ["| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | founder |"],
+    ["| 2026-07-20 | founder | no public account access before decision date | audience and message remain untested |"],
+  );
+  runFixture(
+    "a waiver by the final decision-maker must match the final decision date",
+    researchOfferWaiverWrongDate,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_waiver_missing",
+  );
+
+  const researchOfferWaiverHistoricalAndFinal = makeWaivedOfferFixture(
+    "research-offer-test-waiver-historical-and-final",
+    [
+      "| run | 2026-07-20 | 840 visits and 31 signups in TRACE-003 | continue the measured offer | founder |",
+      "| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | Daisy Rivera owner |",
+    ],
+    [
+      "| 2026-07-20 | founder | earlier acquisition constraint | earlier audience risk |",
+      "| 2026-07-21 | Daisy Rivera owner | no public account access before decision date | audience and message remain untested |",
+    ],
+  );
+  runFixture(
+    "historical waiver rows remain valid when one complete row matches the final decision",
+    researchOfferWaiverHistoricalAndFinal,
+    "check-research-evidence.ts",
+    0,
+  );
+
+  const researchOfferWaiverNormalizedActor = makeWaivedOfferFixture(
+    "research-offer-test-waiver-normalized-actor",
+    ["| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | Daisy Rivera Owner |"],
+    ["| 2026-07-21 | dAiSy   rIvErA   oWnEr | no public account access before decision date | audience and message remain untested |"],
+  );
+  runFixture("waiver actor matching ignores case and repeated whitespace only", researchOfferWaiverNormalizedActor, "check-research-evidence.ts", 0);
+
+  const researchOfferWaiverFounderOwnerAlias = makeWaivedOfferFixture(
+    "research-offer-test-waiver-founder-owner-alias",
+    ["| waived | 2026-07-21 | founder waiver WAIVER-001 | proceed with explicit acquisition risk | founder |"],
+    ["| 2026-07-21 | owner | no public account access before decision date | audience and message remain untested |"],
+  );
+  runFixture(
+    "founder and owner are valid roles but not interchangeable waiver actors",
+    researchOfferWaiverFounderOwnerAlias,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_waiver_missing",
+  );
 
   const researchOfferWaiverImpossibleDate = makeCompletedResearch("research-offer-test-waiver-impossible-date");
   {

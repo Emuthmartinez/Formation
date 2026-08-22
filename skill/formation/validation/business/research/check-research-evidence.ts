@@ -204,7 +204,7 @@ if (text) {
         issue(
           "error",
           "research.no_dated_evidence",
-          "A done research lane needs at least one dated evidence row (a real YYYY-MM-DD date) so freshness is checkable.",
+          "A done research lane needs at least one evidence row with a valid, non-future Observed at timestamp so freshness is checkable.",
           "strategy/RESEARCH.md",
         ),
       );
@@ -484,7 +484,7 @@ if (text) {
         issue(
           "error",
           "research.source_ledger_row_missing",
-          "Done research needs at least one complete Source Ledger evidence row; headers and an unrelated date are not proof.",
+          "Done research needs at least one complete Source Ledger evidence row with a valid, non-future Observed at timestamp; headers and an unrelated date are not proof.",
           "strategy/RESEARCH.md",
         ),
       );
@@ -874,6 +874,7 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
 
   const placeholder = /\b(todo|tbd|placeholder|replace with|pending|unverified)\b/i;
   let status: "run" | "waived" | undefined;
+  let finalDecision: { date: string; decider: string } | undefined;
   if (decisionResult.ok) {
     const statusColumn = tableColumn(decisionResult.section, "Status");
     const dateColumn = tableColumn(decisionResult.section, "Date");
@@ -911,7 +912,12 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
           ),
         );
       } else {
-        status = (decisionRows.at(-1)!.cells[statusColumn] ?? "").trim().toLowerCase() as "run" | "waived";
+        const finalDecisionRow = decisionRows.at(-1)!;
+        status = (finalDecisionRow.cells[statusColumn] ?? "").trim().toLowerCase() as "run" | "waived";
+        finalDecision = {
+          date: (finalDecisionRow.cells[dateColumn] ?? "").trim(),
+          decider: (finalDecisionRow.cells[deciderColumn] ?? "").trim(),
+        };
       }
     }
   }
@@ -955,28 +961,38 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
 
   if (status === "waived") {
     const waiverResult = parseRequiredTableSection(value, "Founder Waiver", OFFER_TEST_HEADERS.waiver);
-    const validWaiver =
-      waiverResult.ok &&
-      rowsMatchTableWidth(waiverResult.section) &&
-      waiverResult.section.rows.length > 0 &&
-      waiverResult.section.rows.every((row) => {
-        const waiverDateColumn = tableColumn(waiverResult.section, "Date");
-        const founderColumn = tableColumn(waiverResult.section, "Founder");
-        const reasonColumn = tableColumn(waiverResult.section, "Reason");
-        const riskColumn = tableColumn(waiverResult.section, "Residual risk accepted");
-        const founder = row.cells[founderColumn] ?? "";
-        return (
-          isValidPastIsoDate((row.cells[waiverDateColumn] ?? "").trim()) &&
-          isFounderDecider(founder) &&
-          [row.cells[reasonColumn] ?? "", row.cells[riskColumn] ?? ""].every((cell) => cell.trim().length > 0 && !placeholder.test(cell))
+    let validWaiver = false;
+    if (waiverResult.ok) {
+      const waiverDateColumn = tableColumn(waiverResult.section, "Date");
+      const founderColumn = tableColumn(waiverResult.section, "Founder");
+      const reasonColumn = tableColumn(waiverResult.section, "Reason");
+      const riskColumn = tableColumn(waiverResult.section, "Residual risk accepted");
+      const rowsValid =
+        rowsMatchTableWidth(waiverResult.section) &&
+        waiverResult.section.rows.length > 0 &&
+        waiverResult.section.rows.every((row) => {
+          const founder = row.cells[founderColumn] ?? "";
+          return (
+            isValidPastIsoDate((row.cells[waiverDateColumn] ?? "").trim()) &&
+            isFounderDecider(founder) &&
+            [row.cells[reasonColumn] ?? "", row.cells[riskColumn] ?? ""].every((cell) => cell.trim().length > 0 && !placeholder.test(cell))
+          );
+        });
+      const matchesFinalDecision =
+        finalDecision !== undefined &&
+        waiverResult.section.rows.some(
+          (row) =>
+            (row.cells[waiverDateColumn] ?? "").trim() === finalDecision.date &&
+            normalizeActorIdentity(row.cells[founderColumn] ?? "") === normalizeActorIdentity(finalDecision.decider),
         );
-      });
+      validWaiver = rowsValid && matchesFinalDecision;
+    }
     if (!validWaiver) {
       target.push(
         issue(
           "error",
           "research.offer_test_waiver_missing",
-          "A waived offer test needs a dated founder, reason, and residual-risk record.",
+          "A waived offer test needs complete founder, reason, and residual-risk records, including one whose date and actor match the final Decision row's Date and Decided by fields.",
           "strategy/OFFER_TEST.md",
         ),
       );
@@ -1014,6 +1030,10 @@ function isFounderDecider(value: string): boolean {
   const candidate = value.trim();
   if (candidate.length === 0 || AUTOMATION_IDENTITY.test(candidate)) return false;
   return /\b(founder|owner)\b/i.test(candidate) || (projectOwner.length > 2 && candidate.toLowerCase().includes(projectOwner.toLowerCase()));
+}
+
+function normalizeActorIdentity(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
 }
 
 interface SourceLedgerColumns {
@@ -1054,7 +1074,7 @@ function buildSourceLedgerEvidence(section: RequiredTableSection | undefined): S
     return { columns, completeRowCount: 0, hasDatedEvidence: false, eligibleIds };
   }
 
-  const hasDatedEvidence = section.rows.some((row) => isDateTime(row.cells[columns.observedAt]));
+  const hasDatedEvidence = section.rows.some((row) => isValidNonFutureRfc3339Instant(row.cells[columns.observedAt]));
   const completeRows = section.rows.filter((row) => isCompleteSourceLedgerRow(row.cells, columns));
   for (const row of completeRows) {
     for (const sourceId of extractStableIds(row.cells[columns.identity] ?? "")) eligibleIds.add(sourceId);
@@ -1076,7 +1096,7 @@ function isCompleteSourceLedgerRow(cells: readonly string[], columns: SourceLedg
   return Boolean(
     source?.trim() &&
     identity?.trim() &&
-    isDateTime(observedAt) &&
+    isValidNonFutureRfc3339Instant(observedAt) &&
     backendQuery?.trim() &&
     transcriptVisual?.trim() &&
     observation?.trim() &&
@@ -1113,8 +1133,19 @@ function extractStableIds(value: string): string[] {
   return [...value.matchAll(/\b[A-Z][A-Z0-9_-]*-[A-Z0-9][A-Z0-9_-]*\b/gi)].map((match) => (match[0] ?? "").toUpperCase());
 }
 
-function isDateTime(value: string | undefined): boolean {
-  return Boolean(value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && !Number.isNaN(new Date(value).getTime()));
+function isValidNonFutureRfc3339Instant(value: string | undefined): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?(?:Z|[+-](\d{2}):(\d{2}))$/.exec(value ?? "");
+  if (!match) return false;
+
+  const [, year, month, day, hour, minute, second, offsetHour, offsetMinute] = match;
+  const datePart = `${year}-${month}-${day}`;
+  const calendarDate = new Date(`${datePart}T00:00:00Z`);
+  if (Number.isNaN(calendarDate.getTime()) || calendarDate.toISOString().slice(0, 10) !== datePart) return false;
+  if (Number(hour) > 23 || Number(minute) > 59 || Number(second) > 59) return false;
+  if (offsetHour !== undefined && (Number(offsetHour) > 23 || Number(offsetMinute) > 59)) return false;
+
+  const instant = new Date(value ?? "");
+  return !Number.isNaN(instant.getTime()) && instant.getTime() <= Date.now();
 }
 
 function isValidPastIsoDate(value: string): boolean {
