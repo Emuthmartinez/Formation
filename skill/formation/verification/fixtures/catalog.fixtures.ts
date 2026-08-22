@@ -479,7 +479,12 @@ export function register(harness: Harness): void {
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
     const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");
     const appBuild = catalog.workflows.find((wf) => wf.id === "workflow.engineering.engineering-orchestration-ce-production-readiness");
-    assert(Boolean(landingBuild && landingPublish && appBuild), "expected local landing, landing publish, and app build workflows");
+    const appleSigning = catalog.workflows.find((wf) => wf.id === "workflow.store.apple-signing-and-release-readiness");
+    assert(Boolean(landingBuild && landingPublish && appBuild && appleSigning), "expected local landing, landing publish, app build, and Apple signing workflows");
+    assert(
+      appleSigning!.gateCommands.includes("check:apple-requirements"),
+      "Apple signing and release readiness must fail closed on the Apple requirements validator",
+    );
     assert(
       landingBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render") &&
         appBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render"),
@@ -513,6 +518,12 @@ export function register(harness: Harness): void {
     // artifact-path collision survived either.
     const plan = compilePlan(input, "2026-08-05T00:00:00.000Z");
     assert(plan.nodes.length === input.workflows.length, "compiled plan should have one node per bridged workflow");
+    const appleSigning = plan.nodes.find((node) => node.workflowId === "workflow.store.apple-signing-and-release-readiness");
+    assert(Boolean(appleSigning), "compiled plan should include Apple signing and release readiness");
+    assert(
+      appleSigning!.verification.kind === "deterministic" && appleSigning!.verification.gateIds.includes("check:apple-requirements"),
+      "Apple signing execution must carry check:apple-requirements as a deterministic gate",
+    );
   });
 
   harness.check("bridge: a business workflow retains its executable process dependency", () => {

@@ -141,6 +141,14 @@ function isValidIsoDate(value: string): boolean {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+function currentIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function hasUnresolvedEvidence(value: string): boolean {
+  return /\b(?:blocked|TBD|pending|unknown|missing|not configured|not set|placeholder|fill in|to fill|N\/A)\b/i.test(value);
+}
+
 function checkResolvedAppleSignOff(markdown: string): void {
   if (hasUnresolvedTemplateState(markdown)) {
     issues.push(
@@ -153,14 +161,32 @@ function checkResolvedAppleSignOff(markdown: string): void {
     );
   }
 
-  const signOffMatch = /Pre-archive\/export\/upload preflight\s*\(sign-off recorded(?: on)?\s+(\d{4}-\d{2}-\d{2})\)\s*:/i.exec(markdown);
+  const signOffMatch = /Pre-archive sign-off\s*\(recorded\s+(\d{4}-\d{2}-\d{2})\)\s*:/i.exec(markdown);
   const signOffDate = signOffMatch?.[1];
   if (!signOffDate || !isValidIsoDate(signOffDate)) {
     issues.push(
       issue(
         "error",
         "apple_requirements.signing_date_missing",
-        "A ready Apple submission needs an ISO-dated pre-archive/export/upload sign-off in store/APPLE_SIGNING.md (YYYY-MM-DD).",
+        "A ready Apple submission needs an ISO-dated pre-archive sign-off in store/APPLE_SIGNING.md (YYYY-MM-DD).",
+        signingRelative,
+      ),
+    );
+  } else if (signOffDate < currentIsoDate()) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.signing_date_stale",
+        "The Apple pre-archive sign-off is stale. Refresh Apple's live requirements and record the sign-off on the archive date.",
+        signingRelative,
+      ),
+    );
+  } else if (signOffDate > currentIsoDate()) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.signing_date_future",
+        "The Apple pre-archive sign-off date is in the future and cannot prove checks performed for the current archive.",
         signingRelative,
       ),
     );
@@ -168,21 +194,79 @@ function checkResolvedAppleSignOff(markdown: string): void {
 
   const checks = [
     ["Live Apple release sources", "Xcode/SDK compatibility"],
-    ["Archive bundle ID", "version", "build identity", "App Store Connect"],
-    ["SDK keys", "Info.plist", "compiled archive"],
+    ["Intended Release bundle ID", "version", "build", "App Store Connect"],
     ["plutil -lint", "PrivacyInfo.xcprivacy"],
     ["NSPrivacyAccessedAPITypes", "actual API usage"],
     ["exportArchive", "authenticationKeyPath", "authenticationKeyID", "authenticationKeyIssuerID"],
     ["Screenshot dimension floor", "no upscaling"],
+    ["New compiled archive", "Info.plist identity", "SDK keys"],
   ];
   const lines = markdown.split(/\r?\n/);
+  const preArchiveHeadingIndex = lines.findIndex((line) => /Pre-archive sign-off\s*\(recorded\s+\d{4}-\d{2}-\d{2}\)\s*:/i.test(line));
+  const postArchiveHeadingIndex = lines.findIndex((line) => /Post-archive sign-off\s*\(recorded before export\/upload\)\s*:/i.test(line));
+  if (postArchiveHeadingIndex === -1) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_signing_heading_missing",
+        "A ready Apple submission needs a post-archive sign-off recorded before export/upload in store/APPLE_SIGNING.md.",
+        signingRelative,
+      ),
+    );
+  }
+  const signingStatus = lines.find((line) => /^\s*Status\s*:/i.test(line));
+  if (!signingStatus || hasUnresolvedEvidence(signingStatus) || !/\b(?:done|complete|completed|ready|verified|approved)\b/i.test(signingStatus)) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.signing_status_unresolved",
+        "A ready Apple submission needs a resolved ready, complete, verified, or approved status in store/APPLE_SIGNING.md.",
+        signingRelative,
+      ),
+    );
+  }
+
+  const detailedEvidence = [
+    { terms: ["upcoming-requirements"], dated: true },
+    { terms: ["app-store/submitting"], dated: true },
+    { terms: ["xcode/system-requirements"], dated: true },
+    { terms: ["manage-builds/upload-builds"], dated: true },
+    { terms: ["CFBundleIdentifier"], dated: false },
+    { terms: ["CFBundleShortVersionString"], dated: false },
+    { terms: ["CFBundleVersion"], dated: false },
+  ];
+
+  detailedEvidence.forEach(({ terms, dated }, index) => {
+    const row = lines.find((line) => /^\s*\|/.test(line) && terms.every((term) => normalizedIncludes(line, term)));
+    const cells = row
+      ?.split("|")
+      .slice(1, -1)
+      .map((cell) => cell.trim());
+    const result = cells?.at(-1) ?? "";
+    const hasCurrentDate = !dated || Boolean(signOffDate && cells?.includes(signOffDate) && signOffDate === currentIsoDate());
+    if (!row || !cells || cells.some(hasUnresolvedEvidence) || !hasCurrentDate || !/^(?:pass|ready|ok|verified|matched)\.?$/i.test(result)) {
+      issues.push(
+        issue(
+          "error",
+          `apple_requirements.signing_detail_${index + 1}_unresolved`,
+          `Apple signing detail row ${index + 1} needs current, resolved evidence and a passing result in store/APPLE_SIGNING.md.`,
+          signingRelative,
+        ),
+      );
+    }
+  });
 
   checks.forEach((requiredTerms, index) => {
     const itemNumber = index + 1;
-    const line = lines.find((candidate) => new RegExp(`^\\s*${itemNumber}\\.\\s+`).test(candidate));
+    const lineIndex = lines.findIndex((candidate) => new RegExp(`^\\s*${itemNumber}\\.\\s+`).test(candidate));
+    const line = lineIndex === -1 ? undefined : lines[lineIndex];
     const hasRequiredTerms = Boolean(line && requiredTerms.every((term) => normalizedIncludes(line, term)));
     const hasResolvedResult = Boolean(line && /:\s*(?:pass|ready|ok)\.?\s*$/i.test(line));
-    if (!line || !hasRequiredTerms || !hasResolvedResult || hasUnresolvedTemplateState(line)) {
+    const isInRequiredStage =
+      itemNumber <= 6
+        ? preArchiveHeadingIndex !== -1 && postArchiveHeadingIndex !== -1 && lineIndex > preArchiveHeadingIndex && lineIndex < postArchiveHeadingIndex
+        : postArchiveHeadingIndex !== -1 && lineIndex > postArchiveHeadingIndex;
+    if (!line || !hasRequiredTerms || !hasResolvedResult || !isInRequiredStage || hasUnresolvedTemplateState(line) || hasUnresolvedEvidence(line)) {
       issues.push(
         issue(
           "error",

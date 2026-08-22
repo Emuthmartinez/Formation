@@ -67,22 +67,24 @@ A weekly source-freshness result only proves that these pages are reachable. Thi
 
 Use three period-separated integer segments for `CFBundleShortVersionString`. Do not use leading zeroes. Confirm that the compiled archive contains no unresolved build variables and that Apple has not already received the same version/build combination. The [2016 Apple Developer Forums thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence only; current Apple documentation is authoritative.
 
-## Pre-Archive/Export/Upload Preflight Sign-Off
+## Archive, Export, And Upload Preflight Sign-Off
 
-Record all seven items below before running `xcodebuild archive`. Each item must read `pass` or `ready` before proceeding; if any item cannot pass, replace the line with `<item>: blocked — <reason>` and stop until it is resolved (that unresolved state opens the `apple-pre-upload-preflight-skipped` failure card).
+Record items 1 through 6 before running `xcodebuild archive`. Record item 7 after the new archive exists and before export or upload. Each item must read `pass` or `ready` before the next stage. If an item cannot pass, replace the line with `<item>: blocked — <reason>` and stop until it is resolved. That unresolved state opens the `apple-pre-upload-preflight-skipped` failure card.
 
 ```text
-Pre-archive/export/upload preflight (sign-off recorded on the archive date):
+Pre-archive sign-off (recorded on the archive date):
 1. Live Apple release sources and local Xcode/SDK compatibility: pass.
-2. Archive bundle ID, version, and build identity against App Store Connect: pass.
-3. SDK keys in Info.plist (RevenueCat, PostHog, Supabase) verified with plutil -p on the compiled archive: pass.
-4. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): ok.
-5. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.
-6. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
-7. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.
+2. Intended Release bundle ID, version, and build against App Store Connect: pass.
+3. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): pass.
+4. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.
+5. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
+6. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.
+
+Post-archive sign-off (recorded before export/upload):
+7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase): pass.
 ```
 
-See the "Pre-Archive/Export/Upload Preflight Checklist" section in `apple-signing-release.md` for commands and acceptance criteria for each item.
+See the "Archive, Export, And Upload Preflight Checklist" section in `apple-signing-release.md` for commands and acceptance criteria for each item.
 
 ## Release Proof
 

@@ -270,6 +270,63 @@ export function register(h: Harness): void {
     "apple_requirements.signing_unresolved_template",
   );
 
+  const staleAppleSigning = makeFixture("apple-requirements-stale-signing");
+  writeCompleteAppleRequirements(staleAppleSigning);
+  const staleSigningPath = path.join(staleAppleSigning, "store/APPLE_SIGNING.md");
+  const currentDate = new Date().toISOString().slice(0, 10);
+  const staleDate = new Date(`${currentDate}T00:00:00Z`);
+  staleDate.setUTCDate(staleDate.getUTCDate() - 1);
+  writeFileSync(staleSigningPath, readFileSync(staleSigningPath, "utf8").replaceAll(currentDate, staleDate.toISOString().slice(0, 10)), "utf8");
+  runFixture(
+    "ready Apple requirements with stale signing evidence fails",
+    staleAppleSigning,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_date_stale",
+  );
+
+  const futureAppleSigning = makeFixture("apple-requirements-future-signing");
+  writeCompleteAppleRequirements(futureAppleSigning);
+  const futureSigningPath = path.join(futureAppleSigning, "store/APPLE_SIGNING.md");
+  const futureDate = new Date(`${currentDate}T00:00:00Z`);
+  futureDate.setUTCDate(futureDate.getUTCDate() + 1);
+  writeFileSync(futureSigningPath, readFileSync(futureSigningPath, "utf8").replaceAll(currentDate, futureDate.toISOString().slice(0, 10)), "utf8");
+  runFixture(
+    "ready Apple requirements with future signing evidence fails",
+    futureAppleSigning,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_date_future",
+  );
+
+  const blockedAppleSigning = makeFixture("apple-requirements-blocked-signing-detail");
+  writeCompleteAppleRequirements(blockedAppleSigning);
+  const blockedSigningPath = path.join(blockedAppleSigning, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    blockedSigningPath,
+    readFileSync(blockedSigningPath, "utf8").replace("| 1.2.3 | 1.2.3 | 1.2.3 | matched |", "| 1.2.3 | 1.2.3 | 1.2.3 | BLOCKED |"),
+    "utf8",
+  );
+  runFixture(
+    "ready Apple requirements with blocked detailed signing evidence fails",
+    blockedAppleSigning,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_detail_6_unresolved",
+  );
+
+  const pendingAppleSigning = makeFixture("apple-requirements-pending-signing-status");
+  writeCompleteAppleRequirements(pendingAppleSigning);
+  const pendingSigningPath = path.join(pendingAppleSigning, "store/APPLE_SIGNING.md");
+  writeFileSync(pendingSigningPath, readFileSync(pendingSigningPath, "utf8").replace("Status: ready.", "Status: pending."), "utf8");
+  runFixture(
+    "ready Apple requirements with pending signing status fails",
+    pendingAppleSigning,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_status_unresolved",
+  );
+
   const iosOnlyStore = makeFixture("store-ios-only");
   const iosOnlyStoreState = readState(iosOnlyStore);
   expectRecord(iosOnlyStoreState.project, "project")["platforms"] = ["ios"];
