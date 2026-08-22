@@ -315,6 +315,7 @@ if (text) {
             [audience, location, format, ownedRoute, measuredSignal, evidenceIds].every(
               (cell) => cell.length > 0 && !PLACEHOLDER_TEXT.test(cell) && !/\breplace with\b/i.test(cell),
             ) &&
+            !isAbsentOwnedRelationship(ownedRoute) &&
             !genericLocation.test(location) &&
             /\d/.test(measuredSignal) &&
             evidenceResolved
@@ -538,7 +539,12 @@ function validateSignalCorpus(value: string | undefined, target: ReturnType<type
   const notApplicable = renderedStatus.ok ? renderedStatus.status.value.match(/^not applicable\b(.*)$/i) : null;
   if (notApplicable) {
     const reason = (notApplicable[1] ?? "").replace(/^[\s:—-]+/, "").trim();
-    if (reason.length === 0 || /\b(todo|tbd|placeholder|replace with|unverified|pending|authored reason)\b/i.test(reason) || /<[^>]+>/.test(reason)) {
+    if (
+      reason.length === 0 ||
+      isEmptySignalNotApplicableReason(reason) ||
+      /\b(todo|tbd|placeholder|replace with|unverified|pending|authored reason)\b/i.test(reason) ||
+      /<[^>]+>/.test(reason)
+    ) {
       target.push(
         issue(
           "error",
@@ -856,6 +862,7 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
     requiredContractFields.some((field) => {
       const value = contractFields.get(field) ?? "";
       if (value.length === 0 || /\b(todo|tbd|placeholder|replace with|pending|unverified|required)\b|<[^>]+>/i.test(value)) return true;
+      if (field === "owned relationship" && isAbsentOwnedRelationship(value)) return true;
       if (isGenericOfferOptionMenu(field, value)) return true;
       if (field === "exact discovery location" && /^(social media|online|internet|web|app store|community|creator audience)$/i.test(value)) return true;
       if (field === "stop rule" && !/\d/.test(value)) return true;
@@ -998,6 +1005,22 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
       );
     }
   }
+}
+
+function isEmptySignalNotApplicableReason(value: string): boolean {
+  const normalized = normalizeSentinelComparison(value);
+  return normalized.length === 0 || /^(?:none|n\/a|not applicable|unknown|no reason)$/i.test(normalized);
+}
+
+function isAbsentOwnedRelationship(value: string): boolean {
+  const normalized = normalizeSentinelComparison(value);
+  return normalized.length === 0 || /^(?:none|n\/a|not applicable|unknown|no owned (?:route|relationship))(?:\b|$)/i.test(normalized);
+}
+
+function normalizeSentinelComparison(value: string): string {
+  const withoutInlineCode = value.replace(/`([^`\r\n]*)`/gu, "$1");
+  const withoutBold = withoutInlineCode.replace(/\*\*([^*\r\n]*)\*\*/gu, "$1");
+  return withoutBold.trim().replace(/\s+/gu, " ");
 }
 
 function isGenericOfferOptionMenu(field: string, value: string): boolean {

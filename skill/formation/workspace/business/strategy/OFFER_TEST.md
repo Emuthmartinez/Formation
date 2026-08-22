@@ -5,6 +5,7 @@ Status: planned until measured response or a founder waiver is recorded.
 ## Test Contract
 
 Replace every `TODO` value with one project-specific choice. A list of possible choices is guidance, not a completed contract.
+The Owned relationship field must name one durable route. An absent route does not complete the contract.
 
 | Field | Value |
 | --- | --- |

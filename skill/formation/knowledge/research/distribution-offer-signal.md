@@ -44,7 +44,7 @@ Do not require email when another durable route fits the product better.
 
 ## 3. Signal Corpus
 
-Write `strategy/SIGNAL_CORPUS.md` before every pre-build verdict when reusable source material exists. Source material can include posts, transcripts, reviews, interviews, support records, and prior launch material. When no reusable source exists, keep the artifact. Record a project-specific `Status: not applicable —` reason. Do not invent evidence. Literal `authored reason` text and angle-bracket instructions are placeholders.
+Write `strategy/SIGNAL_CORPUS.md` before every pre-build verdict when reusable source material exists. Source material can include posts, transcripts, reviews, interviews, support records, and prior launch material. When no reusable source exists, keep the artifact. Record a project-specific `Status: not applicable —` reason. The reason must explain why no reusable source material exists. Do not invent evidence. Do not use `none`, `n/a`, `not applicable`, `unknown`, `no reason`, literal `authored reason` text, or an angle-bracket instruction.
 
 Record every source in Corpus Inputs before you cite it.
 Give each input a stable `INPUT-` ID, a real date range, an owner or creator, a collection route, a permission or public basis, and collection limits.
@@ -86,6 +86,8 @@ Write `strategy/OFFER_TEST.md` before the founder records the verdict.
 Use the smallest truthful offer surface that can measure response.
 Replace every starter field with one project-specific value.
 A menu of possible audiences, locations, formats, relationship routes, responses, or stop rules is guidance, not a completed test contract.
+The Owned relationship field must name one durable route.
+An absent route does not complete the contract.
 
 The test can use:
 

@@ -2,7 +2,7 @@
 
 Status: partial until each used signal has provenance and a lifecycle value.
 
-If no reusable source material exists, replace the status with a project-specific `Status: not applicable —` sentence. Then remove every table row. Do not use `authored reason` or angle-bracket instructions as the reason.
+If no reusable source material exists, replace the status with a project-specific `Status: not applicable —` sentence. Then remove every table row. The reason must explain why no reusable source material exists. Do not use `none`, `n/a`, `not applicable`, `unknown`, `no reason`, `authored reason`, or an angle-bracket instruction.
 
 ## Corpus Inputs
 

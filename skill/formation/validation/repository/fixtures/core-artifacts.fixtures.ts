@@ -1076,6 +1076,26 @@ export function register(h: Harness): void {
     0,
   );
 
+  for (const [name, ownedRelationship] of [
+    ["none", "none"],
+    ["not-applicable-decorated", "not applicable — no account access"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-distribution-proof-owned-relationship-${name}`);
+    replaceDistributionProof(root, [
+      distributionProofLines[0]!,
+      distributionProofLines[1]!,
+      distributionProofLines[2]!,
+      distributionProofLines[3]!.replace("| email waitlist |", `| ${ownedRelationship} |`),
+    ]);
+    runFixture(
+      `Distribution Proof rejects the absent Owned relationship value ${ownedRelationship}`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.distribution_proof_row_invalid",
+    );
+  }
+
   const researchDistributionSourceLedger = makeCompletedResearch("research-distribution-source-ledger");
   {
     const researchPath = path.join(researchDistributionSourceLedger, "strategy/RESEARCH.md");
@@ -1631,6 +1651,47 @@ export function register(h: Harness): void {
     "research.offer_test_contract_incomplete",
   );
 
+  for (const [name, ownedRelationship] of [
+    ["none", "none"],
+    ["n-a", "n/a"],
+    ["not-applicable", "not applicable"],
+    ["unknown", "unknown"],
+    ["no-owned-route", "no owned route"],
+    ["no-owned-relationship", "no owned relationship"],
+    ["not-applicable-spaced", "not  applicable — no account access"],
+    ["not-applicable-formatted", "**not applicable**"],
+    ["empty-inline-code", "``"],
+    ["not-applicable-decorated", "not applicable — no account access"],
+    ["none-available", "none available"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-offer-test-owned-relationship-${name}`);
+    const offerPath = path.join(root, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace("| Owned relationship | email waitlist |", `| Owned relationship | ${ownedRelationship} |`);
+    writeFileSync(offerPath, offer, "utf8");
+    runFixture(
+      `offer Test Contract rejects the absent Owned relationship value ${ownedRelationship}`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.offer_test_contract_incomplete",
+    );
+  }
+
+  for (const [name, ownedRelationship] of [
+    ["email", "email waitlist"],
+    ["formatted-email", "**email waitlist**"],
+    ["inline-code-email", "`email waitlist`"],
+    ["account", "member account"],
+    ["push", "push notification permission"],
+    ["community", "private member community"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-offer-test-owned-relationship-${name}`);
+    const offerPath = path.join(root, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace("| Owned relationship | email waitlist |", `| Owned relationship | ${ownedRelationship} |`);
+    writeFileSync(offerPath, offer, "utf8");
+    runFixture(`offer Test Contract accepts the durable Owned relationship route ${ownedRelationship}`, root, "check-research-evidence.ts", 0);
+  }
+
   const researchOfferDuplicateContractField = makeCompletedResearch("research-offer-test-duplicate-contract-field");
   {
     const offerPath = path.join(researchOfferDuplicateContractField, "strategy/OFFER_TEST.md");
@@ -2045,6 +2106,42 @@ export function register(h: Harness): void {
     "check-research-evidence.ts",
     1,
     "research.signal_corpus_not_applicable_reason_missing",
+  );
+
+  for (const [name, reason] of [
+    ["none", "none"],
+    ["n-a", "n/a"],
+    ["not-applicable", "not applicable"],
+    ["unknown", "unknown"],
+    ["no-reason", "no reason"],
+    ["no-reason-spaced", "no  reason"],
+    ["none-formatted", "**none**"],
+    ["empty-inline-code", "``"],
+  ] as const) {
+    const root = makeCompletedResearch(`research-signal-corpus-not-applicable-reason-${name}`);
+    useSourceLedgerDistribution(root);
+    writeFileSync(path.join(root, "strategy/SIGNAL_CORPUS.md"), `# Signal Corpus\nStatus: not applicable — ${reason}\n`, "utf8");
+    runFixture(
+      `signal corpus rejects the empty-equivalent not-applicable reason ${reason}`,
+      root,
+      "check-research-evidence.ts",
+      1,
+      "research.signal_corpus_not_applicable_reason_missing",
+    );
+  }
+
+  const researchSignalNotApplicableFormattedReason = makeCompletedResearch("research-signal-corpus-not-applicable-formatted-reason");
+  useSourceLedgerDistribution(researchSignalNotApplicableFormattedReason);
+  writeFileSync(
+    path.join(researchSignalNotApplicableFormattedReason, "strategy/SIGNAL_CORPUS.md"),
+    "# Signal Corpus\nStatus: not applicable — **No reusable customer-language source material exists for this project.**\n",
+    "utf8",
+  );
+  runFixture(
+    "signal corpus accepts a substantive formatted not-applicable reason",
+    researchSignalNotApplicableFormattedReason,
+    "check-research-evidence.ts",
+    0,
   );
 
   const researchSignalNotApplicableLiteralReason = makeCompletedResearch("research-signal-corpus-not-applicable-literal-reason");
