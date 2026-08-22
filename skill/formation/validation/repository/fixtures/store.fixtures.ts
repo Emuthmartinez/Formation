@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   type Harness,
@@ -395,7 +395,7 @@ export function register(h: Harness): void {
   writeFileSync(
     staleArchiveSigningPath,
     readFileSync(staleArchiveSigningPath, "utf8").replace(
-      `created_at=${currentDate}T12:00:00Z`,
+      /created_at=\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z/,
       `created_at=${staleArchiveDate.toISOString().slice(0, 10)}T12:00:00Z`,
     ),
     "utf8",
@@ -413,7 +413,7 @@ export function register(h: Harness): void {
   const mismatchedArchiveSigningPath = path.join(mismatchedArchiveEvidence, "store/APPLE_SIGNING.md");
   writeFileSync(
     mismatchedArchiveSigningPath,
-    readFileSync(mismatchedArchiveSigningPath, "utf8").replace("archive path=/tmp/FixtureRelease.xcarchive", "archive path=/tmp/PriorRelease.xcarchive"),
+    readFileSync(mismatchedArchiveSigningPath, "utf8").replace("archive path=build/FixtureRelease.xcarchive", "archive path=build/PriorRelease.xcarchive"),
     "utf8",
   );
   runFixture(
@@ -430,14 +430,111 @@ export function register(h: Harness): void {
   writeFileSync(
     invalidBuildSigningPath,
     readFileSync(invalidBuildSigningPath, "utf8").replace(
-      "| CFBundleVersion | 42 | 42 | 42 | matched |",
-      "| CFBundleVersion | invalid | invalid | invalid | matched |",
+      "| CFBundleVersion | 42 | 42 | available — not previously received | unique |",
+      "| CFBundleVersion | invalid | invalid | available — not previously received | unique |",
     ),
     "utf8",
   );
   runFixture(
     "Apple signing rejects nonnumeric compiled build identifiers",
     invalidBuildIdentity,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_identity_build_invalid",
+  );
+
+  const missingArchiveArtifact = makeFixture("apple-requirements-missing-archive-artifact");
+  writeCompleteAppleRequirements(missingArchiveArtifact);
+  rmSync(path.join(missingArchiveArtifact, "build/FixtureRelease.xcarchive"), { recursive: true, force: true });
+  runFixture(
+    "Apple signing rejects missing recorded archive artifacts",
+    missingArchiveArtifact,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_artifact_missing",
+  );
+
+  const wrongArchiveHash = makeFixture("apple-requirements-wrong-archive-hash");
+  writeCompleteAppleRequirements(wrongArchiveHash);
+  const wrongArchiveHashSigningPath = path.join(wrongArchiveHash, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    wrongArchiveHashSigningPath,
+    readFileSync(wrongArchiveHashSigningPath, "utf8").replaceAll(/Info\.plist SHA-256=[a-f\d]{64}/gi, `Info.plist SHA-256=${"b".repeat(64)}`),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects a recorded hash that does not match compiled Info.plist bytes",
+    wrongArchiveHash,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_artifact_hash_mismatch",
+  );
+
+  const staleArchiveArtifact = makeFixture("apple-requirements-stale-archive-artifact");
+  writeCompleteAppleRequirements(staleArchiveArtifact);
+  const staleArtifactTime = new Date();
+  staleArtifactTime.setUTCDate(staleArtifactTime.getUTCDate() - 1);
+  utimesSync(path.join(staleArchiveArtifact, "build/FixtureRelease.xcarchive"), staleArtifactTime, staleArtifactTime);
+  utimesSync(
+    path.join(staleArchiveArtifact, "build/FixtureRelease.xcarchive/Products/Applications/Fixture.app/Info.plist"),
+    staleArtifactTime,
+    staleArtifactTime,
+  );
+  runFixture(
+    "Apple signing rejects archive artifacts older than their recorded timestamp",
+    staleArchiveArtifact,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.post_archive_artifact_stale",
+  );
+
+  for (const negatedStatus of ["not ready", "not complete"]) {
+    const negatedAppleSigning = makeFixture(`apple-requirements-${negatedStatus.replace(" ", "-")}-status`);
+    writeCompleteAppleRequirements(negatedAppleSigning);
+    const negatedSigningPath = path.join(negatedAppleSigning, "store/APPLE_SIGNING.md");
+    writeFileSync(negatedSigningPath, readFileSync(negatedSigningPath, "utf8").replace("Status: ready.", `Status: ${negatedStatus}.`), "utf8");
+    runFixture(
+      `Apple signing rejects ${negatedStatus} as a ready status`,
+      negatedAppleSigning,
+      "check-apple-app-store-requirements.ts",
+      1,
+      "apple_requirements.signing_status_unresolved",
+    );
+  }
+
+  const mismatchedBuildIdentity = makeFixture("apple-requirements-mismatched-build-identity");
+  writeCompleteAppleRequirements(mismatchedBuildIdentity);
+  const mismatchedBuildSigningPath = path.join(mismatchedBuildIdentity, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    mismatchedBuildSigningPath,
+    readFileSync(mismatchedBuildSigningPath, "utf8").replace(
+      "| CFBundleVersion | 42 | 42 | available — not previously received | unique |",
+      "| CFBundleVersion | 42 | 43 | available — not previously received | unique |",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects mismatched intended and compiled build values",
+    mismatchedBuildIdentity,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_identity_build_invalid",
+  );
+
+  const buildWithoutAvailability = makeFixture("apple-requirements-build-without-availability");
+  writeCompleteAppleRequirements(buildWithoutAvailability);
+  const buildWithoutAvailabilityPath = path.join(buildWithoutAvailability, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    buildWithoutAvailabilityPath,
+    readFileSync(buildWithoutAvailabilityPath, "utf8").replace(
+      "| CFBundleVersion | 42 | 42 | available — not previously received | unique |",
+      "| CFBundleVersion | 42 | 42 | 42 | unique |",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects ASC build equality without availability evidence",
+    buildWithoutAvailability,
     "check-apple-app-store-requirements.ts",
     1,
     "apple_requirements.signing_identity_build_invalid",

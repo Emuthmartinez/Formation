@@ -63,9 +63,9 @@ A weekly source-freshness result only proves that these pages are reachable. Thi
 | --- | --- | --- | --- | --- |
 | `CFBundleIdentifier` | {{IOS_BUNDLE_ID}} | {{ARCHIVE_BUNDLE_ID}} | {{ASC_BUNDLE_ID}} | {{BUNDLE_ID_MATCH_RESULT}} |
 | `CFBundleShortVersionString` | {{MARKETING_VERSION}} | {{ARCHIVE_MARKETING_VERSION}} | {{ASC_VERSION}} | {{VERSION_MATCH_RESULT}} |
-| `CFBundleVersion` | {{CURRENT_PROJECT_VERSION}} | {{ARCHIVE_BUILD_VERSION}} | {{ASC_BUILD_VERSION}} | {{BUILD_UNIQUENESS_RESULT}} |
+| `CFBundleVersion` | {{CURRENT_PROJECT_VERSION}} | {{ARCHIVE_BUILD_VERSION}} | {{ASC_BUILD_AVAILABILITY_EVIDENCE}} | {{BUILD_UNIQUENESS_RESULT}} |
 
-Use three period-separated integer segments for `CFBundleShortVersionString`. Do not use leading zeroes. Use one to three period-separated integers for `CFBundleVersion`; use numeric characters and periods only. Confirm that the compiled archive contains no unresolved build variables and that Apple has not already received the same version/build combination. The [2016 Apple Developer Forums thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence only; current Apple documentation is authoritative.
+Use three period-separated integer segments for `CFBundleShortVersionString`. Do not use leading zeroes. Use one to three period-separated integers for `CFBundleVersion`; use numeric characters and periods only. The intended and compiled `CFBundleVersion` values must match. Replace `{{ASC_BUILD_AVAILABILITY_EVIDENCE}}` with `available — not previously received` only after current App Store Connect evidence confirms it, and replace `{{BUILD_UNIQUENESS_RESULT}}` with `unique`. Do not use the App Store Connect column as an equality value for a new build. Keep bundle ID and `CFBundleShortVersionString` equal to their App Store Connect values. Confirm that the compiled archive contains no unresolved build variables. The [2016 Apple Developer Forums thread](https://developer.apple.com/forums/thread/50931) is historical failure evidence only; current Apple documentation is authoritative.
 
 ## Archive, Export, And Upload Preflight Sign-Off
 
@@ -74,7 +74,7 @@ Record items 1 through 6 before running `xcodebuild archive`. Record item 7 afte
 ```text
 Pre-archive sign-off (recorded on the archive date):
 1. Live Apple release sources and local Xcode/SDK compatibility: pass.
-2. Intended Release bundle ID, version, and build against App Store Connect: pass.
+2. Intended Release bundle ID and version match App Store Connect; build is available and not previously received: pass.
 3. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): pass.
 4. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.
 5. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.
@@ -91,7 +91,7 @@ Post-archive sign-off (recorded before export/upload):
 7. New compiled archive Info.plist identity and SDK keys (RevenueCat, PostHog, Supabase): pass.
 ```
 
-The archive path must end in `.xcarchive`. The timestamp must use ISO 8601 UTC. The SHA-256 must contain 64 hexadecimal characters. Item 7 must repeat the same archive path and SHA-256 as the post-archive evidence record. Regenerate the complete current-release evidence record after every re-archive; never reuse evidence from an older archive.
+The archive path is relative to the business root and must end in `.xcarchive`. The timestamp must use ISO 8601 UTC. The SHA-256 must contain 64 hexadecimal characters. Item 7 must repeat the same archive path and SHA-256 as the post-archive evidence record. The validator resolves that path inside the business root, locates the actual compiled `Products/Applications/*.app/Info.plist`, calculates its SHA-256, reads the archive artifact time, and compares the actual values with this record. Typed values alone are not proof; this evidence cannot be self-attested. Regenerate the complete current-release evidence record after every re-archive; never reuse evidence from an older archive.
 
 See the "Archive, Export, And Upload Preflight Checklist" section in `apple-signing-release.md` for commands and acceptance criteria for each item.
 

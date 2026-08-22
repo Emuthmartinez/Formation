@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
 import path from "node:path";
 import {
   asArray,
@@ -158,6 +160,11 @@ function isResolvedIdentityValue(value: string): boolean {
   return Boolean(value.trim()) && !hasUnresolvedEvidence(value) && !hasUnresolvedTemplateState(value);
 }
 
+function isWithinDirectory(root: string, candidate: string): boolean {
+  const relativePath = path.relative(root, candidate);
+  return relativePath !== "" && relativePath !== ".." && !relativePath.startsWith(`..${path.sep}`) && !path.isAbsolute(relativePath);
+}
+
 function checkResolvedAppleSignOff(markdown: string): void {
   if (hasUnresolvedTemplateState(markdown)) {
     issues.push(
@@ -248,6 +255,74 @@ function checkResolvedAppleSignOff(markdown: string): void {
       ),
     );
   }
+  let archiveArtifactFound = false;
+  let archiveArtifactTimestampMatches = false;
+  let actualArchiveInfoPlistSha: string | undefined;
+  if (archivePath && parsedArchiveTimestamp && !Number.isNaN(parsedArchiveTimestamp.getTime())) {
+    try {
+      const businessRoot = realpathSync(args.root);
+      const resolvedArchiveCandidate = path.resolve(businessRoot, archivePath);
+      if (!isWithinDirectory(businessRoot, resolvedArchiveCandidate) || !existsSync(resolvedArchiveCandidate)) {
+        throw new Error("archive path is outside the business root or missing");
+      }
+      const resolvedArchive = realpathSync(resolvedArchiveCandidate);
+      const archiveStat = statSync(resolvedArchive);
+      if (!isWithinDirectory(businessRoot, resolvedArchive) || !resolvedArchive.endsWith(".xcarchive") || !archiveStat.isDirectory()) {
+        throw new Error("archive path is not a root-confined .xcarchive directory");
+      }
+      const applicationsDirectory = path.join(resolvedArchive, "Products", "Applications");
+      const infoPlists = readdirSync(applicationsDirectory, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && entry.name.endsWith(".app"))
+        .map((entry) => path.join(applicationsDirectory, entry.name, "Info.plist"))
+        .filter((candidate) => existsSync(candidate));
+      if (infoPlists.length !== 1) {
+        throw new Error("archive must contain exactly one compiled app Info.plist");
+      }
+      const resolvedInfoPlist = realpathSync(infoPlists[0] ?? "");
+      if (!isWithinDirectory(resolvedArchive, resolvedInfoPlist)) {
+        throw new Error("compiled Info.plist resolves outside the archive");
+      }
+      const infoPlistStat = statSync(resolvedInfoPlist);
+      if (!infoPlistStat.isFile()) {
+        throw new Error("compiled Info.plist is not a file");
+      }
+      const recordedTime = parsedArchiveTimestamp.getTime();
+      archiveArtifactFound = true;
+      archiveArtifactTimestampMatches = Math.abs(archiveStat.mtimeMs - recordedTime) < 1_000 && Math.abs(infoPlistStat.mtimeMs - recordedTime) < 1_000;
+      actualArchiveInfoPlistSha = createHash("sha256").update(readFileSync(resolvedInfoPlist)).digest("hex");
+    } catch {
+      archiveArtifactFound = false;
+    }
+  }
+  if (!archiveArtifactFound) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_artifact_missing",
+        "The recorded archive must resolve inside the business root to an actual .xcarchive containing one Products/Applications/*.app/Info.plist.",
+        signingRelative,
+      ),
+    );
+  } else if (!archiveArtifactTimestampMatches) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_artifact_stale",
+        "The recorded archive timestamp must match both the .xcarchive and its compiled Info.plist modification time.",
+        signingRelative,
+      ),
+    );
+  }
+  if (archiveArtifactFound && (!archiveInfoPlistSha || actualArchiveInfoPlistSha !== archiveInfoPlistSha)) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.post_archive_artifact_hash_mismatch",
+        "The recorded Info.plist SHA-256 must match the actual compiled Info.plist bytes in the recorded archive.",
+        signingRelative,
+      ),
+    );
+  }
   const itemSevenLine = itemSevenIndex === -1 ? "" : (lines[itemSevenIndex] ?? "");
   const itemSevenEvidenceMatch = /archive path=([^;\r\n]+\.xcarchive)\s*;\s*Info\.plist SHA-256=([a-f\d]{64})\s*:\s*(?:pass|ready|ok)\.?\s*$/i.exec(
     itemSevenLine,
@@ -264,8 +339,9 @@ function checkResolvedAppleSignOff(markdown: string): void {
       ),
     );
   }
-  const signingStatus = lines.find((line) => /^\s*Status\s*:/i.test(line));
-  if (!signingStatus || hasUnresolvedEvidence(signingStatus) || !/\b(?:done|complete|completed|ready|verified|approved)\b/i.test(signingStatus)) {
+  const signingStatusLine = lines.find((line) => /^\s*Status\s*:/i.test(line));
+  const signingStatus = /^\s*Status\s*:\s*(done|complete|completed|ready|verified|approved)\.?\s*$/i.exec(signingStatusLine ?? "")?.[1];
+  if (!signingStatus) {
     issues.push(
       issue(
         "error",
@@ -327,16 +403,23 @@ function checkResolvedAppleSignOff(markdown: string): void {
     const compiled = cells?.[2] ?? "";
     const appStoreConnect = cells?.[3] ?? "";
     const result = cells?.[4] ?? "";
-    const values = [intended, compiled, appStoreConnect];
-    const valuesResolved = values.every(isResolvedIdentityValue);
-    const valuesMatch = valuesResolved && compiled === intended && appStoreConnect === intended;
-    const resultResolved = /^(?:pass|ready|ok|verified|matched|unique)\.?$/i.test(result) && !hasUnresolvedEvidence(result);
-    if (!cells || cells.length !== 5 || !valuesMatch || !validateFormat(intended) || !resultResolved) {
+    const isBuildIdentity = key === "CFBundleVersion";
+    const identityValues = isBuildIdentity ? [intended, compiled] : [intended, compiled, appStoreConnect];
+    const valuesResolved = identityValues.every(isResolvedIdentityValue);
+    const valuesMatch = valuesResolved && compiled === intended && (isBuildIdentity || appStoreConnect === intended);
+    const appStoreAvailabilityResolved =
+      !isBuildIdentity || (isResolvedIdentityValue(appStoreConnect) && /^(?:available|unused)\s*[—-]\s*not previously received\.?$/i.test(appStoreConnect));
+    const resultResolved = isBuildIdentity
+      ? /^(?:unique|pass)\.?$/i.test(result) && !hasUnresolvedEvidence(result)
+      : /^(?:pass|ready|ok|verified|matched)\.?$/i.test(result) && !hasUnresolvedEvidence(result);
+    if (!cells || cells.length !== 5 || !valuesMatch || !appStoreAvailabilityResolved || !validateFormat(intended) || !resultResolved) {
       issues.push(
         issue(
           "error",
           `apple_requirements.signing_identity_${code}_invalid`,
-          `${key} must have matching, resolved intended, compiled archive, and App Store Connect values plus a valid result in store/APPLE_SIGNING.md.`,
+          isBuildIdentity
+            ? "CFBundleVersion must have matching, valid intended and compiled values, explicit App Store Connect availability evidence, and a unique/pass result."
+            : `${key} must have matching, resolved intended, compiled archive, and App Store Connect values plus a valid result in store/APPLE_SIGNING.md.`,
           signingRelative,
         ),
       );

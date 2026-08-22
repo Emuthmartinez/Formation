@@ -85,7 +85,8 @@ Before each archive, reconcile the version record in App Store Connect with the 
 - `CFBundleShortVersionString` is the user-visible version. Use three period-separated integer segments. Do not use leading zeroes in a segment.
 - `CFBundleVersion` is the build identifier. Use one to three period-separated integers. Use numeric characters and periods only. Ensure that the version/build combination is unique for the target platform.
 - `PRODUCT_BUNDLE_IDENTIFIER`, `MARKETING_VERSION`, and `CURRENT_PROJECT_VERSION` are intended values before the archive exists. The compiled archive `Info.plist` is the release evidence after the archive exists.
-- The App Store Connect version must match the intended version before archive and the compiled version after archive. Increment the build before another upload for the same version.
+- The bundle ID and user-visible version in App Store Connect must match the intended values before archive and the compiled values after archive.
+- The compiled `CFBundleVersion` must match the intended build. App Store Connect provides uniqueness evidence for this new build, not an equal build value. Record `available — not previously received` and result `unique` before upload. Increment the build if Apple has already received the version/build combination.
 
 After the archive succeeds, inspect it and compare it with the intended settings and the App Store Connect version. Complete this check before export or upload:
 
@@ -95,7 +96,7 @@ plutil -extract CFBundleShortVersionString raw build/MyApp.xcarchive/Products/Ap
 plutil -extract CFBundleVersion raw build/MyApp.xcarchive/Products/Applications/MyApp.app/Info.plist
 ```
 
-Stop if a value is missing, contains an unresolved build variable, uses a leading-zero version segment, does not match the App Store Connect record, or reuses a version/build combination that Apple has already received.
+Stop if a value is missing, contains an unresolved build variable, uses a leading-zero version segment, the compiled bundle ID or user-visible version does not match App Store Connect, the compiled build does not match the intended build, or Apple has already received the version/build combination.
 
 ## Naming And Identifier Contract
 
@@ -332,7 +333,7 @@ Read the live Apple release sources. Compare the current requirements with the l
 
 ### 2. Intended Release Identity And App Store Connect
 
-Read `PRODUCT_BUNDLE_IDENTIFIER`, `MARKETING_VERSION`, and `CURRENT_PROJECT_VERSION` from the intended Release build settings. Compare them with the App Store Connect app record. Reject leading-zero version segments and a version/build combination that Apple has already received.
+Read `PRODUCT_BUNDLE_IDENTIFIER`, `MARKETING_VERSION`, and `CURRENT_PROJECT_VERSION` from the intended Release build settings. Compare the bundle ID and user-visible version with the App Store Connect app record. Confirm that the intended build is available and was not previously received. Reject leading-zero version segments and a version/build combination that Apple has already received.
 
 This check confirms the intended settings. It does not prove what a future archive will contain.
 
@@ -422,7 +423,7 @@ Screenshot dimension preflight: pass (<device> native: <WxH>) | BLOCKED — <dev
 
 ### Post-Archive Evidence Contract
 
-After the archive succeeds, record the exact artifact before item 7. The archive path must end in `.xcarchive`. Use an ISO 8601 UTC timestamp for the archive creation time. Hash the compiled app's `Info.plist` with SHA-256 and record all 64 hexadecimal characters.
+After the archive succeeds, record the exact artifact before item 7. Record the archive path relative to the business root; it must end in `.xcarchive`. Use an ISO 8601 UTC timestamp for the archive creation time. Hash the actual compiled `Products/Applications/*.app/Info.plist` with SHA-256 and record all 64 hexadecimal characters.
 
 ```text
 Post-archive evidence:
@@ -433,9 +434,11 @@ Post-archive evidence:
 
 Regenerate this current-release evidence after every re-archive. Do not carry the path, creation time, hash, or item 7 result forward from an earlier archive.
 
+The validator resolves the recorded archive path inside the business root. It locates the compiled `Products/Applications/*.app/Info.plist`, calculates the SHA-256 from that file, reads the archive artifact time, and compares the calculated values with the record. Typed values alone are not proof. This evidence cannot be self-attested.
+
 ### 7. Inspect The New Compiled Archive
 
-After `xcodebuild archive` succeeds, inspect the new archive. Do not inspect an older archive. Confirm that its bundle ID, version, and build match the intended Release settings and App Store Connect. Then verify that all provider runtime keys are present in the archive's `Info.plist`. Keys that come from build variables must be expanded.
+After `xcodebuild archive` succeeds, inspect the new archive. Do not inspect an older archive. Confirm that its bundle ID and user-visible version match the intended Release settings and App Store Connect. Confirm that its build matches the intended build and that App Store Connect still reports it as available and not previously received. Then verify that all provider runtime keys are present in the archive's `Info.plist`. Keys that come from build variables must be expanded.
 
 Check the keys the app uses (adapt names to the project):
 

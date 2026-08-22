@@ -1,4 +1,5 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdirSync, readFileSync, utimesSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { expectRecord, getLane, readState, writeState } from "./_state.js";
 
@@ -24,10 +25,22 @@ export function writeCompleteAttribution(root: string): void {
 }
 
 export function writeCompleteAppleSigning(root: string): void {
-  const checkedAt = new Date().toISOString().slice(0, 10);
-  const archivePath = "/tmp/FixtureRelease.xcarchive";
-  const archiveTimestamp = `${checkedAt}T12:00:00Z`;
-  const archiveInfoPlistSha = "a".repeat(64);
+  const artifactDate = new Date();
+  artifactDate.setMilliseconds(0);
+  const checkedAt = artifactDate.toISOString().slice(0, 10);
+  const archiveTimestamp = artifactDate.toISOString();
+  const archivePath = "build/FixtureRelease.xcarchive";
+  const archiveDirectory = path.join(root, archivePath);
+  const archiveInfoPlistPath = path.join(archiveDirectory, "Products/Applications/Fixture.app/Info.plist");
+  mkdirSync(path.dirname(archiveInfoPlistPath), { recursive: true });
+  writeFileSync(
+    archiveInfoPlistPath,
+    '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.example.fixture</string></dict></plist>',
+    "utf8",
+  );
+  utimesSync(archiveInfoPlistPath, artifactDate, artifactDate);
+  utimesSync(archiveDirectory, artifactDate, artifactDate);
+  const archiveInfoPlistSha = createHash("sha256").update(readFileSync(archiveInfoPlistPath)).digest("hex");
   writeFileSync(
     path.join(root, "store/APPLE_SIGNING.md"),
     [
@@ -54,7 +67,7 @@ export function writeCompleteAppleSigning(root: string): void {
       "| --- | --- | --- | --- | --- |",
       "| CFBundleIdentifier | com.example.fixture | com.example.fixture | com.example.fixture | matched |",
       "| CFBundleShortVersionString | 1.2.3 | 1.2.3 | 1.2.3 | matched |",
-      "| CFBundleVersion | 42 | 42 | 42 | matched |",
+      "| CFBundleVersion | 42 | 42 | available — not previously received | unique |",
       "The version uses three integer segments with no leading zeroes; the version/build combination is unique.",
       `Pre-archive sign-off (recorded ${checkedAt}):`,
       "1. Live Apple release sources and local Xcode/SDK compatibility: pass.",
